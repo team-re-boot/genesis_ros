@@ -73,7 +73,6 @@ def get_package_xml_directories():
     return package_dirs
 
 
-
 def save_mesh_filenames_from_urdf_string(urdf_string):
     """
     Parses a URDF string and saves the files referenced in the `filename` attribute
@@ -87,7 +86,7 @@ def save_mesh_filenames_from_urdf_string(urdf_string):
         str: Updated URDF string with modified `filename` attributes.
     """
     # Target directory to save the mesh files
-    target_dir = '/tmp/genesis_ros/meshes'
+    target_dir = "/tmp/genesis_ros/meshes"
 
     # Ensure the target directory exists
     os.makedirs(target_dir, exist_ok=True)
@@ -97,11 +96,11 @@ def save_mesh_filenames_from_urdf_string(urdf_string):
         root = ET.fromstring(urdf_string)
 
         # Namespace handling (if any)
-        namespace = '}' if '}' in root.tag else ''
+        namespace = "}" if "}" in root.tag else ""
 
         # Find all mesh tags
-        for mesh_tag in root.findall(f'.//{namespace}mesh'):
-            filename = mesh_tag.get('filename')
+        for mesh_tag in root.findall(f".//{namespace}mesh"):
+            filename = mesh_tag.get("filename")
             if filename:
                 # Resolve the source file path
                 source_file_path = os.path.abspath(filename)
@@ -116,12 +115,14 @@ def save_mesh_filenames_from_urdf_string(urdf_string):
 
                     # Update the filename attribute to use package://meshes/
                     new_filename = f"package://meshes/{os.path.basename(filename)}"
-                    mesh_tag.set('filename', new_filename)
+                    mesh_tag.set("filename", new_filename)
                 else:
-                    print(f"Warning: {source_file_path} does not exist and cannot be copied.")
+                    print(
+                        f"Warning: {source_file_path} does not exist and cannot be copied."
+                    )
 
         # Convert the updated XML tree back to a string
-        updated_urdf_string = ET.tostring(root, encoding='unicode')
+        updated_urdf_string = ET.tostring(root, encoding="unicode")
         return updated_urdf_string
 
     except ET.ParseError as e:
@@ -130,6 +131,7 @@ def save_mesh_filenames_from_urdf_string(urdf_string):
     except Exception as e:
         print(f"Unexpected error: {e}")
         return urdf_string
+
 
 def pretty_format_xml(input_file, output_file):
     """
@@ -168,6 +170,7 @@ def pretty_format_xml(input_file, output_file):
         print(f"Error: Unable to parse the XML file. {e}")
     except Exception as e:
         print(f"An error occurred: {e}")
+
 
 def save_urdf_to_tmp(urdf_content):
     """
