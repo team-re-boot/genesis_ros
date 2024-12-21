@@ -2,6 +2,8 @@ import os
 import shutil
 import xml.etree.ElementTree as ET
 import argparse
+import xacrodoc as xd
+
 
 def parse_cmake_prefix_path():
     """
@@ -14,6 +16,7 @@ def parse_cmake_prefix_path():
     # Split the variable by ':' and filter out empty strings
     paths = [path for path in cmake_prefix_path.split(":") if path]
     return paths
+
 
 def find_ros2_packages():
     """
@@ -33,7 +36,9 @@ def find_ros2_packages():
         for root, _, files in os.walk(base_path):
             package_files = [f for f in files if f == "package.xml"]
             if len(package_files) > 1:
-                raise ValueError(f"Multiple package.xml files found in directory: {root}")
+                raise ValueError(
+                    f"Multiple package.xml files found in directory: {root}"
+                )
             elif len(package_files) == 1:
                 package_xml_path = os.path.join(root, "package.xml")
                 try:
@@ -48,6 +53,25 @@ def find_ros2_packages():
                     print(f"Failed to parse {package_xml_path}")
 
     return ros2_packages
+
+
+def get_package_xml_directories():
+    """
+    Recursively search paths in CMAKE_PREFIX_PATH for directories containing package.xml files.
+
+    Returns:
+        list: A list of directories that contain package.xml files.
+    """
+    cmake_paths = parse_cmake_prefix_path()
+    package_dirs = []
+
+    for base_path in cmake_paths:
+        for root, _, files in os.walk(base_path):
+            if "package.xml" in files:
+                package_dirs.append(root)
+
+    return package_dirs
+
 
 def save_urdf_to_tmp(urdf_content):
     """
@@ -76,14 +100,20 @@ def save_urdf_to_tmp(urdf_content):
         print(f"Failed to save URDF: {e}")
         raise
 
+    doc = xd.XacroDoc.from_file(output_path)
+    xd.packages.look_in(get_package_xml_directories())
+    print(doc.to_urdf_string())
     return output_path
+
 
 def main():
     """
     Main function to parse arguments and handle URDF saving.
     """
     parser = argparse.ArgumentParser(description="Process URDF files.")
-    parser.add_argument("--urdf", type=str, required=True, help="Path to the URDF file to be saved.")
+    parser.add_argument(
+        "--urdf", type=str, required=True, help="Path to the URDF file to be saved."
+    )
 
     args = parser.parse_args()
 
@@ -101,8 +131,9 @@ def main():
     # Save the URDF content to /tmp/genesis_ros
     save_urdf_to_tmp(urdf_content)
 
+
 if __name__ == "__main__":
-    try:        
+    try:
         main()
     except ValueError as e:
         print(e)
