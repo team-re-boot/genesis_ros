@@ -7,9 +7,10 @@ license = "Apache-2.0"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.10,<3.13"
+python = "3.10.12"
 genesis-world = "^0.2.0"
 amber = {git = "https://github.com/rosbag-sharing-community/amber.git", rev = "0.0.1"}
+xacrodoc = "^0.4.1"
 
 [[tool.poetry.source]]
 name = "torch_cu118"

@@ -468,6 +468,26 @@ files = [
 ]
 
 [[package]]
+name = "catkin-pkg"
+version = "1.0.0"
+description = "catkin package library"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "catkin_pkg-1.0.0-py3-none-any.whl", hash = "sha256:10a6589e9edf3cd5bd18e35e094d20b516e6351bcf0da891c28a0ff526fdb7cc"},
+    {file = "catkin_pkg-1.0.0.tar.gz", hash = "sha256:476e9f52917282f464739241b4bcaf5ebbfba9a7a68d9af8f875225feac0e1b5"},
+]
+
+[package.dependencies]
+docutils = "*"
+pyparsing = "*"
+python-dateutil = "*"
+setuptools = "*"
+
+[package.extras]
+test = ["flake8", "flake8-blind-except", "flake8-builtins", "flake8-class-newline", "flake8-comprehensions", "flake8-deprecated", "flake8-docstrings", "flake8-import-order", "flake8-quotes", "pytest"]
+
+[[package]]
 name = "certifi"
 version = "2024.12.14"
 description = "Python package for providing Mozilla's CA Bundle."
@@ -715,37 +735,6 @@ all = ["cloudpathlib[azure]", "cloudpathlib[gs]", "cloudpathlib[s3]"]
 azure = ["azure-storage-blob (>=12)", "azure-storage-file-datalake (>=12)"]
 gs = ["google-cloud-storage"]
 s3 = ["boto3 (>=1.34.0)"]
-
-[[package]]
-name = "cmake"
-version = "3.31.2"
-description = "CMake is an open-source, cross-platform family of tools designed to build, test and package software"
-optional = false
-python-versions = ">=3.7"
-files = [
-    {file = "cmake-3.31.2-py3-none-macosx_10_10_universal2.whl", hash = "sha256:8c1fa50cafe54f9aa074d03cda1ade54271039d939194adc9cd1ac388b1af055"},
-    {file = "cmake-3.31.2-py3-none-manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:8210a40d5b08bec7c752974f2b217a062a092480e33dcbd39d46a8cd96c29ddc"},
-    {file = "cmake-3.31.2-py3-none-manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:82ec0a96b965874dc793ed6d3aa7edad6f364d4ba8b86307548bfbbca70fd2dd"},
-    {file = "cmake-3.31.2-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:604c44684dbcbec1458310bd57b9e69b7768ddd7cd2fc852607ca24616f34518"},
-    {file = "cmake-3.31.2-py3-none-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:8d8c840502f84a16562820ee23f963583953939de63a9582f0f7735868cd18e6"},
-    {file = "cmake-3.31.2-py3-none-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:2988aac62b9ada74bb802a8065ea58abe57bf203c057bb7e0456c3575a89c48a"},
-    {file = "cmake-3.31.2-py3-none-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:c8f9d7f8371a6739bbec7c238d213877f31b22a10930c91dea59b8b9463b6ee1"},
-    {file = "cmake-3.31.2-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:31aaa73c6bf49109b2a7ab86b3e6887b5db0da6be30ddfb30bed160b84787f89"},
-    {file = "cmake-3.31.2-py3-none-manylinux_2_31_armv7l.whl", hash = "sha256:79b7eb78aea04e363a736e544afc4b4489f50415075bd77131e5314778b8e879"},
-    {file = "cmake-3.31.2-py3-none-musllinux_1_1_aarch64.whl", hash = "sha256:09b3b1c919c76d25272bd9a0f15baf954d6c883abffdd1cfb3fbf1afa7a2c556"},
-    {file = "cmake-3.31.2-py3-none-musllinux_1_1_i686.whl", hash = "sha256:aec014f19536f2b6b0a94f4e20990c28fb93c4bdf9193d57fa5e50ef829aaf78"},
-    {file = "cmake-3.31.2-py3-none-musllinux_1_1_ppc64le.whl", hash = "sha256:994e14f485329d58d316487bd1759ad89717b895079e8b892a8220f03c1c5267"},
-    {file = "cmake-3.31.2-py3-none-musllinux_1_1_s390x.whl", hash = "sha256:e8fc23d376b3fae8945067f397d8503fff210eefe1e49ab9ece1d99a88679cf4"},
-    {file = "cmake-3.31.2-py3-none-musllinux_1_1_x86_64.whl", hash = "sha256:fa3b23b8bd52c0ae9e3c6b635ac8ee70d8f35d24bacf39cc4cea22aec6e4ed84"},
-    {file = "cmake-3.31.2-py3-none-musllinux_1_2_armv7l.whl", hash = "sha256:7b5f4f5ec4b0d6275369881a2a7bf7230af1cb60afdb20a7b2fbc70690f13564"},
-    {file = "cmake-3.31.2-py3-none-win32.whl", hash = "sha256:378036396394dad7673cdfc603bb85af34945607df43e8dad731f5907c755f3b"},
-    {file = "cmake-3.31.2-py3-none-win_amd64.whl", hash = "sha256:cedb6de320a65ff0137e5c6090b9b7fba459788237d3d4deb6e66be19fe9b61d"},
-    {file = "cmake-3.31.2-py3-none-win_arm64.whl", hash = "sha256:3bd054996b8a36ff5beb3cdd0ffbf8edf23d719cf946762662a9fb70525b1d1b"},
-    {file = "cmake-3.31.2.tar.gz", hash = "sha256:16a323fcbb86cf8a10aea82cd4deecb33edb3ed7e8907be8a06933ce04f6e6d1"},
-]
-
-[package.extras]
-test = ["coverage (>=4.2)", "pytest (>=3.0.3)", "pytest-cov (>=2.4.0)"]
 
 [[package]]
 name = "coacd"
@@ -1214,6 +1203,17 @@ files = [
 ]
 
 [[package]]
+name = "distro"
+version = "1.9.0"
+description = "Distro - an OS platform information API"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "distro-1.9.0-py3-none-any.whl", hash = "sha256:7bffd925d65168f85027d8da9af6bddab658135b840670a223589bc0c8ef02b2"},
+    {file = "distro-1.9.0.tar.gz", hash = "sha256:2fa77c6fd8940f116ee1d6b94a2f90b13b5ea8d019b98bc8bafdcabcdd9bdbed"},
+]
+
+[[package]]
 name = "docker"
 version = "6.1.3"
 description = "A Python library for the Docker Engine API."
@@ -1233,6 +1233,17 @@ websocket-client = ">=0.32.0"
 
 [package.extras]
 ssh = ["paramiko (>=2.4.3)"]
+
+[[package]]
+name = "docutils"
+version = "0.21.2"
+description = "Docutils -- Python Documentation Utilities"
+optional = false
+python-versions = ">=3.9"
+files = [
+    {file = "docutils-0.21.2-py3-none-any.whl", hash = "sha256:dafca5b9e384f0e419294eb4d2ff9fa826435bf15f15b7bd45723e8ad76811b2"},
+    {file = "docutils-0.21.2.tar.gz", hash = "sha256:3a6b18732edf182daa3cd12775bbb338cf5691468f91eeeb109deff6ebfa986f"},
+]
 
 [[package]]
 name = "download"
@@ -2670,17 +2681,6 @@ doc = ["myst-parser", "sphinx", "sphinx-book-theme"]
 test = ["coverage", "pytest", "pytest-cov"]
 
 [[package]]
-name = "lit"
-version = "18.1.8"
-description = "A Software Testing Tool"
-optional = false
-python-versions = "*"
-files = [
-    {file = "lit-18.1.8-py3-none-any.whl", hash = "sha256:a873ff7acd76e746368da32eb7355625e2e55a2baaab884c9cc130f2ee0300f7"},
-    {file = "lit-18.1.8.tar.gz", hash = "sha256:47c174a186941ae830f04ded76a3444600be67d5e5fb8282c3783fba671c4edb"},
-]
-
-[[package]]
 name = "llvmlite"
 version = "0.43.0"
 description = "lightweight wrapper around basic LLVM functionality"
@@ -4010,11 +4010,7 @@ files = [
 ]
 
 [package.dependencies]
-numpy = [
-    {version = ">=1.22.4", markers = "python_version < \"3.11\""},
-    {version = ">=1.23.2", markers = "python_version == \"3.11\""},
-    {version = ">=1.26.0", markers = "python_version >= \"3.12\""},
-]
+numpy = {version = ">=1.22.4", markers = "python_version < \"3.11\""}
 python-dateutil = ">=2.8.2"
 pytz = ">=2020.1"
 tzdata = ">=2022.7"
@@ -5263,10 +5259,7 @@ files = [
 grpcio = ">=1.41.0"
 grpcio-tools = ">=1.41.0"
 httpx = {version = ">=0.20.0", extras = ["http2"]}
-numpy = [
-    {version = ">=1.21", markers = "python_version >= \"3.8\" and python_version < \"3.12\""},
-    {version = ">=1.26", markers = "python_version >= \"3.12\""},
-]
+numpy = {version = ">=1.21", markers = "python_version >= \"3.8\" and python_version < \"3.12\""}
 portalocker = ">=2.7.0,<3.0.0"
 pydantic = ">=1.10.8"
 urllib3 = ">=1.26.14,<3"
@@ -5445,6 +5438,25 @@ typing-extensions = {version = ">=4.0.0,<5.0", markers = "python_version < \"3.1
 
 [package.extras]
 jupyter = ["ipywidgets (>=7.5.1,<9)"]
+
+[[package]]
+name = "rospkg"
+version = "1.5.1"
+description = "ROS package library"
+optional = false
+python-versions = "*"
+files = [
+    {file = "rospkg-1.5.1-py3-none-any.whl", hash = "sha256:1167a8f908d9c4379954732a605810e166ddcc18fcf47e6555395e1d6d972a7c"},
+    {file = "rospkg-1.5.1.tar.gz", hash = "sha256:fce76a7477786c3732981262198ea250f097f88e0d3329c10c11069bf40ca604"},
+]
+
+[package.dependencies]
+catkin-pkg = "*"
+distro = {version = ">=1.4.0", markers = "python_version >= \"3.8\""}
+PyYAML = "*"
+
+[package.extras]
+test = ["mock", "pytest"]
 
 [[package]]
 name = "rpds-py"
@@ -6535,33 +6547,8 @@ name = "torch"
 version = "2.0.1+cu118"
 description = "Tensors and Dynamic neural networks in Python with strong GPU acceleration"
 optional = false
-python-versions = ">=3.8.0"
-files = [
-    {file = "torch-2.0.1+cu118-cp310-cp310-linux_x86_64.whl", hash = "sha256:a7a49d459bf4862f64f7bc1a68beccf8881c2fa9f3e0569608e16ba6f85ebf7b"},
-    {file = "torch-2.0.1+cu118-cp310-cp310-win_amd64.whl", hash = "sha256:f58d75619bc96e4322343c030b893613701caa2d6db8017155da226c14171335"},
-    {file = "torch-2.0.1+cu118-cp311-cp311-linux_x86_64.whl", hash = "sha256:143b6c658c17d43376e2dfbaa2c106d35639d615e5e8dec4429cf1e510dd8d61"},
-    {file = "torch-2.0.1+cu118-cp311-cp311-win_amd64.whl", hash = "sha256:b663a4ee744d574095dbd612644de345944247c0605692309fd9f6c7ccdea022"},
-    {file = "torch-2.0.1+cu118-cp38-cp38-linux_x86_64.whl", hash = "sha256:2ce38a6e4ea7c4b7f5baa51e65243a5f687f6e19ab7915ba5b2a431105f50bbe"},
-    {file = "torch-2.0.1+cu118-cp38-cp38-win_amd64.whl", hash = "sha256:e58d26a11bd57ac19761c018c3151c15bc71d068afc8ec409bfd9b4cfcc63a52"},
-    {file = "torch-2.0.1+cu118-cp39-cp39-linux_x86_64.whl", hash = "sha256:eb55f29db5744eda8a96f5594e637daed0d52278273005de759970e67cfa6a5a"},
-    {file = "torch-2.0.1+cu118-cp39-cp39-win_amd64.whl", hash = "sha256:fa225b6f941ee0e78978ac85ed7744d3c19fff462473821f8060c14faa60043e"},
-]
-
-[package.dependencies]
-filelock = "*"
-jinja2 = "*"
-networkx = "*"
-sympy = "*"
-triton = {version = "2.0.0", markers = "platform_system == \"Linux\" and platform_machine == \"x86_64\""}
-typing-extensions = "*"
-
-[package.extras]
-opt-einsum = ["opt-einsum (>=3.3)"]
-
-[package.source]
-type = "legacy"
-url = "https://download.pytorch.org/whl/cu118"
-reference = "torch_cu118"
+python-versions = "*"
+files = []
 
 [[package]]
 name = "torchaudio"
@@ -6569,55 +6556,15 @@ version = "2.0.2+cu118"
 description = "An audio package for PyTorch"
 optional = false
 python-versions = "*"
-files = [
-    {file = "torchaudio-2.0.2+cu118-cp310-cp310-linux_x86_64.whl", hash = "sha256:26692645ea061a005c57ec581a2d0425210ac6ba9f923edf11cc9b0ef3a111e9"},
-    {file = "torchaudio-2.0.2+cu118-cp310-cp310-win_amd64.whl", hash = "sha256:8ad0e93e39ce594a5cc53d46d972fde20b499e69d1e7f765adb33de13cfbab86"},
-    {file = "torchaudio-2.0.2+cu118-cp311-cp311-linux_x86_64.whl", hash = "sha256:7bc0b50a0d83a24bdc3916270c23934345ac84351df76bd3bb08834bdb271df6"},
-    {file = "torchaudio-2.0.2+cu118-cp311-cp311-win_amd64.whl", hash = "sha256:608af74eef9ea53f63673811e8eb5e9fc7d812e6122f498b301e2cc3f022349e"},
-    {file = "torchaudio-2.0.2+cu118-cp38-cp38-linux_x86_64.whl", hash = "sha256:954de78e4f066fe96fa6f418b5f1d7d58d1b0fbcf6a2d3730f041a2fd796f772"},
-    {file = "torchaudio-2.0.2+cu118-cp38-cp38-win_amd64.whl", hash = "sha256:97410a93d5eb81014cf3aa8c389a28e99c4b1b5d13b2838bffdac803eaed1ea5"},
-    {file = "torchaudio-2.0.2+cu118-cp39-cp39-linux_x86_64.whl", hash = "sha256:322c41c36e8e62fd37ab35114a67921ae542bcd940d583cd13e0e15141c848f9"},
-    {file = "torchaudio-2.0.2+cu118-cp39-cp39-win_amd64.whl", hash = "sha256:99595b4b239e5168131d8d016d55fde0b89fe7e0955649daf35f72fe1d3a79f7"},
-]
-
-[package.dependencies]
-torch = "2.0.1"
-
-[package.source]
-type = "legacy"
-url = "https://download.pytorch.org/whl/cu118"
-reference = "torch_cu118"
+files = []
 
 [[package]]
 name = "torchvision"
 version = "0.15.2+cu118"
 description = "image and video datasets and models for torch deep learning"
 optional = false
-python-versions = ">=3.8"
-files = [
-    {file = "torchvision-0.15.2+cu118-cp310-cp310-linux_x86_64.whl", hash = "sha256:19ca4ab5d6179bbe53cff79df1a855ee6533c2861ddc7389f68349d8b9f8302a"},
-    {file = "torchvision-0.15.2+cu118-cp310-cp310-win_amd64.whl", hash = "sha256:bfd2435d681418bea8dacde2b2cb6e5dd40a0e0243d3631e2b71c10bf9831f39"},
-    {file = "torchvision-0.15.2+cu118-cp311-cp311-linux_x86_64.whl", hash = "sha256:def9af47ebc2cad55c5aa2dad1230dcf4261833ed6df8a73e839bc233764f09e"},
-    {file = "torchvision-0.15.2+cu118-cp311-cp311-win_amd64.whl", hash = "sha256:ee36a68bb369d4173eb74ddf457751f6be1531d883f456eaf9b337a06f31c8fb"},
-    {file = "torchvision-0.15.2+cu118-cp38-cp38-linux_x86_64.whl", hash = "sha256:af6807d5e599fe5381c916235a5581407e850eb77c3d43899f37a1511ff81cc0"},
-    {file = "torchvision-0.15.2+cu118-cp38-cp38-win_amd64.whl", hash = "sha256:406ed3d8bc5b66a99b692d4c742de39a3a515a399e6bfd1c24fbb688fbb31968"},
-    {file = "torchvision-0.15.2+cu118-cp39-cp39-linux_x86_64.whl", hash = "sha256:f2c6f5a100bcf9020b82f5d4c87cd7e26af0409cf33b90fb797b1127dcd42de6"},
-    {file = "torchvision-0.15.2+cu118-cp39-cp39-win_amd64.whl", hash = "sha256:27be62ec887ab9a7b86612eac55ba80f8c23978c8afd5e4339669a1bbc4925ea"},
-]
-
-[package.dependencies]
-numpy = "*"
-pillow = ">=5.3.0,<8.3.dev0 || >=8.4.dev0"
-requests = "*"
-torch = "2.0.1"
-
-[package.extras]
-scipy = ["scipy"]
-
-[package.source]
-type = "legacy"
-url = "https://download.pytorch.org/whl/cu118"
-reference = "torch_cu118"
+python-versions = "*"
+files = []
 
 [[package]]
 name = "tornado"
@@ -6740,34 +6687,6 @@ torch-speech = ["kenlm", "librosa", "phonemizer", "pyctcdecode (>=0.4.0)", "torc
 torchhub = ["filelock", "huggingface-hub (>=0.11.0,<1.0)", "importlib-metadata", "numpy (>=1.17)", "packaging (>=20.0)", "protobuf (<=3.20.2)", "regex (!=2019.12.17)", "requests", "sentencepiece (>=0.1.91,!=0.1.92)", "tokenizers (>=0.11.1,!=0.11.3,<0.14)", "torch (>=1.7,!=1.12.0)", "tqdm (>=4.27)"]
 video = ["decord (==0.6.0)"]
 vision = ["Pillow"]
-
-[[package]]
-name = "triton"
-version = "2.0.0"
-description = "A language and compiler for custom Deep Learning operations"
-optional = false
-python-versions = "*"
-files = [
-    {file = "triton-2.0.0-1-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:38806ee9663f4b0f7cd64790e96c579374089e58f49aac4a6608121aa55e2505"},
-    {file = "triton-2.0.0-1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:226941c7b8595219ddef59a1fdb821e8c744289a132415ddd584facedeb475b1"},
-    {file = "triton-2.0.0-1-cp36-cp36m-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:4c9fc8c89874bc48eb7e7b2107a9b8d2c0bf139778637be5bfccb09191685cfd"},
-    {file = "triton-2.0.0-1-cp37-cp37m-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:d2684b6a60b9f174f447f36f933e9a45f31db96cb723723ecd2dcfd1c57b778b"},
-    {file = "triton-2.0.0-1-cp38-cp38-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:9d4978298b74fcf59a75fe71e535c092b023088933b2f1df933ec32615e4beef"},
-    {file = "triton-2.0.0-1-cp39-cp39-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:74f118c12b437fb2ca25e1a04759173b517582fcf4c7be11913316c764213656"},
-    {file = "triton-2.0.0-1-pp37-pypy37_pp73-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:9618815a8da1d9157514f08f855d9e9ff92e329cd81c0305003eb9ec25cc5add"},
-    {file = "triton-2.0.0-1-pp38-pypy38_pp73-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:1aca3303629cd3136375b82cb9921727f804e47ebee27b2677fef23005c3851a"},
-    {file = "triton-2.0.0-1-pp39-pypy39_pp73-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:e3e13aa8b527c9b642e3a9defcc0fbd8ffbe1c80d8ac8c15a01692478dc64d8a"},
-]
-
-[package.dependencies]
-cmake = "*"
-filelock = "*"
-lit = "*"
-torch = "*"
-
-[package.extras]
-tests = ["autopep8", "flake8", "isort", "numpy", "pytest", "scipy (>=1.7.1)"]
-tutorials = ["matplotlib", "pandas", "tabulate"]
 
 [[package]]
 name = "typer"
@@ -7250,6 +7169,21 @@ files = [
 ]
 
 [[package]]
+name = "xacrodoc"
+version = "0.4.1"
+description = "Programmatically compile xacro files."
+optional = false
+python-versions = "<3.12,>=3.8"
+files = [
+    {file = "xacrodoc-0.4.1-py3-none-any.whl", hash = "sha256:66c7c6c89db2856904704a383cd1c2929a78355c66e350f02aa52d47cb88f642"},
+    {file = "xacrodoc-0.4.1.tar.gz", hash = "sha256:6d740278bf4b44961f311640dc023329154326b2ab45944de9d64c1a68801899"},
+]
+
+[package.dependencies]
+pyyaml = ">=6.0"
+rospkg = ">=1.5.0,<2.0.0"
+
+[[package]]
 name = "yarl"
 version = "1.18.3"
 description = "Yet another URL library"
@@ -7532,5 +7466,5 @@ cffi = ["cffi (>=1.11)"]
 
 [metadata]
 lock-version = "2.0"
-python-versions = ">=3.10,<3.13"
-content-hash = "219d428d6849c336e79294c758a70dd19dc1a78f6a83420b9ce4e88b02ce551e"
+python-versions = "3.10.12"
+content-hash = "33d6c86e9415c9392b849faa134ecf7fcbf41a396f70d98dbcb7d47a8f860d72"
