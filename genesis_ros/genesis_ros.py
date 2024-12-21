@@ -73,16 +73,21 @@ def get_package_xml_directories():
     return package_dirs
 
 
+
 def save_mesh_filenames_from_urdf_string(urdf_string):
     """
     Parses a URDF string and saves the files referenced in the `filename` attribute
-    of `mesh` tags to the `/tmp/genesis_ros/mesh` directory.
+    of `mesh` tags to the `/tmp/genesis_ros/mesh` directory. Updates the `filename`
+    attribute to use the `package://meshes/` path.
 
     Args:
         urdf_string (str): URDF file content as a string.
+
+    Returns:
+        str: Updated URDF string with modified `filename` attributes.
     """
     # Target directory to save the mesh files
-    target_dir = "/tmp/genesis_ros/mesh"
+    target_dir = '/tmp/genesis_ros/mesh'
 
     # Ensure the target directory exists
     os.makedirs(target_dir, exist_ok=True)
@@ -92,11 +97,11 @@ def save_mesh_filenames_from_urdf_string(urdf_string):
         root = ET.fromstring(urdf_string)
 
         # Namespace handling (if any)
-        namespace = "}" if "}" in root.tag else ""
+        namespace = '}' if '}' in root.tag else ''
 
         # Find all mesh tags
-        for mesh_tag in root.findall(f".//{namespace}mesh"):
-            filename = mesh_tag.get("filename")
+        for mesh_tag in root.findall(f'.//{namespace}mesh'):
+            filename = mesh_tag.get('filename')
             if filename:
                 # Resolve the source file path
                 source_file_path = os.path.abspath(filename)
@@ -108,16 +113,61 @@ def save_mesh_filenames_from_urdf_string(urdf_string):
                 if os.path.exists(source_file_path):
                     shutil.copy2(source_file_path, dest_file_path)
                     print(f"Copied {source_file_path} to {dest_file_path}")
+
+                    # Update the filename attribute to use package://meshes/
+                    new_filename = f"package://meshes/{os.path.basename(filename)}"
+                    mesh_tag.set('filename', new_filename)
                 else:
-                    print(
-                        f"Warning: {source_file_path} does not exist and cannot be copied."
-                    )
+                    print(f"Warning: {source_file_path} does not exist and cannot be copied.")
+
+        # Convert the updated XML tree back to a string
+        updated_urdf_string = ET.tostring(root, encoding='unicode')
+        return updated_urdf_string
 
     except ET.ParseError as e:
         print(f"Error parsing URDF string: {e}")
+        return urdf_string
     except Exception as e:
         print(f"Unexpected error: {e}")
+        return urdf_string
 
+def pretty_format_xml(input_file, output_file):
+    """
+    Reads an XML file, formats it with proper indentation, and saves it to a new file.
+
+    :param input_file: Path to the input XML file.
+    :param output_file: Path to the output formatted XML file.
+    """
+    try:
+        # Parse the XML file
+        tree = ET.parse(input_file)
+        root = tree.getroot()
+
+        # Define a recursive function for indentation
+        def indent(elem, level=0):
+            i = "\n" + "  " * level
+            if len(elem):
+                if not elem.text or not elem.text.strip():
+                    elem.text = i + "  "
+                for child in elem:
+                    indent(child, level + 1)
+                if not elem.tail or not elem.tail.strip():
+                    elem.tail = i
+            else:
+                if level and (not elem.tail or not elem.tail.strip()):
+                    elem.tail = i
+
+        # Apply the indentation
+        indent(root)
+
+        # Write the formatted XML to the output file
+        tree.write(output_file, encoding="utf-8", xml_declaration=True)
+        print(f"Formatted XML has been saved to {output_file}")
+
+    except ET.ParseError as e:
+        print(f"Error: Unable to parse the XML file. {e}")
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
 def save_urdf_to_tmp(urdf_content):
     """
@@ -140,15 +190,16 @@ def save_urdf_to_tmp(urdf_content):
 
     doc = xd.XacroDoc(urdf_content)
     xd.packages.look_in(get_package_xml_directories())
-    save_mesh_filenames_from_urdf_string(doc.to_urdf_string())
 
     try:
         with open(output_path, "w") as urdf_file:
-            urdf_file.write(doc.to_urdf_string())
+            urdf_file.write(save_mesh_filenames_from_urdf_string(doc.to_urdf_string()))
         print(f"URDF saved to {output_path}")
     except IOError as e:
         print(f"Failed to save URDF: {e}")
         raise
+
+    pretty_format_xml(output_path, output_path)
 
     return output_path
 
