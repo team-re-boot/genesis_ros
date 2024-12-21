@@ -87,7 +87,7 @@ def save_mesh_filenames_from_urdf_string(urdf_string):
         str: Updated URDF string with modified `filename` attributes.
     """
     # Target directory to save the mesh files
-    target_dir = '/tmp/genesis_ros/mesh'
+    target_dir = '/tmp/genesis_ros/meshes'
 
     # Ensure the target directory exists
     os.makedirs(target_dir, exist_ok=True)
