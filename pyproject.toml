@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "genesis-ros"
+version = "0.1.0"
+description = "ROS2 bridge / related tools for genesis"
+authors = ["Masaya Kataoka <ms.kataoka@gmail.com>"]
+license = "Apache-2.0"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.10,<3.13"
+genesis-world = "^0.2.0"
+amber = {git = "https://github.com/rosbag-sharing-community/amber.git", rev = "0.0.1"}
+
+[[tool.poetry.source]]
+name = "torch_cu118"
+url = "https://download.pytorch.org/whl/cu118"
+priority = "explicit"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
