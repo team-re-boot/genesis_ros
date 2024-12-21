@@ -73,6 +73,52 @@ def get_package_xml_directories():
     return package_dirs
 
 
+def save_mesh_filenames_from_urdf_string(urdf_string):
+    """
+    Parses a URDF string and saves the files referenced in the `filename` attribute
+    of `mesh` tags to the `/tmp/genesis_ros/mesh` directory.
+
+    Args:
+        urdf_string (str): URDF file content as a string.
+    """
+    # Target directory to save the mesh files
+    target_dir = "/tmp/genesis_ros/mesh"
+
+    # Ensure the target directory exists
+    os.makedirs(target_dir, exist_ok=True)
+
+    try:
+        # Parse the URDF string
+        root = ET.fromstring(urdf_string)
+
+        # Namespace handling (if any)
+        namespace = "}" if "}" in root.tag else ""
+
+        # Find all mesh tags
+        for mesh_tag in root.findall(f".//{namespace}mesh"):
+            filename = mesh_tag.get("filename")
+            if filename:
+                # Resolve the source file path
+                source_file_path = os.path.abspath(filename)
+
+                # Destination path in the target directory
+                dest_file_path = os.path.join(target_dir, os.path.basename(filename))
+
+                # Copy the file to the target directory
+                if os.path.exists(source_file_path):
+                    shutil.copy2(source_file_path, dest_file_path)
+                    print(f"Copied {source_file_path} to {dest_file_path}")
+                else:
+                    print(
+                        f"Warning: {source_file_path} does not exist and cannot be copied."
+                    )
+
+    except ET.ParseError as e:
+        print(f"Error parsing URDF string: {e}")
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+
+
 def save_urdf_to_tmp(urdf_content):
     """
     Save the provided URDF content to a file in /tmp/genesis_ros. If the directory already exists, delete it first.
@@ -92,17 +138,18 @@ def save_urdf_to_tmp(urdf_content):
     os.makedirs(output_dir, exist_ok=True)
     output_path = os.path.join(output_dir, "model.urdf")
 
+    doc = xd.XacroDoc(urdf_content)
+    xd.packages.look_in(get_package_xml_directories())
+    save_mesh_filenames_from_urdf_string(doc.to_urdf_string())
+
     try:
         with open(output_path, "w") as urdf_file:
-            urdf_file.write(urdf_content)
+            urdf_file.write(doc.to_urdf_string())
         print(f"URDF saved to {output_path}")
     except IOError as e:
         print(f"Failed to save URDF: {e}")
         raise
 
-    doc = xd.XacroDoc.from_file(output_path)
-    xd.packages.look_in(get_package_xml_directories())
-    print(doc.to_urdf_string())
     return output_path
 
 
