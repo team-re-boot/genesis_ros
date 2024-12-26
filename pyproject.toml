@@ -9,12 +9,12 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "3.10.12"
 genesis-world = "^0.2.0"
-amber = {git = "https://github.com/rosbag-sharing-community/amber.git", rev = "0.0.1"}
+amber = {git = "https://github.com/rosbag-sharing-community/amber.git", rev = "feature/tf"}
 xacrodoc = "^0.4.1"
 
 [[tool.poetry.source]]
-name = "torch_cu118"
-url = "https://download.pytorch.org/whl/cu118"
+name = "torch_cu124"
+url = "https://download.pytorch.org/whl/cu124"
 priority = "explicit"
 
 [build-system]
