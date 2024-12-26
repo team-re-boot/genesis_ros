@@ -231,7 +231,7 @@ urllib3 = "^1.26.0"
 type = "git"
 url = "https://github.com/rosbag-sharing-community/amber.git"
 reference = "feature/tf"
-resolved_reference = "44e1fa8ea8a6856ce414d7b219ae7f3219fcc88b"
+resolved_reference = "94417db7c4f53fcd678add62ce4271f06bd98cad"
 
 [[package]]
 name = "annotated-types"
