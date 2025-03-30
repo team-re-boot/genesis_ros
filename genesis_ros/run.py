@@ -1,6 +1,6 @@
 import genesis as gs
-from amber.importer.tf import TfImporter, TfImporterConfig
-from tf2_amber import (
+from amber_mcap.importer.tf import TfImporter, TfImporterConfig
+from amber_mcap.tf2_amber import (
     TransformStamped,
     Header,
     Transform,
