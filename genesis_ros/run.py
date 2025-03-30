@@ -13,7 +13,7 @@ import math
 
 
 def get_tf_from_link(cur_t, link):
-    TransformStamped(
+    return TransformStamped(
         Header(
             Time(
                 int(math.floor(cur_t)),
