@@ -3,6 +3,40 @@ import shutil
 import xml.etree.ElementTree as ET
 import argparse
 import xacrodoc as xd
+import urllib.parse
+
+
+def file_url_to_path(file_url):
+    """
+    Extracts the local full path from a file URL.
+
+    Args:
+        file_url (str): The file URL (e.g., 'file:///path/to/your/file.txt', 'file://localhost/C:/path/to/file.txt').
+
+    Returns:
+        str or None: The full local path of the file, or None if the URL is not a file URL
+                     or cannot be converted to a local path.
+    """
+    parsed_url = urllib.parse.urlparse(file_url)
+
+    if parsed_url.scheme != "file":
+        return None
+
+    # Decode the URL-encoded path
+    path = urllib.parse.unquote(parsed_url.path)
+
+    # For Windows, remove the leading slash from paths like '/C:/...'
+    if os.name == "nt" and path.startswith("/"):
+        path = path[1:]
+
+    # Consider 'localhost' or no hostname as a local file
+    if not parsed_url.netloc or parsed_url.netloc == "localhost":
+        # Get the absolute path
+        full_path = os.path.abspath(path)
+        return full_path
+    else:
+        # Likely a remote file path
+        return None
 
 
 def parse_cmake_prefix_path():
@@ -102,6 +136,8 @@ def save_mesh_filenames_from_urdf_string(urdf_string):
         for mesh_tag in root.findall(f".//{namespace}mesh"):
             filename = mesh_tag.get("filename")
             if filename:
+                if filename.startswith("file://"):
+                    filename = file_url_to_path(filename)
                 # Resolve the source file path
                 source_file_path = os.path.abspath(filename)
 
@@ -117,9 +153,7 @@ def save_mesh_filenames_from_urdf_string(urdf_string):
                     new_filename = f"package://meshes/{os.path.basename(filename)}"
                     mesh_tag.set("filename", new_filename)
                 else:
-                    print(
-                        f"Warning: {source_file_path} does not exist and cannot be copied."
-                    )
+                    print(f"{source_file_path} does not exist and cannot be copied.")
 
         # Convert the updated XML tree back to a string
         updated_urdf_string = ET.tostring(root, encoding="unicode")
