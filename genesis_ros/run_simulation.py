@@ -13,15 +13,19 @@ import math
 from genesis_ros.analyze_urdf import get_camera_sensors
 
 
+def get_header(cur_t, frame_id):
+    return Header(
+        Time(
+            int(math.floor(cur_t)),
+            int((cur_t - float(math.floor(cur_t))) * pow(10, 9)),
+        ),
+        frame_id,
+    )
+
+
 def get_tf_from_link(cur_t, link):
     return TransformStamped(
-        Header(
-            Time(
-                int(math.floor(cur_t)),
-                int((cur_t - float(math.floor(cur_t))) * pow(10, 9)),
-            ),
-            "map",
-        ),
+        get_header(cur_t, "map"),
         link.name,
         Transform(
             Vector3(link.get_pos()[0], link.get_pos()[1], link.get_pos()[2]),
@@ -64,7 +68,11 @@ def main():
             get_tf_from_link(scene.cur_t, robot.get_link("head_pan_link"))
         )
         for camera in camera_sensors:
-            camera.update()
+            rosbag_writer.write_image(
+                "image_raw",
+                camera.update()[0],
+                get_header(scene.cur_t, "cam_gazebo_link"),
+            )
         scene.step()
 
     rosbag_writer.finish()
