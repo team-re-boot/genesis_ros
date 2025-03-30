@@ -1,5 +1,5 @@
 import genesis as gs
-from amber_mcap.importer.tf import TfImporter, TfImporterConfig
+from genesis_ros.rosbag_writer import RosbagWriter
 from amber_mcap.tf2_amber import (
     TransformStamped,
     Header,
@@ -54,13 +54,17 @@ def main():
 
     scene.build()
 
-    importer = TfImporter(TfImporterConfig())
+    rosbag_writer = RosbagWriter()
 
     for i in range(100):
-        importer.write(get_tf_from_link(scene.cur_t, robot.get_link("body_link")))
-        importer.write(get_tf_from_link(scene.cur_t, robot.get_link("head_pan_link")))
+        rosbag_writer.write_tf(
+            get_tf_from_link(scene.cur_t, robot.get_link("body_link"))
+        )
+        rosbag_writer.write_tf(
+            get_tf_from_link(scene.cur_t, robot.get_link("head_pan_link"))
+        )
         for camera in camera_sensors:
             camera.update()
         scene.step()
 
-    importer.finish()
+    rosbag_writer.finish()
