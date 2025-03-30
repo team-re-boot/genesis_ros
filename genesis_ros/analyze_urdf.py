@@ -4,6 +4,7 @@ from amber_mcap.tf2_amber import TransformStamped
 from genesis_ros import math
 import genesis as gs
 import numpy as np
+from typing import List
 
 
 class CameraSensor:
@@ -21,6 +22,7 @@ class CameraSensor:
         self.gs_camera.set_pose(
             pos=self.get_camera_position(), lookat=self.get_look_at_point()
         )
+        return self.gs_camera.render()
 
     def get_camera_position(self):
         return self.gs_robot.get_link(self.link_name).get_pos()
@@ -32,7 +34,8 @@ class CameraSensor:
         )
 
 
-def get_camera_sensors(urdf_path: Path, gs_scene, gs_robot):
+def get_camera_sensors(urdf_path: Path, gs_scene, gs_robot) -> List[CameraSensor]:
+    camera_sensors = []
     tree = ET.parse(urdf_path)
     gazebo_elements = tree.getroot().findall(".//gazebo")
     if gazebo_elements:
@@ -41,6 +44,9 @@ def get_camera_sensors(urdf_path: Path, gs_scene, gs_robot):
             if sensor_elements:
                 for sensor_element in sensor_elements:
                     if sensor_element.attrib["type"] == "camera":
-                        CameraSensor(
-                            gazebo_element.attrib["reference"], gs_scene, gs_robot
+                        camera_sensors.append(
+                            CameraSensor(
+                                gazebo_element.attrib["reference"], gs_scene, gs_robot
+                            )
                         )
+    return camera_sensors

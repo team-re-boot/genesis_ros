@@ -59,6 +59,8 @@ def main():
     for i in range(100):
         importer.write(get_tf_from_link(scene.cur_t, robot.get_link("body_link")))
         importer.write(get_tf_from_link(scene.cur_t, robot.get_link("head_pan_link")))
+        for camera in camera_sensors:
+            camera.update()
         scene.step()
 
     importer.finish()
