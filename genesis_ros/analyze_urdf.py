@@ -1,11 +1,17 @@
 import xml.etree.ElementTree as ET
 from pathlib import Path
 from amber_mcap.tf2_amber import TransformStamped
+from genesis_ros import math
 
 
 class CameraSensor:
     def __init__(self, link: str):
         self.link = link
+
+    def get_look_at_point(gs_link):
+        return math.get_look_at_point(
+            np.array(link.get_pos()), np.array(link.get_quat())
+        )
 
 
 def get_camera_sensors(urdf_path: Path):
