@@ -44,6 +44,9 @@ def main():
     robot = scene.add_entity(
         gs.morphs.URDF(file="/tmp/genesis_ros/model.urdf", fixed=True, pos=(0, 0, 0.4)),
     )
+    print(robot.links)
+    for link in robot.links:
+        print(link.name)
 
     camera_sensors = get_camera_sensors("/tmp/genesis_ros/model.urdf", scene, robot)
 
