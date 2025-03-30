@@ -3,18 +3,23 @@ from pathlib import Path
 from amber_mcap.tf2_amber import TransformStamped
 from genesis_ros import math
 import genesis as gs
+import numpy as np
 
 
 class CameraSensor:
     def __init__(self, link_name: str, gs_scene, gs_robot):
         self.link_name = link_name
-        self.gs_scene = gs_scene
         self.gs_robot = gs_robot
-        self.gs_scene.add_camera(
+        self.gs_camera = gs_scene.add_camera(
             res=(640, 480),
-            pos=self.get_camera_position(),
-            lookat=self.get_look_at_point(),
+            pos=(0, 0, 0),
+            lookat=(0, 0, 1),
             fov=30,
+        )
+
+    def update(self):
+        self.gs_camera.set_pose(
+            pos=self.get_camera_position(), lookat=self.get_look_at_point()
         )
 
     def get_camera_position(self):
