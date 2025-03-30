@@ -1,22 +1,30 @@
-[tool.poetry]
+[project]
 name = "genesis-ros"
 version = "0.1.0"
 description = "ROS2 bridge / related tools for genesis"
-authors = ["Masaya Kataoka <ms.kataoka@gmail.com>"]
 license = "Apache-2.0"
 readme = "README.md"
-
-[tool.poetry.dependencies]
-python = "3.10.12"
-genesis-world = "^0.2.0"
-amber = {git = "https://github.com/rosbag-sharing-community/amber.git", rev = "feature/tf"}
-xacrodoc = "^0.4.1"
-
-[[tool.poetry.source]]
-name = "torch_cu124"
-url = "https://download.pytorch.org/whl/cu124"
-priority = "explicit"
+requires-python = ">=3.10"
+dependencies = [
+    "amber-mcap>=0.4.3; sys_platform == 'linux'",
+    "black>=25.1.0",
+    "torch==2.5.0+cu124; sys_platform == 'linux'",
+    "torch==2.5.0; sys_platform == 'darwin'",
+    "torchaudio==2.5.0+cu124; sys_platform == 'linux'",
+    "torchaudio==2.5.0; sys_platform == 'darwin'",
+    "torchvision==0.20.0+cu124; sys_platform == 'linux'",
+    "torchvision==0.20.0; sys_platform == 'darwin'",
+    "xacrodoc>=0.4.1",
+    "genesis-world>=0.2.0"
+]
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+find-links = [
+    "https://download.pytorch.org/whl/cu124/torch",
+    "https://download.pytorch.org/whl/cu124/torchvision",
+    "https://download.pytorch.org/whl/cu124/torchaudio",
+]
