@@ -44,8 +44,6 @@ robot = scene.add_entity(
 
 scene.build()
 
-print(robot.links)
-
 importer = TfImporter(TfImporterConfig())
 
 for i in range(100):
