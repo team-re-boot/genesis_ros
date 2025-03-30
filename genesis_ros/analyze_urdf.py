@@ -1,5 +1,6 @@
 import xml.etree.ElementTree as ET
 from pathlib import Path
+from amber_mcap.tf2_amber import TransformStamped
 
 
 class CameraSensor:
