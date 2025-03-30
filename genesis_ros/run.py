@@ -34,21 +34,22 @@ def get_tf_from_link(cur_t, link):
     )
 
 
-gs.init(backend=gs.cpu)
+def main():
+    gs.init(backend=gs.cpu)
 
-scene = gs.Scene(show_viewer=True)
-plane = scene.add_entity(gs.morphs.Plane())
-robot = scene.add_entity(
-    gs.morphs.URDF(file="/tmp/genesis_ros/model.urdf", fixed=True, pos=(0, 0, 0.4)),
-)
+    scene = gs.Scene(show_viewer=True)
+    plane = scene.add_entity(gs.morphs.Plane())
+    robot = scene.add_entity(
+        gs.morphs.URDF(file="/tmp/genesis_ros/model.urdf", fixed=True, pos=(0, 0, 0.4)),
+    )
 
-scene.build()
+    scene.build()
 
-importer = TfImporter(TfImporterConfig())
+    importer = TfImporter(TfImporterConfig())
 
-for i in range(100):
-    importer.write(get_tf_from_link(scene.cur_t, robot.get_link("body_link")))
-    importer.write(get_tf_from_link(scene.cur_t, robot.get_link("head_pan_link")))
-    scene.step()
+    for i in range(100):
+        importer.write(get_tf_from_link(scene.cur_t, robot.get_link("body_link")))
+        importer.write(get_tf_from_link(scene.cur_t, robot.get_link("head_pan_link")))
+        scene.step()
 
-importer.finish()
+    importer.finish()
