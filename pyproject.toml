@@ -22,6 +22,9 @@ dependencies = [
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+[project.scripts]
+preprocess_urdf = "genesis_ros.preprocess_urdf:main"
+
 [tool.uv]
 find-links = [
     "https://download.pytorch.org/whl/cu124/torch",
