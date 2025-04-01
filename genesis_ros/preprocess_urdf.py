@@ -246,9 +246,7 @@ def main():
     Main function to parse arguments and handle URDF saving.
     """
     parser = argparse.ArgumentParser(description="Process URDF files.")
-    parser.add_argument(
-        "--urdf", type=str, required=True, help="Path to the URDF file to be saved."
-    )
+    parser.add_argument("urdf", type=str, help="Path to the URDF file to be saved.")
 
     args = parser.parse_args()
 
