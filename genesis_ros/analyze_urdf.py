@@ -12,10 +12,7 @@ class CameraSensor:
         self.link_name = link_name
         self.gs_robot = gs_robot
         self.gs_camera = gs_scene.add_camera(
-            res=(640, 480),
-            pos=(0, 0, 0),
-            lookat=(0, 0, 1),
-            fov=30,
+            res=(640, 480), pos=(0, 0, 0), lookat=(0, 0, 1), fov=30, GUI=False
         )
 
     def update(self):

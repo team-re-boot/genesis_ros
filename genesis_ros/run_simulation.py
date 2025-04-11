@@ -54,7 +54,7 @@ def main():
         ),
     )
 
-    camera_sensors = get_camera_sensors("/tmp/genesis_ros/model.urdf", scene, robot)
+    # camera_sensors = get_camera_sensors("/tmp/genesis_ros/model.urdf", scene, robot)
 
     scene.build()
 
@@ -67,12 +67,12 @@ def main():
         rosbag_writer.write_tf(
             get_tf_from_link(scene.cur_t, robot.get_link("head_pan_link"))
         )
-        for camera in camera_sensors:
-            rosbag_writer.write_image(
-                "image_raw",
-                camera.update()[0],
-                get_header(scene.cur_t, "cam_gazebo_link"),
-            )
+        # for camera in camera_sensors:
+        #     rosbag_writer.write_image(
+        #         "image_raw",
+        #         camera.update()[0],
+        #         get_header(scene.cur_t, "cam_gazebo_link"),
+        #     )
         scene.step()
 
     rosbag_writer.finish()
