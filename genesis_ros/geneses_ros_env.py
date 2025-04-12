@@ -1,11 +1,12 @@
-# class Simulation:
-#     def __init__(self, ):
-#         gs.init(backend=gs.cpu)
-#         self.__hash__scene = gs.Scene(show_viewer=True)
-#         self.plane = scene.add_entity(gs.morphs.Plane())
 import genesis as gs
 from dataclasses import dataclass, field
 from typing import Dict, List, Tuple
+
+
+@dataclass
+class SimulationConfig:
+    simulate_action_latency: bool = True
+    dt: float = 0.02
 
 
 @dataclasses
@@ -84,12 +85,16 @@ class GenesisRosEnv:
     def __init__(
         self,
         num_envs: int,
+        simulation_cfg: SimulationConfig,
         env_cfg: EnvironmentConfig,
         obs_cfg: ObservationConfig,
         reward_cfg: RewardConfig,
         command_cfg: CommandConfig,
         urdf_path: str = "/tmp/genesis_ros/model.urdf",
         show_viewer=False,
-        device="cuda",
     ):
-        pass
+        self.num_envs = num_envs
+        self.num_obs = obs_cfg.num_obs
+        self.num_privileged_obs = None
+        self.num_actions = env_cfg.num_actions
+        self.num_commands = command_cfg.num_commands
