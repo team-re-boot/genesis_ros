@@ -98,3 +98,15 @@ class GenesisRosEnv:
         self.num_privileged_obs = None
         self.num_actions = env_cfg.num_actions
         self.num_commands = command_cfg.num_commands
+        self.simulate_action_latency = (
+            simulation_cfg.simulate_action_latency
+        )  # there is a 1 step latency on real robot
+        self.dt = simulation_cfg.dt
+
+        self.env_cfg = env_cfg
+        self.obs_cfg = obs_cfg
+        self.reward_cfg = reward_cfg
+        self.command_cfg = command_cfg
+
+        self.obs_scales = obs_cfg.obs_scales
+        self.reward_scales = reward_cfg.reward_scales
