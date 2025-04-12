@@ -1,4 +1,3 @@
-import genesis as gs
 from dataclasses import dataclass, field
 from typing import Dict, List, Tuple
 
@@ -9,7 +8,7 @@ class SimulationConfig:
     dt: float = 0.02
 
 
-@dataclasses
+@dataclass
 class EnvironmentConfig:
     num_actions: int = 12
     default_joint_angles: Dict[str, float] = field(default_factory=dict)
@@ -31,13 +30,13 @@ class EnvironmentConfig:
     simulate_action_latency: bool = True
     clip_actions: float = 100.0
 
-    def append_joint(self, joint: Tuple(str, float)) -> None:
+    def append_joint(self, joint: Tuple[str, float]) -> None:
         if not joint[0] in self.dof_names:
             self.dof_names.append(joint[0])
         if not joint[0] in self.default_joint_angles:
             self.default_joint_angles[joint[0]] = joint[1]
 
-    def append_joints(self, joints: List[Tuple(str, float)]) -> None:
+    def append_joints(self, joints: List[Tuple[str, float]]) -> None:
         for joint in joints:
             self.append_joint(joint)
 
@@ -63,7 +62,7 @@ class RewardScalesConfig:
     tracking_ang_vel: float = 0.2
     lin_vel_z: float = -1.0
     base_height: float = -50.0
-    action_rate: float - 0.005
+    action_rate: float = -0.005
     similar_to_default: float = -0.1
 
 
@@ -71,6 +70,7 @@ class RewardScalesConfig:
 class RewardConfig:
     tracking_sigma: float = 0.25
     base_height_target: float = 0.3
+    reward_scales: RewardScalesConfig = RewardScalesConfig()
 
 
 @dataclass
