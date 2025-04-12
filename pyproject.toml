@@ -7,7 +7,6 @@ readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "amber-mcap>=0.4.3; sys_platform == 'linux'",
-    "black>=25.1.0",
     "torch==2.5.0+cu124; sys_platform == 'linux'",
     "torch==2.5.0; sys_platform == 'darwin'",
     "torchaudio==2.5.0+cu124; sys_platform == 'linux'",
@@ -32,4 +31,11 @@ find-links = [
     "https://download.pytorch.org/whl/cu124/torch",
     "https://download.pytorch.org/whl/cu124/torchvision",
     "https://download.pytorch.org/whl/cu124/torchaudio",
+]
+
+[dependency-groups]
+dev = [
+    "black>=25.1.0",
+    "mypy>=1.15.0",
+    "pre-commit>=4.2.0",
 ]
