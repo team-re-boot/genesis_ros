@@ -55,13 +55,30 @@ class ObservationConfig:
     obs_scales: ObservationScaleConfig = ObservationScaleConfig()
 
 
+# TODO: Support decorator for describe reward function and remove this config
+@dataclass
+class RewardScalesConfig:
+    tracking_lin_vel: float = 1.0
+    tracking_ang_vel: float = 0.2
+    lin_vel_z: float = -1.0
+    base_height: float = -50.0
+    action_rate: float - 0.005
+    similar_to_default: float = -0.1
+
+
+@dataclass
+class RewardConfig:
+    tracking_sigma: float = 0.25
+    base_height_target: float = 0.3
+
+
 class GenesisRosEnv:
     def __init__(
         self,
         num_envs: int,
         env_cfg: EnvironmentConfig,
-        obs_cfg,
-        reward_cfg,
+        obs_cfg: ObservationConfig,
+        reward_cfg: RewardConfig,
         command_cfg,
         urdf_path: str = "/tmp/genesis_ros/model.urdf",
         show_viewer=False,
