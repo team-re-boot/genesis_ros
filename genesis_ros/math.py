@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.spatial.transform import Rotation as R
+from scipy.spatial.transform import Rotation as R  # type: ignore
 from typing import Tuple, Union
 
 

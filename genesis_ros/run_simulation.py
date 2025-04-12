@@ -1,6 +1,6 @@
-import genesis as gs
+import genesis as gs  # type: ignore
 from genesis_ros.rosbag_writer import RosbagWriter
-from amber_mcap.tf2_amber import (
+from amber_mcap.tf2_amber import (  # type: ignore
     TransformStamped,
     Header,
     Transform,

@@ -2,7 +2,7 @@ import os
 import shutil
 import xml.etree.ElementTree as ET
 import argparse
-import xacrodoc as xd # type: ignore
+import xacrodoc as xd  # type: ignore
 import urllib.parse
 
 
