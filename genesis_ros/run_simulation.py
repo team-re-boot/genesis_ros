@@ -40,6 +40,7 @@ def get_tf_from_link(cur_t, link):
 
 
 def main():
+    parser = argparse.ArgumentParser(description="Run simulation with Genesis")
     gs.init(backend=gs.cpu)
 
     scene = gs.Scene(show_viewer=True)

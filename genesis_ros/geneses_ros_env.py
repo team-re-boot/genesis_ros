@@ -4,6 +4,31 @@
 #         self.__hash__scene = gs.Scene(show_viewer=True)
 #         self.plane = scene.add_entity(gs.morphs.Plane())
 import genesis as gs
+from dataclasses import dataclass, field
+from typing import Dict, List, Tuple
+
+
+@dataclasses
+class EnvironmentConfig:
+    num_actions: int = 12
+    default_joint_angles: Dict[str, float] = field(default_factory=dict)
+    dof_names: List[str] = field(default_factory=list)
+    # PD
+    kp: float = 20.0
+    kd: float = 0.5
+    # termination
+    termination_if_roll_greater_than: float = 10  # degree
+    termination_if_pitch_greater_than: float = 10.0  # degree
+    # base pose
+    base_init_pos: Tuple[float, float, float] = field(default=(0.0, 0.0, 0.0))
+    base_init_quat: Tuple[float, float, float, float] = field(
+        default=(1.0, 0.0, 0.0, 0.0)
+    )
+    episode_length_seconds: float = 20.0
+    resampling_time_seconds: float = 20.0  # TODO, Enable start training from rosbag data in order to merge real world data.
+    action_scale: float = 0.25
+    simulate_action_latency: bool = True
+    clip_actions: float = 100.0
 
 
 class GenesisRosEnv:
