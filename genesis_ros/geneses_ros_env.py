@@ -30,6 +30,16 @@ class EnvironmentConfig:
     simulate_action_latency: bool = True
     clip_actions: float = 100.0
 
+    def append_joint(self, joint: Tuple(str, float)) -> None:
+        if not joint[0] in self.dof_names:
+            self.dof_names.append(joint[0])
+        if not joint[0] in self.default_joint_angles:
+            self.default_joint_angles[joint[0]] = joint[1]
+
+    def append_joints(self, joints: List[Tuple(str, float)]) -> None:
+        for joint in joints:
+            self.append_joint(joint)
+
 
 class GenesisRosEnv:
     def __init__(
