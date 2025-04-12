@@ -41,11 +41,25 @@ class EnvironmentConfig:
             self.append_joint(joint)
 
 
+@dataclass
+class ObservationScaleConfig:
+    lin_vel: float = 2.0
+    ang_vel: float = 0.25
+    dof_pos: float = 1.0
+    dof_vel: float = 0.05
+
+
+@dataclass
+class ObservationConfig:
+    num_obs: int = 45
+    obs_scales: ObservationScaleConfig = ObservationScaleConfig()
+
+
 class GenesisRosEnv:
     def __init__(
         self,
         num_envs: int,
-        env_cfg,
+        env_cfg: EnvironmentConfig,
         obs_cfg,
         reward_cfg,
         command_cfg,
