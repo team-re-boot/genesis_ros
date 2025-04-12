@@ -1,8 +1,6 @@
 import xml.etree.ElementTree as ET
 from pathlib import Path
-from amber_mcap.tf2_amber import TransformStamped
 from genesis_ros import math
-import genesis as gs
 import numpy as np
 from typing import List
 
