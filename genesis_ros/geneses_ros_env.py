@@ -72,6 +72,14 @@ class RewardConfig:
     base_height_target: float = 0.3
 
 
+@dataclass
+class CommandConfig:
+    num_commands: int = 3
+    lin_vel_x_range: List[float] = field(default_factory=lambda: [0.5, 0.5])
+    lin_vel_y_range: List[float] = field(default_factory=lambda: [0.0, 0.0])
+    ang_vel_range: List[float] = field(default_factory=lambda: [0.0, 0.0])
+
+
 class GenesisRosEnv:
     def __init__(
         self,
@@ -79,7 +87,7 @@ class GenesisRosEnv:
         env_cfg: EnvironmentConfig,
         obs_cfg: ObservationConfig,
         reward_cfg: RewardConfig,
-        command_cfg,
+        command_cfg: CommandConfig,
         urdf_path: str = "/tmp/genesis_ros/model.urdf",
         show_viewer=False,
         device="cuda",
