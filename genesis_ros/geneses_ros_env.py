@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 from typing import Dict, List, Tuple
+import genesis as gs
 
 
 @dataclass
@@ -25,7 +26,9 @@ class EnvironmentConfig:
         default=(1.0, 0.0, 0.0, 0.0)
     )
     episode_length_seconds: float = 20.0
-    resampling_time_seconds: float = 20.0  # TODO, Enable start training from rosbag data in order to merge real world data.
+    resampling_time_seconds: float = (
+        20.0  # TODO, Enable start training from rosbag data in order to merge real world data.
+    )
     action_scale: float = 0.25
     simulate_action_latency: bool = True
     clip_actions: float = 100.0
@@ -91,7 +94,6 @@ class GenesisRosEnv:
         reward_cfg: RewardConfig,
         command_cfg: CommandConfig,
         urdf_path: str = "/tmp/genesis_ros/model.urdf",
-        show_viewer=False,
     ):
         self.num_envs = num_envs
         self.num_obs = obs_cfg.num_obs
@@ -110,3 +112,22 @@ class GenesisRosEnv:
 
         self.obs_scales = obs_cfg.obs_scales
         self.reward_scales = reward_cfg.reward_scales
+
+        # create scene
+        self.scene = gs.Scene(
+            sim_options=gs.options.SimOptions(dt=self.dt, substeps=2),
+            viewer_options=gs.options.ViewerOptions(
+                max_FPS=int(0.5 / self.dt),
+                camera_pos=(2.0, 0.0, 2.5),
+                camera_lookat=(0.0, 0.0, 0.5),
+                camera_fov=40,
+            ),
+            vis_options=gs.options.VisOptions(),
+            rigid_options=gs.options.RigidOptions(
+                dt=self.dt,
+                constraint_solver=gs.constraint_solver.Newton,
+                enable_collision=True,
+                enable_joint_limit=True,
+            ),
+            show_viewer=False,
+        )
