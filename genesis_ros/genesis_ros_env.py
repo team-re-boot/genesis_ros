@@ -9,6 +9,7 @@ from genesis_ros.genesis_ros_env_options import (
 from typing import Any
 import functools
 import inspect
+import sys
 
 
 def genesis_entity(func) -> Any:
@@ -27,6 +28,14 @@ def genesis_entity(func) -> Any:
         return result
 
     return wrapper
+
+
+def list_genesis_entities(module=sys.modules[__name__]):
+    decorated_functions = []
+    for name, func in inspect.getmembers(module, inspect.isfunction):
+        if hasattr(func, "_is_genesis_entity"):
+            decorated_functions.append(name)
+    return decorated_functions
 
 
 class GenesisRosEnv:
@@ -84,17 +93,18 @@ class GenesisRosEnv:
                 merge_fixed_links=False,
             ),
         )
-
-    def list_genesis_entities(module):
-        decorated_functions = []
-        for name, func in inspect.getmembers(module, inspect.isfunction):
-            if hasattr(func, "_is_genesis_entity"):
-                decorated_functions.append(name)
-        return decorated_functions
+        for function_name in list_genesis_entities():
+            function = getattr(sys.modules[__name__], function_name)
+            self.scene.add_entity(function())
 
 
 if __name__ == "__main__":
     gs.init(logging_level="warning", backend=gs.cpu)
+
+    @genesis_entity
+    def add_plane():
+        return gs.morphs.Plane()
+
     env = GenesisRosEnv(
         1,
         SimulationConfig(),
