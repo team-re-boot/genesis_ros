@@ -142,5 +142,5 @@ if __name__ == "__main__":
         ObservationConfig(),
         RewardConfig(),
         CommandConfig(),
-        "/tmp/genesis_ros/model.urdf",
+        "urdf/go2/urdf/go2.urdf",
     )
