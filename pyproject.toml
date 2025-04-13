@@ -37,5 +37,7 @@ find-links = [
 dev = [
     "black==25.1.0",
     "mypy==1.15.0",
+    "pytest==8.3.5",
     "pre-commit>=4.2.0",
+    "lark>=1.2.2",
 ]

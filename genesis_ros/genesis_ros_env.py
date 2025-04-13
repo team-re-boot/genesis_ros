@@ -95,7 +95,7 @@ class GenesisRosEnv:
         # add robot
         self.robot = self.scene.add_entity(
             gs.morphs.URDF(
-                file="/tmp/genesis_ros/model.urdf",
+                file=urdf_path,
                 fixed=True,
                 pos=self.env_cfg.base_init_pos,
                 merge_fixed_links=False,
