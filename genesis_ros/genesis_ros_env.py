@@ -8,12 +8,14 @@ from genesis_ros.genesis_ros_env_options import (
 )
 from typing import Any
 import functools
+import inspect
 
 
 def genesis_entity(func) -> Any:
     """
     Decorator to check if the return type is gs.morphs.Morph
     """
+    func._is_genesis_entity = True
 
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
@@ -74,10 +76,25 @@ class GenesisRosEnv:
             ),
             show_viewer=False,
         )
+        self.robot = self.scene.add_entity(
+            gs.morphs.URDF(
+                file="/tmp/genesis_ros/model.urdf",
+                fixed=True,
+                pos=(0, 0, 0.4),
+                merge_fixed_links=False,
+            ),
+        )
+
+    def list_genesis_entities(module):
+        decorated_functions = []
+        for name, func in inspect.getmembers(module, inspect.isfunction):
+            if hasattr(func, "_is_genesis_entity"):
+                decorated_functions.append(name)
+        return decorated_functions
 
 
 if __name__ == "__main__":
-    gs.init(logging_level="warning")
+    gs.init(logging_level="warning", backend=gs.cpu)
     env = GenesisRosEnv(
         1,
         SimulationConfig(),
