@@ -6,6 +6,25 @@ from genesis_ros.genesis_ros_env_options import (
     RewardConfig,
     CommandConfig,
 )
+from typing import Any
+import functools
+
+
+def genesis_entity(func) -> Any:
+    """
+    Decorator to check if the return type is gs.morphs.Morph
+    """
+
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        result = func(*args, **kwargs)
+        if not isinstance(result, gs.morphs.Morph):
+            raise TypeError(
+                f"The return type of function {func.__name__} is not gs.morphs.Morph."
+            )
+        return result
+
+    return wrapper
 
 
 class GenesisRosEnv:
@@ -55,3 +74,16 @@ class GenesisRosEnv:
             ),
             show_viewer=False,
         )
+
+
+if __name__ == "__main__":
+    gs.init(logging_level="warning")
+    env = GenesisRosEnv(
+        1,
+        SimulationConfig(),
+        EnvironmentConfig(),
+        ObservationConfig(),
+        RewardConfig(),
+        CommandConfig(),
+        "/tmp/genesis_ros/model.urdf",
+    )

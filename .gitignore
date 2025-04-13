@@ -1,2 +1,4 @@
 output.mcap
 __pycache__
+.venv
+.mypy_cache
