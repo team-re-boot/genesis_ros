@@ -1,4 +1,4 @@
-import genesis as gs
+import genesis as gs  # type: ignore
 from genesis_ros.genesis_ros_env_options import (
     SimulationConfig,
     EnvironmentConfig,
