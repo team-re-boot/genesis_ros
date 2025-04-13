@@ -32,6 +32,7 @@ find-links = [
     "https://download.pytorch.org/whl/cu124/torchvision",
     "https://download.pytorch.org/whl/cu124/torchaudio",
 ]
+default-groups = ["dev"]
 
 [dependency-groups]
 dev = [
@@ -40,4 +41,6 @@ dev = [
     "pytest==8.3.5",
     "pre-commit>=4.2.0",
     "lark>=1.2.2",
+    "pytest-cov>=6.1.1",
+    "pytest-testmon>=2.1.3",
 ]
