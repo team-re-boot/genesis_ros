@@ -110,6 +110,23 @@ class GenesisRosEnv:
             function = getattr(sys.modules[__name__], function_name)
             self.scene.add_entity(function())
 
+        # build
+        self.scene.build(n_envs=num_envs)
+        # names to indices
+        for joint in self.robot.joints:
+            if self.robot.get_joint(joint.name).dof_idx_local:
+                self.env_cfg.append_joint(
+                    (
+                        joint.name,
+                        self.robot.get_dofs_position(
+                            [self.robot.get_joint(joint.name).dof_idx_local]
+                        ).item(),
+                    )
+                )
+        self.motor_dofs = [
+            self.robot.get_joint(name).dof_idx_local for name in self.env_cfg.dof_names
+        ]
+
 
 if __name__ == "__main__":
     gs.init(logging_level="warning", backend=gs.cpu)
