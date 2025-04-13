@@ -6,10 +6,17 @@ from genesis_ros.genesis_ros_env_options import (
     RewardConfig,
     CommandConfig,
 )
+from genesis.utils.geom import (
+    quat_to_xyz,
+    transform_by_quat,
+    inv_quat,
+    transform_quat_by_quat,
+)
 from typing import Any
 import functools
 import inspect
 import sys
+import torch
 
 
 def genesis_entity(func) -> Any:
@@ -85,14 +92,20 @@ class GenesisRosEnv:
             ),
             show_viewer=False,
         )
+        # add robot
         self.robot = self.scene.add_entity(
             gs.morphs.URDF(
                 file="/tmp/genesis_ros/model.urdf",
                 fixed=True,
-                pos=(0, 0, 0.4),
+                pos=self.env_cfg.base_init_pos,
                 merge_fixed_links=False,
             ),
         )
+        self.base_init_pos = torch.tensor(self.env_cfg.base_init_pos, device=gs.device)
+        self.base_init_quat = torch.tensor(
+            self.env_cfg.base_init_quat, device=gs.device
+        )
+        self.inv_base_init_quat = inv_quat(self.base_init_quat)
         for function_name in list_genesis_entities():
             function = getattr(sys.modules[__name__], function_name)
             self.scene.add_entity(function())
