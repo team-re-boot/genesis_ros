@@ -22,3 +22,4 @@ repos:
         language: system
         types: [python]
         pass_filenames: false
+fail_fast: true
