@@ -24,6 +24,12 @@ jobs:
         os: [ubuntu-22.04]
     runs-on: ${{ matrix.os }}
     steps:
+      - name: Install EGL libraries
+        run: |
+          apt-get update
+          apt-get install -y libegl-dev xvfb
+          Xvfb :99 -screen 0 1024x768x24 &
+          export DISPLAY=:99
       - uses: actions/checkout@v4
       - name: Install uv
         uses: astral-sh/setup-uv@v5
