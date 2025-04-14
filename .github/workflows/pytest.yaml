@@ -24,10 +24,12 @@ jobs:
         os: [ubuntu-22.04]
     runs-on: ${{ matrix.os }}
     steps:
-      - name: Install OpenCV related libraries
+      - name: Install OpenCV/libegl related libraries
         run: |
           sudo apt-get update
-          sudo apt-get install -y ffmpeg libsm6 libxext6
+          sudo apt-get install -y ffmpeg libsm6 libxext6 libegl-dev xvfb mesa-utils
+          Xvfb :99 -screen 0 1024x768x24 &
+          export DISPLAY=:99
       - uses: actions/checkout@v4
       - name: Install uv
         uses: astral-sh/setup-uv@v5
