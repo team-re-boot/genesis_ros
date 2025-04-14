@@ -34,6 +34,32 @@ find-links = [
 ]
 default-groups = ["dev"]
 
+[tool.coverage.html]
+directory = "_htmlcov"
+
+[tool.coverage.xml]
+output = "_htmlcov/coverage.xml"
+
+[tool.coverage.report]
+exclude_lines = [
+    "@overload",
+    "if TYPE_CHECKING:",
+    "pragma: no cover",
+    "raise AssertionError()",
+    "return NotImplemented",
+]
+
+[tool.pytest.ini_options]
+addopts = [
+    "--cov-report=html",
+    "--cov-report=xml",
+    "--cov-report=term",
+    "--cov=genesis_ros",
+    "--doctest-modules",
+    "--import-mode=importlib",
+]
+testpaths = ["tests",]
+
 [dependency-groups]
 dev = [
     "black==25.1.0",

@@ -1,0 +1,51 @@
+name: ci
+on:
+  pull_request:
+    paths:
+      - .github/workflows/pytest.yaml
+      - genesis_ros/**
+      - tests/**
+      - pyproject.toml
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+  schedule:
+    - cron: 0 0 * * *
+  release:
+    types: [published]
+jobs:
+  pytest:
+    name: pytest
+    strategy:
+      fail-fast: false
+      matrix:
+        uv-version: ["0.6.14"]
+        os: [ubuntu-22.04]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          # Install a specific version of uv.
+          version: "0.6.14"
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+      - name: "Set up Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: "pyproject.toml"
+      - name: "Setup genesis_ros"
+        run: uv sync --dev
+      - name: Run pytest
+        run: uv run pytest -s
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./_htmlcov/coverage.xml
+          flags: pytest # optional
+          name: codecov-umbrella # optional
+          fail_ci_if_error: false # optional (default = false)
+          verbose: true # optional (default = false)
+          token: ${{ secrets.CODECOV_TOKEN }}
