@@ -3,5 +3,5 @@ __pycache__
 .venv
 .mypy_cache
 .testmondata
-.coverage
+.coverage*
 _htmlcov
