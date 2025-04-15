@@ -63,7 +63,7 @@ jobs:
         uv-version: ["0.6.14"]
         ros2_distro: [humble]
     runs-on: ubuntu-22.04
-    container: ros:${{ matrix.rosdistro }}
+    container: ros:${{ matrix.ros2_distro }}
     env:
       DEBIAN_FRONTEND: noninteractive
     steps:
@@ -81,4 +81,4 @@ jobs:
           path: ros_ws/src/op3_packages
           repository: https://github.com/team-re-boot/ROBOTIS-OP3-Common.git
       - name: resolve rosdep
-        run: rosdep install -iy --from-paths ros_ws/src/op3_packages/op3_description --rosdistro ${{ matrix.rosdistro }}
+        run: rosdep install -iy --from-paths ros_ws/src/op3_packages/op3_description --rosdistro ${{ matrix.ros2_distro }}
