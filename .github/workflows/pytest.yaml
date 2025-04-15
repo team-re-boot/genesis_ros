@@ -79,6 +79,6 @@ jobs:
         with:
           fetch-depth: 0
           path: ros_ws/src/op3_packages
-          repository: https://github.com/team-re-boot/ROBOTIS-OP3-Common.git
+          repository: team-re-boot/ROBOTIS-OP3-Common
       - name: resolve rosdep
         run: rosdep install -iy --from-paths ros_ws/src/op3_packages/op3_description --rosdistro ${{ matrix.ros2_distro }}
