@@ -99,7 +99,7 @@ jobs:
       - name: Run pytest
         run: |
           source /opt/ros/${{ matrix.ros2_distro }}/setup.bash
-          source ros_ws/install/local_setup.bash
+          source /home/runner/work/genesis_ros/genesis_ros/ros_ws/install/local_setup.bash
           uv run pytest -s
         shell: bash
       - name: Upload coverage reports to Codecov
