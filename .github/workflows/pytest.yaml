@@ -55,3 +55,30 @@ jobs:
           fail_ci_if_error: false # optional (default = false)
           verbose: true # optional (default = false)
           token: ${{ secrets.CODECOV_TOKEN }}
+  pytest_with_ros2:
+    name: pytest with ROS 2 environment
+    strategy:
+      fail-fast: false
+      matrix:
+        uv-version: ["0.6.14"]
+        ros2_distro: [humble]
+    runs-on: ubuntu-22.04
+    container: ros:${{ matrix.rosdistro }}
+    env:
+      DEBIAN_FRONTEND: noninteractive
+    steps:
+      - name: Install OpenCV/libegl/git related libraries
+        run: |
+          apt-get update
+          apt-get install -y ffmpeg libsm6 libxext6 libegl-dev xvfb mesa-utils
+          Xvfb :99 -screen 0 1024x768x24 &
+          export DISPLAY=:99
+      - name: make workspace
+        run: mkdir -p ros_ws/src
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          path: ros_ws/src/op3_packages
+          repository: https://github.com/team-re-boot/ROBOTIS-OP3-Common.git
+      - name: resolve rosdep
+        run: rosdep install -iy --from-paths ros_ws/src/op3_packages/op3_description --rosdistro ${{ matrix.rosdistro }}
