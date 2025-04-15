@@ -2,6 +2,6 @@ output.mcap
 __pycache__
 .venv
 .mypy_cache
-.testmondata
+.testmondata*
 .coverage*
 _htmlcov
