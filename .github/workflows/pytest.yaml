@@ -60,8 +60,8 @@ jobs:
           required-ros-distributions: ${{ matrix.ros2_distro }}
       - name: Install OpenCV/libegl/git related libraries
         run: |
-          apt-get update
-          apt-get install -y ffmpeg libsm6 libxext6 libegl-dev xvfb mesa-utils
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg libsm6 libxext6 libegl-dev xvfb mesa-utils
           Xvfb :99 -screen 0 1024x768x24 &
           export DISPLAY=:99
       - name: make workspace
