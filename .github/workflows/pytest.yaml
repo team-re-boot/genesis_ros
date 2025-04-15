@@ -81,4 +81,6 @@ jobs:
           path: ros_ws/src/op3_packages
           repository: team-re-boot/ROBOTIS-OP3-Common
       - name: resolve rosdep
-        run: rosdep install -iy --from-paths ros_ws/src/op3_packages/op3_description --rosdistro ${{ matrix.ros2_distro }}
+        run: |
+          rosdep update --include-eol-distros
+          rosdep install -iy --from-paths ros_ws/src/op3_packages/op3_description --rosdistro ${{ matrix.ros2_distro }}
