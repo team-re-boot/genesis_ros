@@ -1,11 +1,11 @@
 name: ci
 on:
   pull_request:
-    paths:
-      - .github/workflows/pytest.yaml
-      - genesis_ros/**
-      - tests/**
-      - pyproject.toml
+    # paths:
+    #   - .github/workflows/pytest.yaml
+    #   - genesis_ros/**
+    #   - tests/**
+    #   - pyproject.toml
   push:
     branches:
       - master
