@@ -76,7 +76,9 @@ jobs:
           rosdep update --include-eol-distros
           rosdep install -iy --from-paths ros_ws/src/op3_packages/op3_description --rosdistro ${{ matrix.ros2_distro }}
       - name: colcon build
-        run: colcon build --packages-select op3_description
+        run: |
+          source /opt/ros/${{ matrix.ros2_distro }}/setup.bash
+          colcon build --packages-select op3_description
         working-directory: ros_ws
       # Setup genesis_ros
       - uses: actions/checkout@v4
@@ -94,7 +96,10 @@ jobs:
       - name: "Setup genesis_ros"
         run: uv sync --dev
       - name: Run pytest
-        run: uv run pytest -s
+        run: |
+          source /opt/ros/${{ matrix.ros2_distro }}/setup.bash
+          source ros_ws/install/local_setup.bash
+          uv run pytest -s
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v4
         with:
