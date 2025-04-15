@@ -80,6 +80,7 @@ jobs:
           source /opt/ros/${{ matrix.ros2_distro }}/setup.bash
           colcon build --packages-select op3_description
         working-directory: ros_ws
+        shell: bash
       # Setup genesis_ros
       - uses: actions/checkout@v4
       - name: Install uv
@@ -100,6 +101,7 @@ jobs:
           source /opt/ros/${{ matrix.ros2_distro }}/setup.bash
           source ros_ws/install/local_setup.bash
           uv run pytest -s
+        shell: bash
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v4
         with:
