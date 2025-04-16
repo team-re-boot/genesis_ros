@@ -781,7 +781,6 @@ source = { editable = "." }
 dependencies = [
     { name = "amber-mcap", marker = "sys_platform == 'linux'" },
     { name = "genesis-world" },
-    { name = "opencv-python" },
     { name = "rsl-rl-lib" },
     { name = "torch", version = "2.5.0", source = { registry = "https://download.pytorch.org/whl/cu124/torch" }, marker = "sys_platform == 'darwin'" },
     { name = "torch", version = "2.5.0+cu124", source = { registry = "https://download.pytorch.org/whl/cu124/torch" }, marker = "sys_platform == 'linux'" },
@@ -807,7 +806,6 @@ dev = [
 requires-dist = [
     { name = "amber-mcap", marker = "sys_platform == 'linux'", specifier = ">=0.5.3" },
     { name = "genesis-world", specifier = ">=0.2.0" },
-    { name = "opencv-python", specifier = ">=4.10.0.84" },
     { name = "rsl-rl-lib", specifier = ">=2.3.1" },
     { name = "torch", marker = "sys_platform == 'darwin'", specifier = "==2.5.0" },
     { name = "torch", marker = "sys_platform == 'linux'", specifier = "==2.5.0+cu124" },
