@@ -44,7 +44,7 @@ wheels = [
 
 [[package]]
 name = "amber-mcap"
-version = "0.4.3"
+version = "0.5.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "addict", marker = "sys_platform == 'linux'" },
@@ -57,9 +57,9 @@ dependencies = [
     { name = "huggingface-hub", marker = "sys_platform == 'linux'" },
     { name = "mcap-ros2-support", marker = "sys_platform == 'linux'" },
     { name = "numpy", marker = "sys_platform == 'linux'" },
+    { name = "numpy-quaternion", marker = "sys_platform == 'linux'" },
     { name = "onnxruntime-gpu", marker = "sys_platform == 'linux'" },
     { name = "open3d", marker = "sys_platform == 'linux'" },
-    { name = "opencv-python", marker = "sys_platform == 'linux'" },
     { name = "pandas", marker = "sys_platform == 'linux'" },
     { name = "pillow", marker = "sys_platform == 'linux'" },
     { name = "pybind11", marker = "sys_platform == 'linux'" },
@@ -81,9 +81,9 @@ dependencies = [
     { name = "transformers", marker = "sys_platform == 'linux'" },
     { name = "urllib3", marker = "sys_platform == 'linux'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/26/d7/36e154894bbbcacfc1d214bd7acd537fdc564d16b728509d6ed53b4b0155/amber_mcap-0.4.3.tar.gz", hash = "sha256:809572c6a8368f117f89f32439ba4a6e41761285927dbb665b250cbaf797c1dc", size = 321602 }
+sdist = { url = "https://files.pythonhosted.org/packages/33/e5/05f5c0eddfe61f41335bc9e04b86c14bb8eb0fad186dea4ac529c6c5540e/amber_mcap-0.5.3.tar.gz", hash = "sha256:108dbcd0d9a0abec6f58f998dc3cf37ae43a1b619f8c69830e256c3da429a738", size = 321963 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f8/89/cf4ac7c193f8f910a00be85e333b8d16aea6759f3d35ef70d02f2c472e72/amber_mcap-0.4.3-cp310-cp310-manylinux_2_35_x86_64.whl", hash = "sha256:1597d21d87a16c7bc7b422e3a93f714c9fda767aad589e227453600e0f064fd5", size = 501979 },
+    { url = "https://files.pythonhosted.org/packages/c4/98/86d47182974c03da99fadf5045b654270433b678fe0fb80daa763c021409/amber_mcap-0.5.3-cp310-cp310-manylinux_2_35_x86_64.whl", hash = "sha256:18c83f66a3936b41fec3052042e14f7134f1d705221e71852865e6205378d698", size = 504828 },
 ]
 
 [[package]]
@@ -805,7 +805,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "amber-mcap", marker = "sys_platform == 'linux'", specifier = ">=0.4.3" },
+    { name = "amber-mcap", marker = "sys_platform == 'linux'", specifier = ">=0.5.3" },
     { name = "genesis-world", specifier = ">=0.2.0" },
     { name = "opencv-python", specifier = ">=4.10.0.84" },
     { name = "rsl-rl-lib", specifier = ">=2.3.1" },
@@ -1640,6 +1640,20 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/39/fe/39ada9b094f01f5a35486577c848fe274e374bbf8d8f472e1423a0bbd26d/numpy-1.26.4-cp310-cp310-musllinux_1_1_x86_64.whl", hash = "sha256:a4abb4f9001ad2858e7ac189089c42178fcce737e4169dc61321660f1a96c7d2", size = 18078620 },
     { url = "https://files.pythonhosted.org/packages/d5/ef/6ad11d51197aad206a9ad2286dc1aac6a378059e06e8cf22cd08ed4f20dc/numpy-1.26.4-cp310-cp310-win32.whl", hash = "sha256:bfe25acf8b437eb2a8b2d49d443800a5f18508cd811fea3181723922a8a82b07", size = 5972659 },
     { url = "https://files.pythonhosted.org/packages/19/77/538f202862b9183f54108557bfda67e17603fc560c384559e769321c9d92/numpy-1.26.4-cp310-cp310-win_amd64.whl", hash = "sha256:b97fe8060236edf3662adfc2c633f56a08ae30560c56310562cb4f95500022d5", size = 15808905 },
+]
+
+[[package]]
+name = "numpy-quaternion"
+version = "2024.0.8"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy", marker = "sys_platform == 'linux'" },
+    { name = "scipy", marker = "sys_platform == 'linux'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/59/3c/0dc1f644316f623fcb3d60f07cc62bfd6bec879fff1d1cd56c376c21511a/numpy_quaternion-2024.0.8.tar.gz", hash = "sha256:764b97a1be816671b5308777efde7dfbcfa9dab0d650d454ce0314e0879434ac", size = 67047 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/32/47/448ab33347c901e3a81f04a48ec8819cbf14ef649f8082633735ec176bd6/numpy_quaternion-2024.0.8-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:72ddc41a8fcd6f22ed666f6cd581f15cd83f578a9dfe58e8c057beafb6e131d3", size = 182465 },
+    { url = "https://files.pythonhosted.org/packages/d6/c0/96b62616291161fab35622df7ecf85496d2f477c3b69c659ab8d45fe1301/numpy_quaternion-2024.0.8-cp310-cp310-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:d380d29c5a977ea3d392aa6104bb95686e203e45fd5a9f0e4e6e1291bca50272", size = 197751 },
 ]
 
 [[package]]

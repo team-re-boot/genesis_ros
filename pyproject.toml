@@ -6,7 +6,7 @@ license = "Apache-2.0"
 readme = "README.md"
 requires-python = "==3.10.12"
 dependencies = [
-    "amber-mcap>=0.4.3; sys_platform == 'linux'",
+    "amber-mcap>=0.5.3; sys_platform == 'linux'",
     "torch==2.5.0+cu124; sys_platform == 'linux'",
     "torch==2.5.0; sys_platform == 'darwin'",
     "torchaudio==2.5.0+cu124; sys_platform == 'linux'",
