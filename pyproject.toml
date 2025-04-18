@@ -6,7 +6,7 @@ license = "Apache-2.0"
 readme = "README.md"
 requires-python = "==3.10.12"
 dependencies = [
-    "amber-mcap>=0.4.3; sys_platform == 'linux'",
+    "amber-mcap>=0.6.0; sys_platform == 'linux'",
     "torch==2.5.0+cu124; sys_platform == 'linux'",
     "torch==2.5.0; sys_platform == 'darwin'",
     "torchaudio==2.5.0+cu124; sys_platform == 'linux'",
@@ -16,7 +16,6 @@ dependencies = [
     "xacrodoc>=0.4.1",
     "genesis-world>=0.2.0",
     "rsl-rl-lib>=2.3.1",
-    "opencv-python>=4.10.0.84",
 ]
 
 [build-system]
