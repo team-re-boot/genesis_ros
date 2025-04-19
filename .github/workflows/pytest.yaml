@@ -112,9 +112,10 @@ jobs:
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v4
         with:
-          file: ./genesis_ros/_htmlcov/coverage.xml
+          file: ./_htmlcov/coverage.xml
           flags: pytest # optional
           name: codecov-umbrella # optional
           fail_ci_if_error: false # optional (default = false)
           verbose: true # optional (default = false)
           token: ${{ secrets.CODECOV_TOKEN }}
+          working-directory: /home/runner/work/genesis_ros/genesis_ros
