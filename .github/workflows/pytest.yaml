@@ -73,6 +73,10 @@ jobs:
           fetch-depth: 0
           path: /opt/ros_ws/src/op3_packages
           repository: team-re-boot/ROBOTIS-OP3-Common
+      - name: Clone op3_packages
+        run: |
+          git clone https://github.com/team-re-boot/ROBOTIS-OP3-Common.git op3_packages
+        working-directory: /opt/ros_ws/src/
       - name: resolve rosdep
         run: |
           rosdep update --include-eol-distros
