@@ -1,5 +1,5 @@
 import genesis as gs  # type: ignore
-from genesis_ros.genesis_ros_env_options import (
+from genesis_ros.ppo.ppo_env_options import (
     SimulationConfig,
     EnvironmentConfig,
     ObservationConfig,
@@ -45,7 +45,7 @@ def list_genesis_entities(module=sys.modules[__name__]):
     return decorated_functions
 
 
-class GenesisRosEnv:
+class PPOEnv:
     def __init__(
         self,
         num_envs: int,
@@ -128,7 +128,7 @@ if __name__ == "__main__":
     def add_plane():
         return gs.morphs.Plane()
 
-    env = GenesisRosEnv(
+    env = PPOEnv(
         1,
         SimulationConfig(),
         EnvironmentConfig(),
