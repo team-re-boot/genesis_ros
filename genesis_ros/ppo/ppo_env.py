@@ -12,7 +12,7 @@ from genesis.utils.geom import (
     inv_quat,
     transform_quat_by_quat,
 )
-from typing import Any, List
+from typing import Any, List, Tuple
 import functools
 import inspect
 import sys
@@ -56,7 +56,7 @@ def ppo_reward_function(func) -> Any:
         result = func(*args, **kwargs)
         if not isinstance(result, torch.Tensor):
             raise TypeError(
-                f"The return type of function {func.__name__} is not torch.Tensor."
+                f"The return type of function {func.__name__}  is not torch.Tensor."
             )
         return result
 
@@ -81,7 +81,9 @@ class PPOEnv:
         reward_cfg: RewardConfig,
         command_cfg: CommandConfig,
         urdf_path: str = "/tmp/genesis_ros/model.urdf",
+        device="cuda" if torch.cuda.is_available() else "cpu",
     ):
+        self.device = torch.device(device)
         self.num_envs = num_envs
         self.num_obs = obs_cfg.num_obs
         self.num_privileged_obs = None
@@ -98,7 +100,6 @@ class PPOEnv:
         self.command_cfg = command_cfg
 
         self.obs_scales = obs_cfg.obs_scales
-        self.reward_scales = reward_cfg.reward_scales
 
         # create scene
         self.scene = gs.Scene(
@@ -154,13 +155,81 @@ class PPOEnv:
         self.reward_functions = {}  # type: ignore
         self.episode_sums = {}  # type: ignore
         for ppo_reward_function in list_ppo_reward_functions():
-            print(ppo_reward_function)
-        # for name in self.reward_scales.keys():
-        # self.reward_scales[name] *= self.dt
-        # self.reward_functions[name] = getattr(self, "_reward_" + name)
-        # self.episode_sums[name] = torch.zeros(
-        #     (self.num_envs,), device=self.device, dtype=gs.tc_float
-        # )
+            print("Adding reward function: ", ppo_reward_function)
+            setattr(
+                self,
+                "_" + ppo_reward_function,
+                getattr(sys.modules[__name__], "ppo_reward_function"),
+            )
+            self.reward_cfg.reward_scales[ppo_reward_function] *= self.dt
+            self.reward_functions[ppo_reward_function] = getattr(
+                self, "_" + ppo_reward_function
+            )
+            self.episode_sums[ppo_reward_function] = torch.zeros(
+                (self.num_envs,), device=self.device, dtype=gs.tc_float
+            )
+
+        # initialize buffers
+        self.base_lin_vel = torch.zeros(
+            (self.num_envs, 3), device=self.device, dtype=gs.tc_float
+        )
+        self.base_ang_vel = torch.zeros(
+            (self.num_envs, 3), device=self.device, dtype=gs.tc_float
+        )
+        self.projected_gravity = torch.zeros(
+            (self.num_envs, 3), device=self.device, dtype=gs.tc_float
+        )
+        self.global_gravity = torch.tensor(
+            [0.0, 0.0, -1.0], device=self.device, dtype=gs.tc_float
+        ).repeat(self.num_envs, 1)
+        self.obs_buf = torch.zeros(
+            (self.num_envs, self.num_obs), device=self.device, dtype=gs.tc_float
+        )
+        self.rew_buf = torch.zeros(
+            (self.num_envs,), device=self.device, dtype=gs.tc_float
+        )
+        self.reset_buf = torch.ones(
+            (self.num_envs,), device=self.device, dtype=gs.tc_int
+        )
+        self.episode_length_buf = torch.zeros(
+            (self.num_envs,), device=self.device, dtype=gs.tc_int
+        )
+        self.commands = torch.zeros(
+            (self.num_envs, self.num_commands), device=self.device, dtype=gs.tc_float
+        )
+        self.commands_scale = torch.tensor(
+            [
+                self.obs_scales.lin_vel,
+                self.obs_scales.lin_vel,
+                self.obs_scales.ang_vel,
+            ],
+            device=self.device,
+            dtype=gs.tc_float,
+        )
+        self.actions = torch.zeros(
+            (self.num_envs, self.num_actions), device=self.device, dtype=gs.tc_float
+        )
+        self.last_actions = torch.zeros_like(self.actions)
+        self.dof_pos = torch.zeros_like(self.actions)
+        self.dof_vel = torch.zeros_like(self.actions)
+        self.last_dof_vel = torch.zeros_like(self.actions)
+        self.base_pos = torch.zeros(
+            (self.num_envs, 3), device=self.device, dtype=gs.tc_float
+        )
+        self.base_quat = torch.zeros(
+            (self.num_envs, 4), device=self.device, dtype=gs.tc_float
+        )
+        self.default_dof_pos = torch.tensor(
+            [
+                self.env_cfg.default_joint_angles[name]
+                for name in self.env_cfg.dof_names
+            ],
+            device=self.device,
+            dtype=gs.tc_float,
+        )
+        # extra information for logging
+        self.extras = dict()  # type: ignore
+        self.extras["observations"] = dict()
 
 
 if __name__ == "__main__":
@@ -177,13 +246,13 @@ if __name__ == "__main__":
         lin_vel_error = torch.sum(
             torch.square(self.commands[:, :2] - self.base_lin_vel[:, :2]), dim=1
         )
-        return torch.exp(-lin_vel_error / self.reward_cfg["tracking_sigma"])
+        return torch.exp(-lin_vel_error / self.reward_cfg.tracking_sigma)
 
     @ppo_reward_function
     def reward_tracking_ang_vel(self):
         # Tracking of angular velocity commands (yaw)
         ang_vel_error = torch.square(self.commands[:, 2] - self.base_ang_vel[:, 2])
-        return torch.exp(-ang_vel_error / self.reward_cfg["tracking_sigma"])
+        return torch.exp(-ang_vel_error / self.reward_cfg.tracking_sigma)
 
     @ppo_reward_function
     def reward_lin_vel_z(self):
@@ -203,14 +272,24 @@ if __name__ == "__main__":
     @ppo_reward_function
     def reward_base_height(self):
         # Penalize base height away from target
-        return torch.square(self.base_pos[:, 2] - self.reward_cfg["base_height_target"])
+        return torch.square(self.base_pos[:, 2] - self.reward_cfg.base_height_target)
+
+    reward_config = RewardConfig()
+    reward_config.reward_scales = {
+        "reward_tracking_lin_vel": 1.0,
+        "reward_tracking_ang_vel": 0.2,
+        "reward_lin_vel_z": -1.0,
+        "reward_action_rate": -0.005,
+        "reward_similar_to_default": -0.1,
+        "reward_base_height": -50.0,
+    }
 
     env = PPOEnv(
         1,
         SimulationConfig(),
         EnvironmentConfig(),
         ObservationConfig(),
-        RewardConfig(),
+        reward_config,
         CommandConfig(),
         "urdf/go2/urdf/go2.urdf",
     )
