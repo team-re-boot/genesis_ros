@@ -68,11 +68,6 @@ jobs:
           export DISPLAY=:99
       - name: make workspace
         run: mkdir -p /opt/ros_ws/src
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          path: /opt/ros_ws/src/op3_packages
-          repository: team-re-boot/ROBOTIS-OP3-Common
       - name: Clone op3_packages
         run: |
           git clone https://github.com/team-re-boot/ROBOTIS-OP3-Common.git op3_packages
