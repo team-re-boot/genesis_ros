@@ -67,47 +67,42 @@ jobs:
           Xvfb :99 -screen 0 1024x768x24 &
           export DISPLAY=:99
       - name: make workspace
-        run: mkdir -p ros_ws/src
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          path: ros_ws/src/op3_packages
-          repository: team-re-boot/ROBOTIS-OP3-Common
+        run: mkdir -p /opt/ros_ws/src
+      - name: Clone op3_packages
+        run: |
+          git clone https://github.com/team-re-boot/ROBOTIS-OP3-Common.git op3_packages
+        working-directory: /opt/ros_ws/src/
       - name: resolve rosdep
         run: |
           rosdep update --include-eol-distros
-          rosdep install -iy --from-paths ros_ws/src/op3_packages/op3_description --rosdistro ${{ matrix.ros2_distro }}
+          rosdep install -iy --from-paths /opt/ros_ws/src/op3_packages/op3_description --rosdistro ${{ matrix.ros2_distro }}
       - name: colcon build
         run: |
           source /opt/ros/${{ matrix.ros2_distro }}/setup.bash
           colcon build --packages-select op3_description
-        working-directory: ros_ws
+        working-directory: /opt/ros_ws
         shell: bash
-      # Setup genesis_ros
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          path: genesis_ros
       - name: Install uv
         uses: astral-sh/setup-uv@v5
         with:
           # Install a specific version of uv.
           version: "0.6.14"
           enable-cache: true
-          cache-dependency-glob: "genesis_ros/uv.lock"
+          cache-dependency-glob: "uv.lock"
       - name: "Set up Python"
         uses: actions/setup-python@v5
         with:
-          python-version-file: "genesis_ros/pyproject.toml"
+          python-version-file: "pyproject.toml"
       - name: "Setup genesis_ros"
         run: uv sync --dev
-        working-directory: genesis_ros
       - name: Run pytest
         run: |
           source /opt/ros/${{ matrix.ros2_distro }}/setup.bash
-          source /home/runner/work/genesis_ros/genesis_ros/ros_ws/install/local_setup.bash
+          source /opt/ros_ws/install/local_setup.bash
           uv run pytest -s
-        working-directory: genesis_ros
         shell: bash
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v4
@@ -118,4 +113,3 @@ jobs:
           fail_ci_if_error: false # optional (default = false)
           verbose: true # optional (default = false)
           token: ${{ secrets.CODECOV_TOKEN }}
-          working-directory: /home/runner/work/genesis_ros/genesis_ros
