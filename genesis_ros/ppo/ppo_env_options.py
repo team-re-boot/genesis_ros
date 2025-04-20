@@ -61,7 +61,6 @@ class ObservationConfig:
 class RewardConfig:
     tracking_sigma: float = 0.25
     base_height_target: float = 0.3
-    reward_scales: Dict[str, float] = field(default_factory=dict)
 
 
 @dataclass

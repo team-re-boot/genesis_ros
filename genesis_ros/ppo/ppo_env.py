@@ -12,7 +12,7 @@ from genesis.utils.geom import (
     inv_quat,
     transform_quat_by_quat,
 )
-from typing import Any, List, Tuple
+from typing import Any, List, Tuple, Optional, Dict
 import functools
 import inspect
 import sys
@@ -50,6 +50,7 @@ def ppo_reward_function(func) -> Any:
     Decorator for reward functions
     """
     func._is_ppo_reward_function = True
+    func._reward_scale = None
 
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
@@ -61,6 +62,18 @@ def ppo_reward_function(func) -> Any:
         return result
 
     return wrapper
+
+
+def set_reward_scale(scale: float):
+    """
+    Decorator to set the reward scale for a reward function. Reward function should be decorated with @ppo_reward_function.
+    """
+
+    def decorator(func):
+        func._reward_scale = scale
+        return func
+
+    return decorator
 
 
 def list_ppo_reward_functions(module=sys.modules[__name__]) -> List[str]:
@@ -153,15 +166,29 @@ class PPOEnv:
 
         # prepare reward functions and multiply reward scales by dt
         self.reward_functions = {}  # type: ignore
+        self.reward_scales: Dict[str, float] = {}
         self.episode_sums = {}  # type: ignore
         for ppo_reward_function in list_ppo_reward_functions():
             print("Adding reward function: ", ppo_reward_function)
-            setattr(
-                self,
-                "_" + ppo_reward_function,
-                getattr(sys.modules[__name__], "ppo_reward_function"),
-            )
-            self.reward_cfg.reward_scales[ppo_reward_function] *= self.dt
+            function = getattr(sys.modules[__name__], ppo_reward_function)
+            if function is None:
+                raise ValueError(
+                    f"Reward function {ppo_reward_function} is not defined."
+                )
+            setattr(self, "_" + ppo_reward_function, function)
+            if not hasattr(function, "_is_ppo_reward_function"):
+                raise ValueError(
+                    f"Reward function {ppo_reward_function} is not decorated with @ppo_reward_function."
+                )
+            if not hasattr(function, "_reward_scale"):
+                raise ValueError(
+                    f"Reward function {ppo_reward_function} is missing reward scale."
+                )
+            if function._reward_scale is None:
+                raise ValueError(
+                    f"Reward function {ppo_reward_function} has no reward scale. Please check @set_reward_scale decorator was used."
+                )
+            self.reward_scales[ppo_reward_function] = function._reward_scale * self.dt
             self.reward_functions[ppo_reward_function] = getattr(
                 self, "_" + ppo_reward_function
             )
@@ -241,6 +268,7 @@ if __name__ == "__main__":
 
     # ------------ reward functions----------------
     @ppo_reward_function
+    @set_reward_scale(1.0)
     def reward_tracking_lin_vel(self):
         # Tracking of linear velocity commands (xy axes)
         lin_vel_error = torch.sum(
@@ -249,47 +277,42 @@ if __name__ == "__main__":
         return torch.exp(-lin_vel_error / self.reward_cfg.tracking_sigma)
 
     @ppo_reward_function
+    @set_reward_scale(0.2)
     def reward_tracking_ang_vel(self):
         # Tracking of angular velocity commands (yaw)
         ang_vel_error = torch.square(self.commands[:, 2] - self.base_ang_vel[:, 2])
         return torch.exp(-ang_vel_error / self.reward_cfg.tracking_sigma)
 
     @ppo_reward_function
+    @set_reward_scale(-1.0)
     def reward_lin_vel_z(self):
         # Penalize z axis base linear velocity
         return torch.square(self.base_lin_vel[:, 2])
 
     @ppo_reward_function
+    @set_reward_scale(-0.005)
     def reward_action_rate(self):
         # Penalize changes in actions
         return torch.sum(torch.square(self.last_actions - self.actions), dim=1)
 
     @ppo_reward_function
+    @set_reward_scale(-0.1)
     def reward_similar_to_default(self):
         # Penalize joint poses far away from default pose
         return torch.sum(torch.abs(self.dof_pos - self.default_dof_pos), dim=1)
 
     @ppo_reward_function
+    @set_reward_scale(-50.0)
     def reward_base_height(self):
         # Penalize base height away from target
         return torch.square(self.base_pos[:, 2] - self.reward_cfg.base_height_target)
-
-    reward_config = RewardConfig()
-    reward_config.reward_scales = {
-        "reward_tracking_lin_vel": 1.0,
-        "reward_tracking_ang_vel": 0.2,
-        "reward_lin_vel_z": -1.0,
-        "reward_action_rate": -0.005,
-        "reward_similar_to_default": -0.1,
-        "reward_base_height": -50.0,
-    }
 
     env = PPOEnv(
         1,
         SimulationConfig(),
         EnvironmentConfig(),
         ObservationConfig(),
-        reward_config,
+        RewardConfig(),
         CommandConfig(),
         "urdf/go2/urdf/go2.urdf",
     )
