@@ -359,6 +359,62 @@ class PPOEnv:
 
         return self.obs_buf, self.rew_buf, self.reset_buf, self.extras
 
+    def get_observations(self):
+        self.extras["observations"]["critic"] = self.obs_buf
+        return self.obs_buf, self.extras
+
+    def get_privileged_observations(self):
+        return None
+
+    def reset_idx(self, envs_idx):
+        if len(envs_idx) == 0:
+            return
+
+        # reset dofs
+        self.dof_pos[envs_idx] = self.default_dof_pos
+        self.dof_vel[envs_idx] = 0.0
+        self.robot.set_dofs_position(
+            position=self.dof_pos[envs_idx],
+            dofs_idx_local=self.motor_dofs,
+            zero_velocity=True,
+            envs_idx=envs_idx,
+        )
+
+        # reset base
+        self.base_pos[envs_idx] = self.base_init_pos
+        self.base_quat[envs_idx] = self.base_init_quat.reshape(1, -1)
+        self.robot.set_pos(
+            self.base_pos[envs_idx], zero_velocity=False, envs_idx=envs_idx
+        )
+        self.robot.set_quat(
+            self.base_quat[envs_idx], zero_velocity=False, envs_idx=envs_idx
+        )
+        self.base_lin_vel[envs_idx] = 0
+        self.base_ang_vel[envs_idx] = 0
+        self.robot.zero_all_dofs_velocity(envs_idx)
+
+        # reset buffers
+        self.last_actions[envs_idx] = 0.0
+        self.last_dof_vel[envs_idx] = 0.0
+        self.episode_length_buf[envs_idx] = 0
+        self.reset_buf[envs_idx] = True
+
+        # fill extras
+        self.extras["episode"] = {}
+        for key in self.episode_sums.keys():
+            self.extras["episode"]["rew_" + key] = (
+                torch.mean(self.episode_sums[key][envs_idx]).item()
+                / self.env_cfg.episode_length_seconds
+            )
+            self.episode_sums[key][envs_idx] = 0.0
+
+        self._resample_commands(envs_idx)
+
+    def reset(self):
+        self.reset_buf[:] = True
+        self.reset_idx(torch.arange(self.num_envs, device=gs.device))
+        return self.obs_buf, None
+
 
 if __name__ == "__main__":
     gs.init(logging_level="warning", backend=gs.cpu)
