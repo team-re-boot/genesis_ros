@@ -18,6 +18,7 @@ import pickle
 import shutil
 import os
 from rsl_rl.runners import OnPolicyRunner
+from dataclasses import asdict
 
 if __name__ == "__main__":
     gs.init(logging_level="warning", backend=gs.cpu)
@@ -96,7 +97,7 @@ if __name__ == "__main__":
         "urdf/go2/urdf/go2.urdf",
     )
 
-    runner = OnPolicyRunner(env, train_cfg, log_dir, device=gs.device)
+    runner = OnPolicyRunner(env, asdict(train_cfg), log_dir, device=gs.device)
 
     runner.learn(
         num_learning_iterations=train_cfg.runner.max_iterations,

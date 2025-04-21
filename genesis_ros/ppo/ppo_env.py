@@ -17,6 +17,7 @@ import functools
 import inspect
 import sys
 import torch
+import math
 
 
 def genesis_entity(func) -> Any:
@@ -106,6 +107,7 @@ class PPOEnv:
             simulation_cfg.simulate_action_latency
         )  # there is a 1 step latency on real robot
         self.dt = simulation_cfg.dt
+        self.max_episode_length = math.ceil(env_cfg.episode_length_seconds / self.dt)
 
         self.env_cfg = env_cfg
         self.obs_cfg = obs_cfg
