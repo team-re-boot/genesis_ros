@@ -13,6 +13,11 @@ from genesis_ros.ppo.ppo_env_options import (
     RewardConfig,
     CommandConfig,
 )
+from genesis_ros.ppo.ppo_train_options import TrainConfig, Algorithm, Policy, Runner
+import pickle
+import shutil
+import os
+from rsl_rl.runners import OnPolicyRunner
 
 if __name__ == "__main__":
     gs.init(logging_level="warning", backend=gs.cpu)
@@ -62,12 +67,38 @@ if __name__ == "__main__":
         # Penalize base height away from target
         return torch.square(self.base_pos[:, 2] - self.reward_cfg.base_height_target)
 
+    env_cfg = EnvironmentConfig()
+    sim_cfg = SimulationConfig()
+    obs_cfg = ObservationConfig()
+    reward_cfg = RewardConfig()
+    command_cfg = CommandConfig()
+
+    # ------------ Train config ----------------
+    train_cfg = TrainConfig()
+    log_dir = f"logs/{train_cfg.runner.experiment_name}"
+
+    if os.path.exists(log_dir):
+        shutil.rmtree(log_dir)
+    os.makedirs(log_dir, exist_ok=True)
+
+    pickle.dump(
+        [env_cfg, obs_cfg, reward_cfg, command_cfg, train_cfg],
+        open(f"{log_dir}/cfgs.pkl", "wb"),
+    )
+
     env = PPOEnv(
         1,
-        SimulationConfig(),
-        EnvironmentConfig(),
-        ObservationConfig(),
-        RewardConfig(),
-        CommandConfig(),
+        sim_cfg,
+        env_cfg,
+        obs_cfg,
+        reward_cfg,
+        command_cfg,
         "urdf/go2/urdf/go2.urdf",
+    )
+
+    runner = OnPolicyRunner(env, train_cfg, log_dir, device=gs.device)
+
+    runner.learn(
+        num_learning_iterations=train_cfg.runner.max_iterations,
+        init_at_random_ep_len=True,
     )
