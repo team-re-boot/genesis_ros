@@ -10,7 +10,6 @@ class SimulationConfig:
 
 @dataclass
 class EnvironmentConfig:
-    num_actions: int = 12
     default_joint_angles: Dict[str, float] = field(default_factory=dict)
     dof_names: List[str] = field(default_factory=list)
     # PD

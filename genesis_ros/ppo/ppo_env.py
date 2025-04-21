@@ -101,7 +101,6 @@ class PPOEnv:
         self.num_envs = num_envs
         self.num_obs = obs_cfg.num_obs
         self.num_privileged_obs = None
-        self.num_actions = env_cfg.num_actions
         self.num_commands = command_cfg.num_commands
         self.simulate_action_latency = (
             simulation_cfg.simulate_action_latency
@@ -158,7 +157,9 @@ class PPOEnv:
                         ).item(),
                     )
                 )
-        self.motor_dofs = [0] + [
+        self.num_actions = len(self.env_cfg.dof_names)
+        print(self.env_cfg.dof_names)
+        self.motor_dofs = [
             self.robot.get_joint(name).dof_idx_local for name in self.env_cfg.dof_names
         ]
 
