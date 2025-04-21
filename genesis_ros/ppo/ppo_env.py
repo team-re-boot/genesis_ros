@@ -135,9 +135,11 @@ class PPOEnv:
                 merge_fixed_links=False,
             ),
         )
-        self.base_init_pos = torch.tensor(self.env_cfg.base_init_pos, device=gs.device)
+        self.base_init_pos = torch.tensor(
+            self.env_cfg.base_init_pos, device=self.device
+        )
         self.base_init_quat = torch.tensor(
-            self.env_cfg.base_init_quat, device=gs.device
+            self.env_cfg.base_init_quat, device=self.device
         )
         self.inv_base_init_quat = inv_quat(self.base_init_quat)
         for function_name in list_genesis_entities():
@@ -158,7 +160,6 @@ class PPOEnv:
                     )
                 )
         self.num_actions = len(self.env_cfg.dof_names)
-        print(self.env_cfg.dof_names)
         self.motor_dofs = [
             self.robot.get_joint(name).dof_idx_local for name in self.env_cfg.dof_names
         ]
@@ -263,13 +264,13 @@ class PPOEnv:
 
     def _resample_commands(self, envs_idx):
         self.commands[envs_idx, 0] = gs_rand_float(
-            *self.command_cfg["lin_vel_x_range"], (len(envs_idx),), gs.device
+            *self.command_cfg["lin_vel_x_range"], (len(envs_idx),), self.device
         )
         self.commands[envs_idx, 1] = gs_rand_float(
-            *self.command_cfg["lin_vel_y_range"], (len(envs_idx),), gs.device
+            *self.command_cfg["lin_vel_y_range"], (len(envs_idx),), self.device
         )
         self.commands[envs_idx, 2] = gs_rand_float(
-            *self.command_cfg["ang_vel_range"], (len(envs_idx),), gs.device
+            *self.command_cfg["ang_vel_range"], (len(envs_idx),), self.device
         )
 
     def step(self, actions):
@@ -329,7 +330,7 @@ class PPOEnv:
             .flatten()
         )
         self.extras["time_outs"] = torch.zeros_like(
-            self.reset_buf, device=gs.device, dtype=gs.tc_float
+            self.reset_buf, device=self.device, dtype=gs.tc_float
         )
         self.extras["time_outs"][time_out_idx] = 1.0
 
@@ -415,7 +416,7 @@ class PPOEnv:
 
     def reset(self):
         self.reset_buf[:] = True
-        self.reset_idx(torch.arange(self.num_envs, device=gs.device))
+        self.reset_idx(torch.arange(self.num_envs, device=self.device))
         return self.obs_buf, None
 
 
