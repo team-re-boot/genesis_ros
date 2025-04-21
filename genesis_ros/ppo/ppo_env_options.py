@@ -10,7 +10,6 @@ class SimulationConfig:
 
 @dataclass
 class EnvironmentConfig:
-    num_actions: int = 12
     default_joint_angles: Dict[str, float] = field(default_factory=dict)
     dof_names: List[str] = field(default_factory=list)
     # PD
@@ -53,26 +52,14 @@ class ObservationScaleConfig:
 
 @dataclass
 class ObservationConfig:
-    num_obs: int = 45
+    num_obs: int = 42  # TODO This parameter should be automatically set.
     obs_scales: ObservationScaleConfig = ObservationScaleConfig()
-
-
-# TODO: Support decorator for describe reward function and remove this config
-@dataclass
-class RewardScalesConfig:
-    tracking_lin_vel: float = 1.0
-    tracking_ang_vel: float = 0.2
-    lin_vel_z: float = -1.0
-    base_height: float = -50.0
-    action_rate: float = -0.005
-    similar_to_default: float = -0.1
 
 
 @dataclass
 class RewardConfig:
     tracking_sigma: float = 0.25
     base_height_target: float = 0.3
-    reward_scales: RewardScalesConfig = RewardScalesConfig()
 
 
 @dataclass
