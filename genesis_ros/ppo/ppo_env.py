@@ -291,9 +291,7 @@ class PPOEnv:
             transform_quat_by_quat(
                 torch.ones_like(self.base_quat) * self.inv_base_init_quat,
                 self.base_quat,
-            ),
-            rpy=True,
-            degrees=True,
+            )
         )
         inv_base_quat = inv_quat(self.base_quat)
         self.base_lin_vel[:] = transform_by_quat(self.robot.get_vel(), inv_base_quat)
