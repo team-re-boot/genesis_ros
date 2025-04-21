@@ -95,9 +95,9 @@ class PPOEnv:
         reward_cfg: RewardConfig,
         command_cfg: CommandConfig,
         urdf_path: str = "/tmp/genesis_ros/model.urdf",
-        device="cuda" if torch.cuda.is_available() else "cpu",
+        # device="cuda" if torch.cuda.is_available() else "cpu",
     ):
-        self.device = torch.device(device)
+        self.device = gs.device
         self.num_envs = num_envs
         self.num_obs = obs_cfg.num_obs
         self.num_privileged_obs = None

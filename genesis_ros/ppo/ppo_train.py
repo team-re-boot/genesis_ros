@@ -95,7 +95,6 @@ if __name__ == "__main__":
         reward_cfg,
         command_cfg,
         "urdf/go2/urdf/go2.urdf",
-        gs.device,
     )
 
     runner = OnPolicyRunner(env, asdict(train_cfg), log_dir, device=gs.device)
