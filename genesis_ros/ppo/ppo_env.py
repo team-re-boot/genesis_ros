@@ -258,6 +258,107 @@ class PPOEnv:
         self.extras = dict()  # type: ignore
         self.extras["observations"] = dict()
 
+    def _resample_commands(self, envs_idx):
+        self.commands[envs_idx, 0] = gs_rand_float(
+            *self.command_cfg["lin_vel_x_range"], (len(envs_idx),), gs.device
+        )
+        self.commands[envs_idx, 1] = gs_rand_float(
+            *self.command_cfg["lin_vel_y_range"], (len(envs_idx),), gs.device
+        )
+        self.commands[envs_idx, 2] = gs_rand_float(
+            *self.command_cfg["ang_vel_range"], (len(envs_idx),), gs.device
+        )
+
+    def step(self, actions):
+        self.actions = torch.clip(
+            actions, -self.env_cfg.clip_actions, self.env_cfg.clip_actions
+        )
+        exec_actions = (
+            self.last_actions if self.simulate_action_latency else self.actions
+        )
+        target_dof_pos = exec_actions * self.env_cfg.action_scale + self.default_dof_pos
+        self.robot.control_dofs_position(target_dof_pos, self.motor_dofs)
+        self.scene.step()
+        # update buffers
+        self.episode_length_buf += 1
+        self.base_pos[:] = self.robot.get_pos()
+        self.base_quat[:] = self.robot.get_quat()
+        self.base_euler = quat_to_xyz(
+            transform_quat_by_quat(
+                torch.ones_like(self.base_quat) * self.inv_base_init_quat,
+                self.base_quat,
+            ),
+            rpy=True,
+            degrees=True,
+        )
+        inv_base_quat = inv_quat(self.base_quat)
+        self.base_lin_vel[:] = transform_by_quat(self.robot.get_vel(), inv_base_quat)
+        self.base_ang_vel[:] = transform_by_quat(self.robot.get_ang(), inv_base_quat)
+        self.projected_gravity = transform_by_quat(self.global_gravity, inv_base_quat)
+        self.dof_pos[:] = self.robot.get_dofs_position(self.motor_dofs)
+        self.dof_vel[:] = self.robot.get_dofs_velocity(self.motor_dofs)
+
+        # resample commands
+        envs_idx = (
+            (
+                self.episode_length_buf
+                % int(self.env_cfg.resampling_time_seconds / self.dt)
+                == 0
+            )
+            .nonzero(as_tuple=False)
+            .flatten()
+        )
+        self._resample_commands(envs_idx)
+        # check termination and reset
+        self.reset_buf = self.episode_length_buf > self.max_episode_length
+        self.reset_buf |= (
+            torch.abs(self.base_euler[:, 1])
+            > self.env_cfg.termination_if_pitch_greater_than
+        )
+        self.reset_buf |= (
+            torch.abs(self.base_euler[:, 0])
+            > self.env_cfg.termination_if_roll_greater_than
+        )
+
+        time_out_idx = (
+            (self.episode_length_buf > self.max_episode_length)
+            .nonzero(as_tuple=False)
+            .flatten()
+        )
+        self.extras["time_outs"] = torch.zeros_like(
+            self.reset_buf, device=gs.device, dtype=gs.tc_float
+        )
+        self.extras["time_outs"][time_out_idx] = 1.0
+
+        self.reset_idx(self.reset_buf.nonzero(as_tuple=False).flatten())
+
+        # compute reward
+        self.rew_buf[:] = 0.0
+        for name, reward_func in self.reward_functions.items():
+            rew = reward_func() * self.reward_scales[name]
+            self.rew_buf += rew
+            self.episode_sums[name] += rew
+
+        # compute observations
+        self.obs_buf = torch.cat(
+            [
+                self.base_ang_vel * self.obs_scales.ang_vel,  # 3
+                self.projected_gravity,  # 3
+                self.commands * self.commands_scale,  # 3
+                (self.dof_pos - self.default_dof_pos) * self.obs_scales.dof_pos,  # 12
+                self.dof_vel * self.obs_scales.dof_vel,  # 12
+                self.actions,  # 12
+            ],
+            axis=-1,
+        )
+
+        self.last_actions[:] = self.actions[:]
+        self.last_dof_vel[:] = self.dof_vel[:]
+
+        self.extras["observations"]["critic"] = self.obs_buf
+
+        return self.obs_buf, self.rew_buf, self.reset_buf, self.extras
+
 
 if __name__ == "__main__":
     gs.init(logging_level="warning", backend=gs.cpu)
