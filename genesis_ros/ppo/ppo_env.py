@@ -85,6 +85,10 @@ def list_ppo_reward_functions(module=sys.modules[__name__]) -> List[str]:
     return decorated_functions
 
 
+def gs_rand_float(lower, upper, shape, device):
+    return (upper - lower) * torch.rand(size=shape, device=device) + lower
+
+
 class PPOEnv:
     def __init__(
         self,
@@ -264,13 +268,13 @@ class PPOEnv:
 
     def _resample_commands(self, envs_idx):
         self.commands[envs_idx, 0] = gs_rand_float(
-            *self.command_cfg["lin_vel_x_range"], (len(envs_idx),), self.device
+            *self.command_cfg.lin_vel_x_range, (len(envs_idx),), self.device
         )
         self.commands[envs_idx, 1] = gs_rand_float(
-            *self.command_cfg["lin_vel_y_range"], (len(envs_idx),), self.device
+            *self.command_cfg.lin_vel_y_range, (len(envs_idx),), self.device
         )
         self.commands[envs_idx, 2] = gs_rand_float(
-            *self.command_cfg["ang_vel_range"], (len(envs_idx),), self.device
+            *self.command_cfg.ang_vel_range, (len(envs_idx),), self.device
         )
 
     def step(self, actions):
