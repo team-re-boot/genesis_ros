@@ -20,7 +20,8 @@ import os
 from rsl_rl.runners import OnPolicyRunner
 from dataclasses import asdict
 
-if __name__ == "__main__":
+
+def main():
     gs.init(logging_level="warning", backend=gs.cpu)
 
     @genesis_entity
@@ -103,3 +104,7 @@ if __name__ == "__main__":
         num_learning_iterations=train_cfg.runner.max_iterations,
         init_at_random_ep_len=True,
     )
+
+
+if __name__ == "__main__":
+    main()
