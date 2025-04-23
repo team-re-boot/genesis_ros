@@ -99,7 +99,7 @@ class PPOEnv:
         reward_cfg: RewardConfig,
         command_cfg: CommandConfig,
         urdf_path: str = "/tmp/genesis_ros/model.urdf",
-        # device="cuda" if torch.cuda.is_available() else "cpu",
+        show_viewer: bool = False,
     ):
         self.device = gs.device
         self.num_envs = num_envs
@@ -127,7 +127,7 @@ class PPOEnv:
                 enable_collision=True,
                 enable_joint_limit=True,
             ),
-            show_viewer=False,
+            show_viewer=show_viewer,
         )
         # add robot
         self.robot = self.scene.add_entity(
