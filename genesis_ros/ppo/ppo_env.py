@@ -103,7 +103,6 @@ class PPOEnv:
     ):
         self.device = gs.device
         self.num_envs = num_envs
-        self.num_obs = obs_cfg.num_obs
         self.num_privileged_obs = None
         self.num_commands = command_cfg.num_commands
         self.simulate_action_latency = (
@@ -164,6 +163,7 @@ class PPOEnv:
                     )
                 )
         self.num_actions = len(self.env_cfg.dof_names)
+        self.num_obs = 9 + 3 * self.num_actions
         self.motor_dofs = [
             self.robot.get_joint(name).dof_idx_local for name in self.env_cfg.dof_names
         ]
@@ -348,12 +348,12 @@ class PPOEnv:
         # compute observations
         self.obs_buf = torch.cat(
             [
-                self.base_ang_vel * self.obs_scales.ang_vel,  # 3
-                self.projected_gravity,  # 3
-                self.commands * self.commands_scale,  # 3
-                (self.dof_pos - self.default_dof_pos) * self.obs_scales.dof_pos,  # 12
-                self.dof_vel * self.obs_scales.dof_vel,  # 12
-                self.actions,  # 12
+                self.base_ang_vel * self.obs_scales.ang_vel,
+                self.projected_gravity,
+                self.commands * self.commands_scale,
+                (self.dof_pos - self.default_dof_pos) * self.obs_scales.dof_pos,
+                self.dof_vel * self.obs_scales.dof_vel,
+                self.actions,
             ],
             axis=-1,
         )

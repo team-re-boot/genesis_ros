@@ -24,9 +24,7 @@ class EnvironmentConfig:
         default=(1.0, 0.0, 0.0, 0.0)
     )
     episode_length_seconds: float = 20.0
-    resampling_time_seconds: float = (
-        20.0  # TODO, Enable start training from rosbag data in order to merge real world data.
-    )
+    resampling_time_seconds: float = 20.0
     action_scale: float = 0.25
     simulate_action_latency: bool = True
     clip_actions: float = 100.0
@@ -52,7 +50,6 @@ class ObservationScaleConfig:
 
 @dataclass
 class ObservationConfig:
-    num_obs: int = 42  # TODO This parameter should be automatically set.
     obs_scales: ObservationScaleConfig = ObservationScaleConfig()
 
 
