@@ -1,7 +1,6 @@
 import argparse
 from genesis_ros.ppo.ppo_env import (
     PPOEnv,
-    genesis_entity,
     set_reward_scale,
     ppo_reward_function,
 )
@@ -22,15 +21,15 @@ from rsl_rl.runners import OnPolicyRunner
 from dataclasses import asdict
 
 
-def run_eval(
-    exp_name: str, ckpt: int, max_steps: int = 10000, show_viewer: bool = True
-):
+def run_eval(exp_name: str, ckpt: int, max_steps: int = 100, show_viewer: bool = True):
     gs.init(logging_level="warning", backend=gs.cpu)
+
     log_dir = f"logs/{exp_name}"
     env_cfg, obs_cfg, reward_cfg, command_cfg, train_cfg = pickle.load(
         open(f"logs/{exp_name}/cfgs.pkl", "rb")
     )
     env = PPOEnv(
+        [gs.morphs.Plane()],
         1,
         SimulationConfig(),
         EnvironmentConfig(),

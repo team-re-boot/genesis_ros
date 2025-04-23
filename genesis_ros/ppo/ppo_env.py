@@ -20,32 +20,6 @@ import torch
 import math
 
 
-def genesis_entity(func) -> Any:
-    """
-    Decorator to check if the return type is gs.morphs.Morph
-    """
-    func._is_genesis_entity = True
-
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        result = func(*args, **kwargs)
-        if not isinstance(result, gs.morphs.Morph):
-            raise TypeError(
-                f"The return type of function {func.__name__} is not gs.morphs.Morph."
-            )
-        return result
-
-    return wrapper
-
-
-def list_genesis_entities(module=sys.modules[__name__]) -> List[str]:
-    decorated_functions = []
-    for name, func in inspect.getmembers(module, inspect.isfunction):
-        if hasattr(func, "_is_genesis_entity"):
-            decorated_functions.append(name)
-    return decorated_functions
-
-
 def ppo_reward_function(func) -> Any:
     """
     Decorator for reward functions
@@ -92,6 +66,7 @@ def gs_rand_float(lower, upper, shape, device):
 class PPOEnv:
     def __init__(
         self,
+        entities: List[gs.morphs.Morph],
         num_envs: int,
         simulation_cfg: SimulationConfig,
         env_cfg: EnvironmentConfig,
@@ -145,9 +120,13 @@ class PPOEnv:
             self.env_cfg.base_init_quat, device=self.device
         )
         self.inv_base_init_quat = inv_quat(self.base_init_quat)
-        for function_name in list_genesis_entities():
-            function = getattr(sys.modules[__name__], function_name)
-            self.scene.add_entity(function())
+        for entity in entities:
+            if isinstance(entity, gs.morphs.Morph):
+                self.scene.add_entity(entity)
+            else:
+                raise TypeError(
+                    f"Entity {entity} is not a valid Genesis morph. Please check the entity type."
+                )
 
         # build
         self.scene.build(n_envs=num_envs)
@@ -421,61 +400,5 @@ class PPOEnv:
         self.reset_idx(torch.arange(self.num_envs, device=self.device))
         return self.obs_buf, None
 
-
-if __name__ == "__main__":
-    gs.init(logging_level="warning", backend=gs.cpu)
-
-    @genesis_entity
-    def add_plane():
-        return gs.morphs.Plane()
-
-    # ------------ reward functions----------------
-    @ppo_reward_function
-    @set_reward_scale(1.0)
-    def reward_tracking_lin_vel(self):
-        # Tracking of linear velocity commands (xy axes)
-        lin_vel_error = torch.sum(
-            torch.square(self.commands[:, :2] - self.base_lin_vel[:, :2]), dim=1
-        )
-        return torch.exp(-lin_vel_error / self.reward_cfg.tracking_sigma)
-
-    @ppo_reward_function
-    @set_reward_scale(0.2)
-    def reward_tracking_ang_vel(self):
-        # Tracking of angular velocity commands (yaw)
-        ang_vel_error = torch.square(self.commands[:, 2] - self.base_ang_vel[:, 2])
-        return torch.exp(-ang_vel_error / self.reward_cfg.tracking_sigma)
-
-    @ppo_reward_function
-    @set_reward_scale(-1.0)
-    def reward_lin_vel_z(self):
-        # Penalize z axis base linear velocity
-        return torch.square(self.base_lin_vel[:, 2])
-
-    @ppo_reward_function
-    @set_reward_scale(-0.005)
-    def reward_action_rate(self):
-        # Penalize changes in actions
-        return torch.sum(torch.square(self.last_actions - self.actions), dim=1)
-
-    @ppo_reward_function
-    @set_reward_scale(-0.1)
-    def reward_similar_to_default(self):
-        # Penalize joint poses far away from default pose
-        return torch.sum(torch.abs(self.dof_pos - self.default_dof_pos), dim=1)
-
-    @ppo_reward_function
-    @set_reward_scale(-50.0)
-    def reward_base_height(self):
-        # Penalize base height away from target
-        return torch.square(self.base_pos[:, 2] - self.reward_cfg.base_height_target)
-
-    env = PPOEnv(
-        1,
-        SimulationConfig(),
-        EnvironmentConfig(),
-        ObservationConfig(),
-        RewardConfig(),
-        CommandConfig(),
-        "urdf/go2/urdf/go2.urdf",
-    )
+    def __del__(self):
+        gs.destroy()

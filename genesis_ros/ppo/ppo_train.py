@@ -1,6 +1,5 @@
 from genesis_ros.ppo.ppo_env import (
     PPOEnv,
-    genesis_entity,
     set_reward_scale,
     ppo_reward_function,
 )
@@ -23,10 +22,6 @@ from dataclasses import asdict
 
 def main():
     gs.init(logging_level="warning", backend=gs.cpu)
-
-    @genesis_entity
-    def add_plane():
-        return gs.morphs.Plane()
 
     # ------------ reward functions----------------
     @ppo_reward_function
@@ -89,6 +84,7 @@ def main():
     )
 
     env = PPOEnv(
+        [gs.morphs.Plane()],
         1,
         sim_cfg,
         env_cfg,
