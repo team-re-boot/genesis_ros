@@ -103,7 +103,6 @@ class PPOEnv:
     ):
         self.device = gs.device
         self.num_envs = num_envs
-        self.num_obs = obs_cfg.num_obs
         self.num_privileged_obs = None
         self.num_commands = command_cfg.num_commands
         self.simulate_action_latency = (
@@ -164,6 +163,7 @@ class PPOEnv:
                     )
                 )
         self.num_actions = len(self.env_cfg.dof_names)
+        self.num_obs = 9 + 3 * self.num_actions
         self.motor_dofs = [
             self.robot.get_joint(name).dof_idx_local for name in self.env_cfg.dof_names
         ]

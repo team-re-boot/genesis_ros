@@ -52,7 +52,6 @@ class ObservationScaleConfig:
 
 @dataclass
 class ObservationConfig:
-    num_obs: int = 42  # TODO This parameter should be automatically set.
     obs_scales: ObservationScaleConfig = ObservationScaleConfig()
 
 
