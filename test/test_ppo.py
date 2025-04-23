@@ -1,4 +1,9 @@
+from genesis_ros.ppo import ppo_train
 from genesis_ros.ppo import ppo_eval
+
+
+def test_ppo_train():
+    ppo_train.main()
 
 
 def test_ppo_eval():
