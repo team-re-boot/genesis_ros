@@ -132,33 +132,6 @@ class PPOEnv:
             self.episode_sums[reward_function.__name__] = torch.zeros(
                 (self.num_envs,), device=self.device, dtype=gs.tc_float
             )
-        # for ppo_reward_function in list_ppo_reward_functions():
-        #     print("Adding reward function: ", ppo_reward_function)
-        #     function = getattr(sys.modules[__name__], ppo_reward_function)
-        #     if function is None:
-        #         raise ValueError(
-        #             f"Reward function {ppo_reward_function} is not defined."
-        #         )
-        #     setattr(self, "_" + ppo_reward_function, function)
-        #     if not hasattr(function, "_is_ppo_reward_function"):
-        #         raise ValueError(
-        #             f"Reward function {ppo_reward_function} is not decorated with @ppo_reward_function."
-        #         )
-        #     if not hasattr(function, "_reward_scale"):
-        #         raise ValueError(
-        #             f"Reward function {ppo_reward_function} is missing reward scale."
-        #         )
-        #     if function._reward_scale is None:
-        #         raise ValueError(
-        #             f"Reward function {ppo_reward_function} has no reward scale. Please check @set_reward_scale decorator was used."
-        #         )
-        #     self.reward_scales[ppo_reward_function] = function._reward_scale * self.dt
-        #     self.reward_functions[ppo_reward_function] = getattr(
-        #         self, "_" + ppo_reward_function
-        #     )
-        #     self.episode_sums[ppo_reward_function] = torch.zeros(
-        #         (self.num_envs,), device=self.device, dtype=gs.tc_float
-        #     )
 
         # initialize buffers
         self.base_lin_vel = torch.zeros(
