@@ -12,51 +12,13 @@ from genesis.utils.geom import (
     inv_quat,
     transform_quat_by_quat,
 )
-from typing import Any, List, Tuple, Optional, Dict
+from typing import Any, List, Tuple, Optional, Dict, Callable
 import functools
 import inspect
 import sys
 import torch
 import math
-
-
-def ppo_reward_function(func) -> Any:
-    """
-    Decorator for reward functions
-    """
-    func._is_ppo_reward_function = True
-    func._reward_scale = None
-
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        result = func(*args, **kwargs)
-        if not isinstance(result, torch.Tensor):
-            raise TypeError(
-                f"The return type of function {func.__name__}  is not torch.Tensor."
-            )
-        return result
-
-    return wrapper
-
-
-def set_reward_scale(scale: float):
-    """
-    Decorator to set the reward scale for a reward function. Reward function should be decorated with @ppo_reward_function.
-    """
-
-    def decorator(func):
-        func._reward_scale = scale
-        return func
-
-    return decorator
-
-
-def list_ppo_reward_functions(module=sys.modules[__name__]) -> List[str]:
-    decorated_functions = []
-    for name, func in inspect.getmembers(module, inspect.isfunction):
-        if hasattr(func, "_is_ppo_reward_function"):
-            decorated_functions.append(name)
-    return decorated_functions
+import types
 
 
 def gs_rand_float(lower, upper, shape, device):
@@ -67,6 +29,7 @@ class PPOEnv:
     def __init__(
         self,
         entities: List[gs.morphs.Morph],
+        reward_functions: List[Tuple[Callable[[Any], torch.tensor], float]],
         num_envs: int,
         simulation_cfg: SimulationConfig,
         env_cfg: EnvironmentConfig,
@@ -155,33 +118,47 @@ class PPOEnv:
         self.reward_functions = {}  # type: ignore
         self.reward_scales: Dict[str, float] = {}
         self.episode_sums = {}  # type: ignore
-        for ppo_reward_function in list_ppo_reward_functions():
-            print("Adding reward function: ", ppo_reward_function)
-            function = getattr(sys.modules[__name__], ppo_reward_function)
-            if function is None:
-                raise ValueError(
-                    f"Reward function {ppo_reward_function} is not defined."
-                )
-            setattr(self, "_" + ppo_reward_function, function)
-            if not hasattr(function, "_is_ppo_reward_function"):
-                raise ValueError(
-                    f"Reward function {ppo_reward_function} is not decorated with @ppo_reward_function."
-                )
-            if not hasattr(function, "_reward_scale"):
-                raise ValueError(
-                    f"Reward function {ppo_reward_function} is missing reward scale."
-                )
-            if function._reward_scale is None:
-                raise ValueError(
-                    f"Reward function {ppo_reward_function} has no reward scale. Please check @set_reward_scale decorator was used."
-                )
-            self.reward_scales[ppo_reward_function] = function._reward_scale * self.dt
-            self.reward_functions[ppo_reward_function] = getattr(
-                self, "_" + ppo_reward_function
+        for reward_function, reward_scale in reward_functions:
+            print("Adding reward function: ", reward_function.__name__)
+            setattr(
+                self,
+                "_" + reward_function.__name__,
+                types.MethodType(reward_function, self),
             )
-            self.episode_sums[ppo_reward_function] = torch.zeros(
+            self.reward_scales[reward_function.__name__] = reward_scale * self.dt
+            self.reward_functions[reward_function.__name__] = getattr(
+                self, "_" + reward_function.__name__
+            )
+            self.episode_sums[reward_function.__name__] = torch.zeros(
                 (self.num_envs,), device=self.device, dtype=gs.tc_float
             )
+        # for ppo_reward_function in list_ppo_reward_functions():
+        #     print("Adding reward function: ", ppo_reward_function)
+        #     function = getattr(sys.modules[__name__], ppo_reward_function)
+        #     if function is None:
+        #         raise ValueError(
+        #             f"Reward function {ppo_reward_function} is not defined."
+        #         )
+        #     setattr(self, "_" + ppo_reward_function, function)
+        #     if not hasattr(function, "_is_ppo_reward_function"):
+        #         raise ValueError(
+        #             f"Reward function {ppo_reward_function} is not decorated with @ppo_reward_function."
+        #         )
+        #     if not hasattr(function, "_reward_scale"):
+        #         raise ValueError(
+        #             f"Reward function {ppo_reward_function} is missing reward scale."
+        #         )
+        #     if function._reward_scale is None:
+        #         raise ValueError(
+        #             f"Reward function {ppo_reward_function} has no reward scale. Please check @set_reward_scale decorator was used."
+        #         )
+        #     self.reward_scales[ppo_reward_function] = function._reward_scale * self.dt
+        #     self.reward_functions[ppo_reward_function] = getattr(
+        #         self, "_" + ppo_reward_function
+        #     )
+        #     self.episode_sums[ppo_reward_function] = torch.zeros(
+        #         (self.num_envs,), device=self.device, dtype=gs.tc_float
+        #     )
 
         # initialize buffers
         self.base_lin_vel = torch.zeros(
@@ -401,4 +378,7 @@ class PPOEnv:
         return self.obs_buf, None
 
     def __del__(self):
-        gs.destroy()
+        try:
+            gs.destroy()
+        finally:
+            pass

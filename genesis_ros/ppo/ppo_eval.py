@@ -1,9 +1,5 @@
 import argparse
-from genesis_ros.ppo.ppo_env import (
-    PPOEnv,
-    set_reward_scale,
-    ppo_reward_function,
-)
+from genesis_ros.ppo.ppo_env import PPOEnv
 import genesis as gs  # type: ignore
 import torch
 from genesis_ros.ppo.ppo_env_options import (
@@ -30,6 +26,7 @@ def run_eval(exp_name: str, ckpt: int, max_steps: int = 100, show_viewer: bool =
     )
     env = PPOEnv(
         [gs.morphs.Plane()],
+        [],
         1,
         SimulationConfig(),
         EnvironmentConfig(),
