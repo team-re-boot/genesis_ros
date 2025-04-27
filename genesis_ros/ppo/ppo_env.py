@@ -73,6 +73,7 @@ class PPOEnv:
                 file=urdf_path,
                 fixed=False,
                 pos=self.env_cfg.base_init_pos,
+                quat=self.env_cfg.base_init_quat,
                 merge_fixed_links=False,
             ),
         )
