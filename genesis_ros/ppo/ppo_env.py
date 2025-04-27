@@ -94,9 +94,23 @@ class PPOEnv:
         # build
         self.scene.build(n_envs=num_envs)
         # names to indices
+        for joint in self.robot.joints:
+            if self.robot.get_joint(joint.name).dof_idx_local:
+                if self.robot.base_joint.name == joint.name:
+                    continue
+                self.env_cfg.append_joint(
+                    (
+                        joint.name,
+                        self.robot.get_dofs_position(
+                            [self.robot.get_joint(joint.name).dof_idx_local]
+                        ).item(),
+                    )
+                )
         self.motors_dof_idx = [
             self.robot.get_joint(name).dof_start for name in self.env_cfg.dof_names
         ]
+        print("Number of joints: ", len(self.env_cfg.dof_names))
+        print("Joints : ", self.env_cfg.dof_names)
         self.num_actions = len(self.env_cfg.dof_names)
         self.num_obs = 9 + 3 * self.num_actions
         self.motor_dofs = [
@@ -113,6 +127,8 @@ class PPOEnv:
         self.episode_sums = {}  # type: ignore
         for reward_function, reward_scale in reward_functions:
             print("Adding reward function: ", reward_function.__name__)
+            print("Reward_scale = ", reward_scale)
+            print("Reward scale considering time delta = ", reward_scale * self.dt)
             setattr(
                 self,
                 "_" + reward_function.__name__,
@@ -125,6 +141,7 @@ class PPOEnv:
             self.episode_sums[reward_function.__name__] = torch.zeros(
                 (self.num_envs,), device=self.device, dtype=gs.tc_float
             )
+        print("Reward functions setup finished.")
 
         # initialize buffers
         self.base_lin_vel = torch.zeros(
@@ -347,6 +364,6 @@ class PPOEnv:
         try:
             gs.destroy()
         except Exception as e:
-            print(e.what())
+            pass
         finally:
             pass

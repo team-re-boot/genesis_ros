@@ -19,7 +19,7 @@ class EnvironmentConfig:
     termination_if_roll_greater_than: float = 10  # degree
     termination_if_pitch_greater_than: float = 10.0  # degree
     # base pose
-    base_init_pos: Tuple[float, float, float] = field(default=(0.0, 0.0, 0.4))
+    base_init_pos: Tuple[float, float, float] = field(default=(0.0, 0.0, 0.3))
     base_init_quat: Tuple[float, float, float, float] = field(
         default=(1.0, 0.0, 0.0, 0.0)
     )

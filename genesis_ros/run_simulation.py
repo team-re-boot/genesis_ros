@@ -51,7 +51,7 @@ def main():
         gs.morphs.URDF(
             file="/tmp/genesis_ros/model.urdf",
             fixed=False,
-            pos=(0, 0, 0.4),
+            pos=(0, 0, 0.3),
             merge_fixed_links=False,
         ),
     )
