@@ -54,9 +54,12 @@ def run_eval(exp_name: str, ckpt: int, max_steps: int = 100, show_viewer: bool =
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-e", "--exp_name", type=str, default="genesis_ros_ppo")
+    parser.add_argument(
+        "-m", "--max_steps", type=int, default=100, help="Max steps to run"
+    )
     parser.add_argument("--ckpt", type=int, default=100)
     args = parser.parse_args()
-    run_eval(args.exp_name, args.ckpt)
+    run_eval(args.exp_name, args.ckpt, args.max_steps)
 
 
 if __name__ == "__main__":

@@ -71,7 +71,7 @@ class PPOEnv:
         self.robot = self.scene.add_entity(
             gs.morphs.URDF(
                 file=urdf_path,
-                fixed=True,
+                fixed=False,
                 pos=self.env_cfg.base_init_pos,
                 merge_fixed_links=False,
             ),
@@ -94,16 +94,9 @@ class PPOEnv:
         # build
         self.scene.build(n_envs=num_envs)
         # names to indices
-        for joint in self.robot.joints:
-            if self.robot.get_joint(joint.name).dof_idx_local:
-                self.env_cfg.append_joint(
-                    (
-                        joint.name,
-                        self.robot.get_dofs_position(
-                            [self.robot.get_joint(joint.name).dof_idx_local]
-                        ).item(),
-                    )
-                )
+        self.motors_dof_idx = [
+            self.robot.get_joint(name).dof_start for name in self.env_cfg.dof_names
+        ]
         self.num_actions = len(self.env_cfg.dof_names)
         self.num_obs = 9 + 3 * self.num_actions
         self.motor_dofs = [
@@ -353,5 +346,7 @@ class PPOEnv:
     def __del__(self):
         try:
             gs.destroy()
+        except Exception as e:
+            print(e.what())
         finally:
             pass
