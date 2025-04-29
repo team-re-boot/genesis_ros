@@ -1,11 +1,20 @@
 from genesis_ros.ppo import ppo_train
+from pathlib import Path
 
 # from genesis_ros.ppo import ppo_eval
 
 
 def test_ppo_train():
     ppo_train.train(
-        device="cpu", num_environments=1, urdf_path="urdf/go2/urdf/go2.urdf"
+        device="cpu",
+        num_environments=1,
+        urdf_path="urdf/go2/urdf/go2.urdf",
+        config_directory=Path(__file__).resolve()
+        / ".."
+        / "genesis_ros"
+        / "ppo"
+        / "config"
+        / "go2_walking",
     )
 
 

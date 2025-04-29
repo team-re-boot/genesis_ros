@@ -1,9 +1,10 @@
 from dataclasses import dataclass, field
 from typing import Dict, List, Tuple, Optional
+from dataclass_wizard import YAMLWizard
 
 
 @dataclass
-class Algorithm:
+class Algorithm(YAMLWizard):
     class_name: str = "PPO"
     clip_param: float = 0.2
     desired_kl: float = 0.01
@@ -20,7 +21,7 @@ class Algorithm:
 
 
 @dataclass
-class Policy:
+class Policy(YAMLWizard):
     activation: str = "elu"
     actor_hidden_dims: List[int] = field(default_factory=lambda: [512, 256, 128])
     critic_hidden_dims: List[int] = field(default_factory=lambda: [512, 256, 128])
@@ -29,7 +30,7 @@ class Policy:
 
 
 @dataclass
-class Runner:
+class Runner(YAMLWizard):
     checkpoint: int = -1
     experiment_name: str = "genesis_ros_ppo"
     load_run: int = -1
@@ -42,7 +43,7 @@ class Runner:
 
 
 @dataclass
-class TrainConfig:
+class TrainConfig(YAMLWizard):
     algorithm: Algorithm = Algorithm()
     init_member_classes: Dict = field(default_factory=dict)
     policy: Policy = Policy()

@@ -1,15 +1,16 @@
 from dataclasses import dataclass, field
 from typing import Dict, List, Tuple
+from dataclass_wizard import YAMLWizard
 
 
 @dataclass
-class SimulationConfig:
+class SimulationConfig(YAMLWizard):
     simulate_action_latency: bool = True
     dt: float = 0.02
 
 
 @dataclass
-class EnvironmentConfig:
+class EnvironmentConfig(YAMLWizard):
     default_joint_angles: Dict[str, float] = field(default_factory=dict)
     dof_names: List[str] = field(default_factory=list)
     # PD
@@ -37,7 +38,7 @@ class EnvironmentConfig:
 
 
 @dataclass
-class ObservationScaleConfig:
+class ObservationScaleConfig(YAMLWizard):
     lin_vel: float = 2.0
     ang_vel: float = 0.25
     dof_pos: float = 1.0
@@ -45,18 +46,18 @@ class ObservationScaleConfig:
 
 
 @dataclass
-class ObservationConfig:
+class ObservationConfig(YAMLWizard):
     obs_scales: ObservationScaleConfig = ObservationScaleConfig()
 
 
 @dataclass
-class RewardConfig:
+class RewardConfig(YAMLWizard):
     tracking_sigma: float = 0.25
     base_height_target: float = 0.3
 
 
 @dataclass
-class CommandConfig:
+class CommandConfig(YAMLWizard):
     num_commands: int = 3
     lin_vel_x_range: List[float] = field(default_factory=lambda: [0.5, 0.5])
     lin_vel_y_range: List[float] = field(default_factory=lambda: [0.0, 0.0])

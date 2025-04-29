@@ -614,6 +614,7 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "amber-mcap", marker = "sys_platform == 'linux'" },
+    { name = "dataclass-wizard" },
     { name = "genesis-world" },
     { name = "rsl-rl-lib" },
     { name = "torch", version = "2.5.0", source = { registry = "https://download.pytorch.org/whl/cu124/torch" }, marker = "sys_platform == 'darwin'" },
@@ -640,6 +641,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "amber-mcap", marker = "sys_platform == 'linux'", specifier = ">=0.6.0" },
+    { name = "dataclass-wizard", specifier = ">=0.22.3" },
     { name = "genesis-world", specifier = ">=0.2.0" },
     { name = "rsl-rl-lib", specifier = "==2.2.4" },
     { name = "torch", marker = "sys_platform == 'darwin'", specifier = "==2.5.0" },

@@ -14,11 +14,13 @@ import shutil
 import os
 from rsl_rl.runners import OnPolicyRunner
 from dataclasses import asdict
+from pathlib import Path
 import argparse
 
 
 def train(
     device: str = "gpu",
+    config_directory: Path = Path(__file__).resolve(),
     num_environments: int = 4096,
     urdf_path: str = "urdf/go2/urdf/go2.urdf",
 ):
@@ -73,20 +75,10 @@ def train(
     reward_functions.append((reward_base_height, -50.0))
 
     env_cfg = EnvironmentConfig()
-    env_cfg.default_joint_angles = {  # [rad]
-        "FL_hip_joint": 0.0,
-        "FR_hip_joint": 0.0,
-        "RL_hip_joint": 0.0,
-        "RR_hip_joint": 0.0,
-        "FL_thigh_joint": 0.8,
-        "FR_thigh_joint": 0.8,
-        "RL_thigh_joint": 1.0,
-        "RR_thigh_joint": 1.0,
-        "FL_calf_joint": -1.5,
-        "FR_calf_joint": -1.5,
-        "RL_calf_joint": -1.5,
-        "RR_calf_joint": -1.5,
-    }
+    if (config_directory / "environment_config.yaml").exists():
+        env_cfg = EnvironmentConfig().from_yaml_file(
+            config_directory / "environment_config.yaml"
+        )
     sim_cfg = SimulationConfig()
     obs_cfg = ObservationConfig()
     reward_cfg = RewardConfig()
@@ -132,8 +124,10 @@ def cli_entrypoint():
     parser.add_argument(
         "-c",
         "--config",
+        type=Path,
         required=True,
         help="Path to the config directory",
+        default=Path(__file__).resolve(),
     )
     parser.add_argument(
         "-d",
@@ -153,7 +147,12 @@ def cli_entrypoint():
         default="urdf/go2/urdf/go2.urdf",
     )
     args = parser.parse_args()
-    train(args.device, args.num_environments, args.urdf_path)
+    train(
+        device=args.device,
+        config_directory=args.config,
+        num_environments=args.num_environments,
+        urdf_path=args.urdf_path,
+    )
 
 
 if __name__ == "__main__":
