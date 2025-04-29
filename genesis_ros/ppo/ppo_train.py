@@ -16,8 +16,17 @@ from rsl_rl.runners import OnPolicyRunner
 from dataclasses import asdict
 
 
-def main():
-    gs.init(logging_level="warning", backend=gs.gpu)
+def train(
+    device: str = "gpu",
+    num_environments: int = 4096,
+    urdf_path: str = "urdf/go2/urdf/go2.urdf",
+):
+    if device == "cpu":
+        gs.init(logging_level="warning", backend=gs.cpu)
+    elif device == "gpu":
+        gs.init(logging_level="warning", backend=gs.gpu)
+    else:
+        raise ValueError("Invalid device specified. Choose 'cpu' or 'gpu'.")
 
     reward_functions = []
 
@@ -98,13 +107,13 @@ def main():
     env = PPOEnv(
         [gs.morphs.Plane()],
         reward_functions,
-        4096,
+        num_environments,
         sim_cfg,
         env_cfg,
         obs_cfg,
         reward_cfg,
         command_cfg,
-        "urdf/go2/urdf/go2.urdf",
+        urdf_path,
     )
 
     runner = OnPolicyRunner(env, asdict(train_cfg), log_dir, device=gs.device)
@@ -115,5 +124,28 @@ def main():
     )
 
 
+def cli_entrypoint():
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
+    parser.add_argument(
+        "--device",
+        help="Specify device which you want to run PPO and simulation.",
+        type=str,
+        choices=["cpu", "gpu"],
+    )
+    parser.add_argument(
+        "--num_environments", help="Number of environments", type=int, default=4096
+    )
+    parser.add_argument(
+        "--urdf_path",
+        help="Path to the URDF file",
+        type=str,
+        default="urdf/go2/urdf/go2.urdf",
+    )
+    args = parser.parse_args()
+    train(args.device, args.num_environments, args.urdf_path)
+
+
 if __name__ == "__main__":
-    main()
+    cli_entrypoint()
