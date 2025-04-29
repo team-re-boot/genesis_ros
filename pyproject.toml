@@ -15,7 +15,8 @@ dependencies = [
     "torchvision==0.20.0; sys_platform == 'darwin'",
     "xacrodoc>=0.4.1",
     "genesis-world>=0.2.0",
-    "rsl-rl-lib>=2.3.1",
+    "rsl-rl-lib==2.2.4",
+    "trimesh>=4.6.8",
 ]
 
 [build-system]
