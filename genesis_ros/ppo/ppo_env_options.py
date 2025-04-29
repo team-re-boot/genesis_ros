@@ -24,7 +24,7 @@ class EnvironmentConfig:
         default=(1.0, 0.0, 0.0, 0.0)
     )
     episode_length_seconds: float = 20.0
-    resampling_time_seconds: float = 20.0
+    resampling_time_seconds: float = 4.0
     action_scale: float = 0.25
     simulate_action_latency: bool = True
     clip_actions: float = 100.0

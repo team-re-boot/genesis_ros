@@ -26,6 +26,7 @@ build-backend = "hatchling.build"
 [project.scripts]
 preprocess_urdf = "genesis_ros.preprocess_urdf:main"
 simulation = "genesis_ros.run_simulation:main"
+ppo_train = "genesis_ros.ppo.ppo_train:cli_entrypoint"
 
 [tool.uv]
 find-links = [

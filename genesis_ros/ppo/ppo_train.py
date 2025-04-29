@@ -14,6 +14,7 @@ import shutil
 import os
 from rsl_rl.runners import OnPolicyRunner
 from dataclasses import asdict
+import argparse
 
 
 def train(
@@ -129,10 +130,18 @@ def cli_entrypoint():
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
     parser.add_argument(
+        "-c",
+        "--config",
+        required=True,
+        help="Path to the config directory",
+    )
+    parser.add_argument(
+        "-d",
         "--device",
         help="Specify device which you want to run PPO and simulation.",
         type=str,
         choices=["cpu", "gpu"],
+        required=True,
     )
     parser.add_argument(
         "--num_environments", help="Number of environments", type=int, default=4096
