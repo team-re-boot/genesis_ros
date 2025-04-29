@@ -113,6 +113,7 @@ class PPOEnv:
         print("Number of joints: ", len(self.env_cfg.dof_names))
         print("Joints : ", self.env_cfg.dof_names)
         self.num_actions = len(self.env_cfg.dof_names)
+        print("Number of actions: ", self.num_actions)
         self.num_obs = 9 + 3 * self.num_actions
         self.motor_dofs = [
             self.robot.get_joint(name).dof_idx_local for name in self.env_cfg.dof_names
@@ -265,6 +266,22 @@ class PPOEnv:
             torch.abs(self.base_euler[:, 0])
             > self.env_cfg.termination_if_roll_greater_than
         )
+        if self.reset_buf:
+            print(
+                "Episode was terminated, \n",
+                "Maximum episode length: ",
+                self.max_episode_length,
+                "actual episode length: ",
+                self.episode_length_buf,
+                "pitch threshold: ",
+                self.env_cfg.termination_if_pitch_greater_than,
+                "actual pitch: ",
+                self.base_euler[:, 1],
+                "roll threshold: ",
+                self.env_cfg.termination_if_roll_greater_than,
+                "actual roll: ",
+                self.base_euler[:, 0],
+            )
 
         time_out_idx = (
             (self.episode_length_buf > self.max_episode_length)
