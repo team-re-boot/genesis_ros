@@ -18,7 +18,7 @@ from dataclasses import asdict
 
 
 def run_eval(exp_name: str, ckpt: int, max_steps: int = 100, show_viewer: bool = True):
-    gs.init(logging_level="warning", backend=gs.cpu)
+    gs.init(logging_level="warning", backend=gs.gpu)
 
     log_dir = f"logs/{exp_name}"
     env_cfg, obs_cfg, reward_cfg, command_cfg, train_cfg = pickle.load(

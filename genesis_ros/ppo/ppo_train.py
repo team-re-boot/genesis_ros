@@ -17,7 +17,7 @@ from dataclasses import asdict
 
 
 def main():
-    gs.init(logging_level="warning", backend=gs.cpu)
+    gs.init(logging_level="warning", backend=gs.gpu)
 
     reward_functions = []
 
@@ -63,6 +63,20 @@ def main():
     reward_functions.append((reward_base_height, -50.0))
 
     env_cfg = EnvironmentConfig()
+    env_cfg.default_joint_angles = {  # [rad]
+        "FL_hip_joint": 0.0,
+        "FR_hip_joint": 0.0,
+        "RL_hip_joint": 0.0,
+        "RR_hip_joint": 0.0,
+        "FL_thigh_joint": 0.8,
+        "FR_thigh_joint": 0.8,
+        "RL_thigh_joint": 1.0,
+        "RR_thigh_joint": 1.0,
+        "FL_calf_joint": -1.5,
+        "FR_calf_joint": -1.5,
+        "RL_calf_joint": -1.5,
+        "RR_calf_joint": -1.5,
+    }
     sim_cfg = SimulationConfig()
     obs_cfg = ObservationConfig()
     reward_cfg = RewardConfig()
@@ -84,7 +98,7 @@ def main():
     env = PPOEnv(
         [gs.morphs.Plane()],
         reward_functions,
-        1,
+        4096,
         sim_cfg,
         env_cfg,
         obs_cfg,

@@ -104,7 +104,7 @@ class PPOEnv:
                         joint.name,
                         self.robot.get_dofs_position(
                             [self.robot.get_joint(joint.name).dof_idx_local]
-                        ).item(),
+                        )[0].item(),
                     )
                 )
         self.motors_dof_idx = [
@@ -266,22 +266,6 @@ class PPOEnv:
             torch.abs(self.base_euler[:, 0])
             > self.env_cfg.termination_if_roll_greater_than
         )
-        if self.reset_buf:
-            print(
-                "Episode was terminated, \n",
-                "Maximum episode length: ",
-                self.max_episode_length,
-                "actual episode length: ",
-                self.episode_length_buf,
-                "pitch threshold: ",
-                self.env_cfg.termination_if_pitch_greater_than,
-                "actual pitch: ",
-                self.base_euler[:, 1],
-                "roll threshold: ",
-                self.env_cfg.termination_if_roll_greater_than,
-                "actual roll: ",
-                self.base_euler[:, 0],
-            )
 
         time_out_idx = (
             (self.episode_length_buf > self.max_episode_length)

@@ -35,10 +35,6 @@ class EnvironmentConfig:
         if not joint[0] in self.default_joint_angles:
             self.default_joint_angles[joint[0]] = joint[1]
 
-    def append_joints(self, joints: List[Tuple[str, float]]) -> None:
-        for joint in joints:
-            self.append_joint(joint)
-
 
 @dataclass
 class ObservationScaleConfig:
