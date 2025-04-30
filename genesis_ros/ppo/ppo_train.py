@@ -24,12 +24,13 @@ def train(
     num_environments: int = 4096,
     urdf_path: str = "urdf/go2/urdf/go2.urdf",
 ):
-    if device == "cpu":
-        gs.init(logging_level="warning", backend=gs.cpu)
-    elif device == "gpu":
-        gs.init(logging_level="warning", backend=gs.gpu)
-    else:
-        raise ValueError("Invalid device specified. Choose 'cpu' or 'gpu'.")
+    if not gs._initialized:
+        if device == "cpu":
+            gs.init(logging_level="warning", backend=gs.cpu)
+        elif device == "gpu":
+            gs.init(logging_level="warning", backend=gs.gpu)
+        else:
+            raise ValueError("Invalid device specified. Choose 'cpu' or 'gpu'.")
 
     # reward_functions =
 

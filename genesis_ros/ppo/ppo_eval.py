@@ -22,8 +22,15 @@ def eval(
     max_steps: int = 100,
     show_viewer: bool = True,
     urdf_path: str = "urdf/go2/urdf/go2.urdf",
+    device: str = "gpu",
 ):
-    gs.init(logging_level="warning", backend=gs.gpu)
+    if not gs._initialized:
+        if device == "cpu":
+            gs.init(logging_level="warning", backend=gs.cpu)
+        elif device == "gpu":
+            gs.init(logging_level="warning", backend=gs.gpu)
+        else:
+            raise ValueError("Invalid device specified. Choose 'cpu' or 'gpu'.")
 
     log_dir = f"logs/{exp_name}"
     env_cfg, obs_cfg, command_cfg, train_cfg = pickle.load(
@@ -55,8 +62,16 @@ def eval(
             step += 1
 
 
-def main():
+def cli_entrypoint():
     parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-d",
+        "--device",
+        help="Specify device which you want to run PPO and simulation.",
+        type=str,
+        choices=["cpu", "gpu"],
+        required=True,
+    )
     parser.add_argument("-e", "--exp_name", type=str, default="genesis_ros_ppo")
     parser.add_argument(
         "-m", "--max_steps", type=int, default=100, help="Max steps to run"
@@ -69,8 +84,15 @@ def main():
         default="urdf/go2/urdf/go2.urdf",
     )
     args = parser.parse_args()
-    eval(args.exp_name, args.ckpt, args.max_steps, args.urdf_path)
+    eval(
+        exp_name=args.exp_name,
+        ckpt=args.ckpt,
+        max_steps=args.max_steps,
+        urdf_path=args.urdf_path,
+        show_viewer=True,
+        device=args.device,
+    )
 
 
 if __name__ == "__main__":
-    main()
+    cli_entrypoint()

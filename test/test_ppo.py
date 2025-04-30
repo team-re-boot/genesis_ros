@@ -1,7 +1,5 @@
-from genesis_ros.ppo import ppo_train
+from genesis_ros.ppo import ppo_train, ppo_eval
 from pathlib import Path
-
-# from genesis_ros.ppo import ppo_eval
 
 
 def test_ppo_train():
@@ -18,5 +16,12 @@ def test_ppo_train():
     )
 
 
-# def test_ppo_eval():
-#     ppo_eval.eval("genesis_ros_ppo", 100, 100, False)
+def test_ppo_eval():
+    ppo_eval.eval(
+        device="cpu",
+        exp_name="go2_walking",
+        ckpt=100,
+        max_steps=100,
+        show_viewer=False,
+        urdf_path="urdf/go2/urdf/go2.urdf",
+    )
