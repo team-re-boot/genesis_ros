@@ -23,20 +23,6 @@ def run_eval(exp_name: str, ckpt: int, max_steps: int = 100, show_viewer: bool =
     env_cfg, obs_cfg, command_cfg, train_cfg = pickle.load(
         open(f"logs/{exp_name}/cfgs.pkl", "rb")
     )
-    env_cfg.default_joint_angles = {  # [rad]
-        "FL_hip_joint": 0.0,
-        "FR_hip_joint": 0.0,
-        "RL_hip_joint": 0.0,
-        "RR_hip_joint": 0.0,
-        "FL_thigh_joint": 0.8,
-        "FR_thigh_joint": 0.8,
-        "RL_thigh_joint": 1.0,
-        "RR_thigh_joint": 1.0,
-        "FL_calf_joint": -1.5,
-        "FR_calf_joint": -1.5,
-        "RL_calf_joint": -1.5,
-        "RR_calf_joint": -1.5,
-    }
     env = PPOEnv(
         [gs.morphs.Plane()],
         [],
