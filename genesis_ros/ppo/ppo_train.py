@@ -48,7 +48,9 @@ def train(
         )
 
     # ------------ Train config ----------------
-    train_cfg = TrainConfig()
+    train_cfg = TrainConfig.safe_load(
+        config_directory / "train_config.yaml",
+    )
     log_dir = f"logs/{train_cfg.runner.experiment_name}"
 
     if os.path.exists(log_dir):
