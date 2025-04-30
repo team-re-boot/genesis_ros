@@ -10,14 +10,14 @@ def get_reward_functions():
         lin_vel_error = torch.sum(
             torch.square(self.commands[:, :2] - self.base_lin_vel[:, :2]), dim=1
         )
-        return torch.exp(-lin_vel_error / self.reward_cfg.tracking_sigma)
+        return torch.exp(-lin_vel_error / 0.25)
 
     reward_functions.append((reward_tracking_lin_vel, 1.0))
 
     def reward_tracking_ang_vel(self):
         # Tracking of angular velocity commands (yaw)
         ang_vel_error = torch.square(self.commands[:, 2] - self.base_ang_vel[:, 2])
-        return torch.exp(-ang_vel_error / self.reward_cfg.tracking_sigma)
+        return torch.exp(-ang_vel_error / 0.25)
 
     reward_functions.append((reward_tracking_ang_vel, 0.2))
 
@@ -41,7 +41,7 @@ def get_reward_functions():
 
     def reward_base_height(self):
         # Penalize base height away from target
-        return torch.square(self.base_pos[:, 2] - self.reward_cfg.base_height_target)
+        return torch.square(self.base_pos[:, 2] - 0.3)
 
     reward_functions.append((reward_base_height, -50.0))
 

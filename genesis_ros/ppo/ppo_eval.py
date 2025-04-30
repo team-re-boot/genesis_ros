@@ -6,7 +6,6 @@ from genesis_ros.ppo.ppo_env_options import (
     SimulationConfig,
     EnvironmentConfig,
     ObservationConfig,
-    RewardConfig,
     CommandConfig,
 )
 from genesis_ros.ppo.ppo_train_options import TrainConfig, Algorithm, Policy, Runner
@@ -21,7 +20,7 @@ def run_eval(exp_name: str, ckpt: int, max_steps: int = 100, show_viewer: bool =
     gs.init(logging_level="warning", backend=gs.gpu)
 
     log_dir = f"logs/{exp_name}"
-    env_cfg, obs_cfg, reward_cfg, command_cfg, train_cfg = pickle.load(
+    env_cfg, obs_cfg, command_cfg, train_cfg = pickle.load(
         open(f"logs/{exp_name}/cfgs.pkl", "rb")
     )
     env_cfg.default_joint_angles = {  # [rad]
@@ -45,7 +44,6 @@ def run_eval(exp_name: str, ckpt: int, max_steps: int = 100, show_viewer: bool =
         SimulationConfig(),
         env_cfg,
         obs_cfg,
-        reward_cfg,
         command_cfg,
         "urdf/go2/urdf/go2.urdf",
         show_viewer=show_viewer,

@@ -3,7 +3,6 @@ from genesis_ros.ppo.ppo_env_options import (
     SimulationConfig,
     EnvironmentConfig,
     ObservationConfig,
-    RewardConfig,
     CommandConfig,
 )
 from genesis.utils.geom import (
@@ -34,7 +33,6 @@ class PPOEnv:
         simulation_cfg: SimulationConfig,
         env_cfg: EnvironmentConfig,
         obs_cfg: ObservationConfig,
-        reward_cfg: RewardConfig,
         command_cfg: CommandConfig,
         urdf_path: str = "/tmp/genesis_ros/model.urdf",
         show_viewer: bool = False,
@@ -51,7 +49,6 @@ class PPOEnv:
 
         self.env_cfg = env_cfg
         self.obs_cfg = obs_cfg
-        self.reward_cfg = reward_cfg
         self.command_cfg = command_cfg
 
         self.obs_scales = obs_cfg.obs_scales

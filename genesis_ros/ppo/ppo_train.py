@@ -5,7 +5,6 @@ from genesis_ros.ppo.ppo_env_options import (
     SimulationConfig,
     EnvironmentConfig,
     ObservationConfig,
-    RewardConfig,
     CommandConfig,
 )
 from genesis_ros.ppo.ppo_train_options import TrainConfig, Algorithm, Policy, Runner
@@ -48,8 +47,12 @@ def train(
             f"reward_functions.py not found in {config_directory}. Please provide the correct path."
         )
     sim_cfg = SimulationConfig()
+    if (config_directory / "simulation_config.yaml").exists():
+        env_cfg = SimulationConfig().from_yaml_file(
+            config_directory / "simulation_config.yaml"
+        )
+
     obs_cfg = ObservationConfig()
-    reward_cfg = RewardConfig()
     command_cfg = CommandConfig()
 
     # ------------ Train config ----------------
@@ -61,7 +64,7 @@ def train(
     os.makedirs(log_dir, exist_ok=True)
 
     pickle.dump(
-        [env_cfg, obs_cfg, reward_cfg, command_cfg, train_cfg],
+        [env_cfg, obs_cfg, command_cfg, train_cfg],
         open(f"{log_dir}/cfgs.pkl", "wb"),
     )
 
@@ -72,7 +75,6 @@ def train(
         sim_cfg,
         env_cfg,
         obs_cfg,
-        reward_cfg,
         command_cfg,
         urdf_path,
     )

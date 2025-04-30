@@ -51,12 +51,6 @@ class ObservationConfig(YAMLWizard):
 
 
 @dataclass
-class RewardConfig(YAMLWizard):
-    tracking_sigma: float = 0.25
-    base_height_target: float = 0.3
-
-
-@dataclass
 class CommandConfig(YAMLWizard):
     num_commands: int = 3
     lin_vel_x_range: List[float] = field(default_factory=lambda: [0.5, 0.5])
