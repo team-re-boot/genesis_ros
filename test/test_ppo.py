@@ -9,7 +9,7 @@ def test_ppo_train():
         device="cpu",
         num_environments=1,
         urdf_path="urdf/go2/urdf/go2.urdf",
-        config_directory=Path(__file__).resolve()
+        config_directory=Path(__file__).resolve().parent
         / ".."
         / "genesis_ros"
         / "ppo"
