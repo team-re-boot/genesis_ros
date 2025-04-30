@@ -1,12 +1,20 @@
 from dataclasses import dataclass, field
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Any
 from dataclass_wizard import YAMLWizard
+from pathlib import Path
 
 
 @dataclass
 class SimulationConfig(YAMLWizard):
     simulate_action_latency: bool = True
     dt: float = 0.02
+
+    @classmethod
+    def safe_load(cls, path: Path) -> Any:
+        if path.exists():
+            return SimulationConfig().from_yaml_file(path)
+        else:
+            return SimulationConfig()
 
 
 @dataclass
@@ -36,6 +44,13 @@ class EnvironmentConfig(YAMLWizard):
         if not joint[0] in self.default_joint_angles:
             self.default_joint_angles[joint[0]] = joint[1]
 
+    @classmethod
+    def safe_load(cls, path: Path) -> Any:
+        if path.exists():
+            return EnvironmentConfig().from_yaml_file(path)
+        else:
+            return EnvironmentConfig()
+
 
 @dataclass
 class ObservationScaleConfig(YAMLWizard):
@@ -44,10 +59,24 @@ class ObservationScaleConfig(YAMLWizard):
     dof_pos: float = 1.0
     dof_vel: float = 0.05
 
+    @classmethod
+    def safe_load(cls, path: Path) -> Any:
+        if path.exists():
+            return ObservationScaleConfig().from_yaml_file(path)
+        else:
+            return ObservationScaleConfig()
+
 
 @dataclass
 class ObservationConfig(YAMLWizard):
     obs_scales: ObservationScaleConfig = ObservationScaleConfig()
+
+    @classmethod
+    def safe_load(cls, path: Path) -> Any:
+        if path.exists():
+            return ObservationConfig().from_yaml_file(path)
+        else:
+            return ObservationConfig()
 
 
 @dataclass
@@ -56,3 +85,10 @@ class CommandConfig(YAMLWizard):
     lin_vel_x_range: List[float] = field(default_factory=lambda: [0.5, 0.5])
     lin_vel_y_range: List[float] = field(default_factory=lambda: [0.0, 0.0])
     ang_vel_range: List[float] = field(default_factory=lambda: [0.0, 0.0])
+
+    @classmethod
+    def safe_load(cls, path: Path) -> Any:
+        if path.exists():
+            return CommandConfig().from_yaml_file(path)
+        else:
+            return CommandConfig()

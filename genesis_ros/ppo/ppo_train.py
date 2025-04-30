@@ -33,11 +33,11 @@ def train(
 
     # reward_functions =
 
-    env_cfg = EnvironmentConfig()
-    if (config_directory / "environment_config.yaml").exists():
-        env_cfg = EnvironmentConfig().from_yaml_file(
-            config_directory / "environment_config.yaml"
-        )
+    env_cfg = EnvironmentConfig.safe_load(config_directory / "environment_config.yaml")
+    sim_cfg = SimulationConfig.safe_load(config_directory / "simulation_config.yaml")
+    obs_cfg = ObservationConfig.safe_load(config_directory / "observation_config.yaml")
+    command_cfg = CommandConfig.safe_load(config_directory / "command_config.yaml")
+
     if (config_directory / "reward_functions.py").exists():
         reward_functions = call_function_in_another_file(
             config_directory / "reward_functions.py", "get_reward_functions"
@@ -46,14 +46,6 @@ def train(
         raise FileNotFoundError(
             f"reward_functions.py not found in {config_directory}. Please provide the correct path."
         )
-    sim_cfg = SimulationConfig()
-    if (config_directory / "simulation_config.yaml").exists():
-        env_cfg = SimulationConfig().from_yaml_file(
-            config_directory / "simulation_config.yaml"
-        )
-
-    obs_cfg = ObservationConfig()
-    command_cfg = CommandConfig()
 
     # ------------ Train config ----------------
     train_cfg = TrainConfig()
