@@ -16,7 +16,13 @@ from rsl_rl.runners import OnPolicyRunner
 from dataclasses import asdict
 
 
-def run_eval(exp_name: str, ckpt: int, max_steps: int = 100, show_viewer: bool = True):
+def eval(
+    exp_name: str,
+    ckpt: int,
+    max_steps: int = 100,
+    show_viewer: bool = True,
+    urdf_path: str = "urdf/go2/urdf/go2.urdf",
+):
     gs.init(logging_level="warning", backend=gs.gpu)
 
     log_dir = f"logs/{exp_name}"
@@ -56,8 +62,14 @@ def main():
         "-m", "--max_steps", type=int, default=100, help="Max steps to run"
     )
     parser.add_argument("--ckpt", type=int, default=100)
+    parser.add_argument(
+        "--urdf_path",
+        help="Path to the URDF file",
+        type=str,
+        default="urdf/go2/urdf/go2.urdf",
+    )
     args = parser.parse_args()
-    run_eval(args.exp_name, args.ckpt, args.max_steps)
+    eval(args.exp_name, args.ckpt, args.max_steps, args.urdf_path)
 
 
 if __name__ == "__main__":
