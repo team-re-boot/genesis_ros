@@ -32,11 +32,11 @@ def eval(
         raise ValueError("Invalid device specified. Choose 'cpu' or 'gpu'.")
 
     log_dir = f"logs/{exp_name}"
-    env_cfg, obs_cfg, command_cfg, train_cfg = pickle.load(
+    env_cfg, obs_cfg, command_cfg, train_cfg, entities = pickle.load(
         open(f"logs/{exp_name}/cfgs.pkl", "rb")
     )
     env = PPOEnv(
-        entities=[gs.morphs.Plane()],
+        entities=entities,
         reward_functions=[],
         num_envs=1,
         simulation_cfg=SimulationConfig(),

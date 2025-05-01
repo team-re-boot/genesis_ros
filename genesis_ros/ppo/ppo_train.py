@@ -65,7 +65,7 @@ def train(
     os.makedirs(log_dir, exist_ok=True)
 
     pickle.dump(
-        [env_cfg, obs_cfg, command_cfg, train_cfg],
+        [env_cfg, obs_cfg, command_cfg, train_cfg, entities],
         open(f"{log_dir}/cfgs.pkl", "wb"),
     )
 
