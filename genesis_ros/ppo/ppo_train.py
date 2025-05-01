@@ -81,11 +81,12 @@ def train(
     )
 
     runner = OnPolicyRunner(env, asdict(train_cfg), log_dir, device=gs.device)
-
     runner.learn(
         num_learning_iterations=train_cfg.runner.max_iterations,
         init_at_random_ep_len=True,
     )
+    torch.jit.script(runner.alg.actor_critic.actor).save(Path(log_dir) / "actor.pt")
+    torch.jit.script(runner.alg.actor_critic.critic).save(Path(log_dir) / "critic.pt")
     gs.destroy()
 
 
