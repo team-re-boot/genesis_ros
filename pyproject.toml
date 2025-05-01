@@ -18,6 +18,7 @@ dependencies = [
     "rsl-rl-lib==2.2.4",
     "trimesh>=4.6.8",
     "dataclass-wizard>=0.22.3",
+    "taichi>=1.7.3",
 ]
 
 [build-system]
