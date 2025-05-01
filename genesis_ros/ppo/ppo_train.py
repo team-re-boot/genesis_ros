@@ -45,6 +45,15 @@ def train(
             f"reward_functions.py not found in {config_directory}. Please provide the correct path."
         )
 
+    if (config_directory / "entities.py").exists():
+        entities = call_function_in_another_file(
+            config_directory / "entities.py", "get_entities"
+        )
+    else:
+        raise FileNotFoundError(
+            f"entities.py not found in {config_directory}. Please provide the correct path."
+        )
+
     # ------------ Train config ----------------
     train_cfg = TrainConfig.safe_load(
         config_directory / "train_config.yaml",
@@ -61,14 +70,14 @@ def train(
     )
 
     env = PPOEnv(
-        [gs.morphs.Plane()],
-        reward_functions,
-        num_environments,
-        sim_cfg,
-        env_cfg,
-        obs_cfg,
-        command_cfg,
-        urdf_path,
+        entities=entities,
+        reward_functions=reward_functions,
+        num_envs=num_environments,
+        simulation_cfg=sim_cfg,
+        env_cfg=env_cfg,
+        obs_cfg=obs_cfg,
+        command_cfg=command_cfg,
+        urdf_path=urdf_path,
     )
 
     runner = OnPolicyRunner(env, asdict(train_cfg), log_dir, device=gs.device)

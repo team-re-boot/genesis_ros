@@ -36,14 +36,14 @@ def eval(
         open(f"logs/{exp_name}/cfgs.pkl", "rb")
     )
     env = PPOEnv(
-        [gs.morphs.Plane()],
-        [],
-        1,
-        SimulationConfig(),
-        env_cfg,
-        obs_cfg,
-        command_cfg,
-        "urdf/go2/urdf/go2.urdf",
+        entities=[gs.morphs.Plane()],
+        reward_functions=[],
+        num_envs=1,
+        simulation_cfg=SimulationConfig(),
+        env_cfg=env_cfg,
+        obs_cfg=obs_cfg,
+        command_cfg=command_cfg,
+        urdf_path="urdf/go2/urdf/go2.urdf",
         show_viewer=show_viewer,
     )
 
