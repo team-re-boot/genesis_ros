@@ -24,13 +24,12 @@ def eval(
     urdf_path: str = "urdf/go2/urdf/go2.urdf",
     device: str = "gpu",
 ):
-    if not gs._initialized:
-        if device == "cpu":
-            gs.init(logging_level="warning", backend=gs.cpu)
-        elif device == "gpu":
-            gs.init(logging_level="warning", backend=gs.gpu)
-        else:
-            raise ValueError("Invalid device specified. Choose 'cpu' or 'gpu'.")
+    if device == "cpu":
+        gs.init(logging_level="warning", backend=gs.cpu)
+    elif device == "gpu":
+        gs.init(logging_level="warning", backend=gs.gpu)
+    else:
+        raise ValueError("Invalid device specified. Choose 'cpu' or 'gpu'.")
 
     log_dir = f"logs/{exp_name}"
     env_cfg, obs_cfg, command_cfg, train_cfg = pickle.load(
@@ -60,6 +59,7 @@ def eval(
             actions = policy(obs)
             obs, rews, dones, infos = env.step(actions)
             step += 1
+    gs.destroy()
 
 
 def cli_entrypoint():

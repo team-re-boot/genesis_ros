@@ -358,11 +358,3 @@ class PPOEnv:
         self.reset_buf[:] = True
         self.reset_idx(torch.arange(self.num_envs, device=self.device))
         return self.obs_buf, None
-
-    def __del__(self):
-        try:
-            gs.destroy()
-        except Exception as e:
-            pass
-        finally:
-            pass

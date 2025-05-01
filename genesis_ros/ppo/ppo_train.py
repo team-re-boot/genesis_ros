@@ -24,15 +24,12 @@ def train(
     num_environments: int = 4096,
     urdf_path: str = "urdf/go2/urdf/go2.urdf",
 ):
-    if not gs._initialized:
-        if device == "cpu":
-            gs.init(logging_level="warning", backend=gs.cpu)
-        elif device == "gpu":
-            gs.init(logging_level="warning", backend=gs.gpu)
-        else:
-            raise ValueError("Invalid device specified. Choose 'cpu' or 'gpu'.")
-
-    # reward_functions =
+    if device == "cpu":
+        gs.init(logging_level="warning", backend=gs.cpu)
+    elif device == "gpu":
+        gs.init(logging_level="warning", backend=gs.gpu)
+    else:
+        raise ValueError("Invalid device specified. Choose 'cpu' or 'gpu'.")
 
     env_cfg = EnvironmentConfig.safe_load(config_directory / "environment_config.yaml")
     sim_cfg = SimulationConfig.safe_load(config_directory / "simulation_config.yaml")
@@ -80,6 +77,7 @@ def train(
         num_learning_iterations=train_cfg.runner.max_iterations,
         init_at_random_ep_len=True,
     )
+    gs.destroy()
 
 
 def cli_entrypoint():
