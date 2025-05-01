@@ -50,8 +50,8 @@ def main():
     robot = scene.add_entity(
         gs.morphs.URDF(
             file="/tmp/genesis_ros/model.urdf",
-            fixed=True,
-            pos=(0, 0, 0.4),
+            fixed=False,
+            pos=(0, 0, 0.3),
             merge_fixed_links=False,
         ),
     )

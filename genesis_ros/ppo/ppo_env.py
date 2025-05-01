@@ -3,7 +3,6 @@ from genesis_ros.ppo.ppo_env_options import (
     SimulationConfig,
     EnvironmentConfig,
     ObservationConfig,
-    RewardConfig,
     CommandConfig,
 )
 from genesis.utils.geom import (
@@ -12,77 +11,13 @@ from genesis.utils.geom import (
     inv_quat,
     transform_quat_by_quat,
 )
-from typing import Any, List, Tuple, Optional, Dict
+from typing import Any, List, Tuple, Optional, Dict, Callable
 import functools
 import inspect
 import sys
 import torch
 import math
-
-
-def genesis_entity(func) -> Any:
-    """
-    Decorator to check if the return type is gs.morphs.Morph
-    """
-    func._is_genesis_entity = True
-
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        result = func(*args, **kwargs)
-        if not isinstance(result, gs.morphs.Morph):
-            raise TypeError(
-                f"The return type of function {func.__name__} is not gs.morphs.Morph."
-            )
-        return result
-
-    return wrapper
-
-
-def list_genesis_entities(module=sys.modules[__name__]) -> List[str]:
-    decorated_functions = []
-    for name, func in inspect.getmembers(module, inspect.isfunction):
-        if hasattr(func, "_is_genesis_entity"):
-            decorated_functions.append(name)
-    return decorated_functions
-
-
-def ppo_reward_function(func) -> Any:
-    """
-    Decorator for reward functions
-    """
-    func._is_ppo_reward_function = True
-    func._reward_scale = None
-
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        result = func(*args, **kwargs)
-        if not isinstance(result, torch.Tensor):
-            raise TypeError(
-                f"The return type of function {func.__name__}  is not torch.Tensor."
-            )
-        return result
-
-    return wrapper
-
-
-def set_reward_scale(scale: float):
-    """
-    Decorator to set the reward scale for a reward function. Reward function should be decorated with @ppo_reward_function.
-    """
-
-    def decorator(func):
-        func._reward_scale = scale
-        return func
-
-    return decorator
-
-
-def list_ppo_reward_functions(module=sys.modules[__name__]) -> List[str]:
-    decorated_functions = []
-    for name, func in inspect.getmembers(module, inspect.isfunction):
-        if hasattr(func, "_is_ppo_reward_function"):
-            decorated_functions.append(name)
-    return decorated_functions
+import types
 
 
 def gs_rand_float(lower, upper, shape, device):
@@ -92,14 +27,15 @@ def gs_rand_float(lower, upper, shape, device):
 class PPOEnv:
     def __init__(
         self,
+        entities: List[gs.morphs.Morph],
+        reward_functions: List[Tuple[Callable[[Any], torch.tensor], float]],
         num_envs: int,
         simulation_cfg: SimulationConfig,
         env_cfg: EnvironmentConfig,
         obs_cfg: ObservationConfig,
-        reward_cfg: RewardConfig,
         command_cfg: CommandConfig,
         urdf_path: str = "/tmp/genesis_ros/model.urdf",
-        # device="cuda" if torch.cuda.is_available() else "cpu",
+        show_viewer: bool = False,
     ):
         self.device = gs.device
         self.num_envs = num_envs
@@ -113,7 +49,6 @@ class PPOEnv:
 
         self.env_cfg = env_cfg
         self.obs_cfg = obs_cfg
-        self.reward_cfg = reward_cfg
         self.command_cfg = command_cfg
 
         self.obs_scales = obs_cfg.obs_scales
@@ -127,14 +62,15 @@ class PPOEnv:
                 enable_collision=True,
                 enable_joint_limit=True,
             ),
-            show_viewer=False,
+            show_viewer=show_viewer,
         )
         # add robot
         self.robot = self.scene.add_entity(
             gs.morphs.URDF(
                 file=urdf_path,
-                fixed=True,
+                fixed=False,
                 pos=self.env_cfg.base_init_pos,
+                quat=self.env_cfg.base_init_quat,
                 merge_fixed_links=False,
             ),
         )
@@ -145,24 +81,36 @@ class PPOEnv:
             self.env_cfg.base_init_quat, device=self.device
         )
         self.inv_base_init_quat = inv_quat(self.base_init_quat)
-        for function_name in list_genesis_entities():
-            function = getattr(sys.modules[__name__], function_name)
-            self.scene.add_entity(function())
+        for entity in entities:
+            if isinstance(entity, gs.morphs.Morph):
+                self.scene.add_entity(entity)
+            else:
+                raise TypeError(
+                    f"Entity {entity} is not a valid Genesis morph. Please check the entity type."
+                )
 
         # build
         self.scene.build(n_envs=num_envs)
         # names to indices
         for joint in self.robot.joints:
             if self.robot.get_joint(joint.name).dof_idx_local:
+                if self.robot.base_joint.name == joint.name:
+                    continue
                 self.env_cfg.append_joint(
                     (
                         joint.name,
                         self.robot.get_dofs_position(
                             [self.robot.get_joint(joint.name).dof_idx_local]
-                        ).item(),
+                        )[0].item(),
                     )
                 )
+        self.motors_dof_idx = [
+            self.robot.get_joint(name).dof_start for name in self.env_cfg.dof_names
+        ]
+        print("Number of joints: ", len(self.env_cfg.dof_names))
+        print("Joints : ", self.env_cfg.dof_names)
         self.num_actions = len(self.env_cfg.dof_names)
+        print("Number of actions: ", self.num_actions)
         self.num_obs = 9 + 3 * self.num_actions
         self.motor_dofs = [
             self.robot.get_joint(name).dof_idx_local for name in self.env_cfg.dof_names
@@ -176,33 +124,23 @@ class PPOEnv:
         self.reward_functions = {}  # type: ignore
         self.reward_scales: Dict[str, float] = {}
         self.episode_sums = {}  # type: ignore
-        for ppo_reward_function in list_ppo_reward_functions():
-            print("Adding reward function: ", ppo_reward_function)
-            function = getattr(sys.modules[__name__], ppo_reward_function)
-            if function is None:
-                raise ValueError(
-                    f"Reward function {ppo_reward_function} is not defined."
-                )
-            setattr(self, "_" + ppo_reward_function, function)
-            if not hasattr(function, "_is_ppo_reward_function"):
-                raise ValueError(
-                    f"Reward function {ppo_reward_function} is not decorated with @ppo_reward_function."
-                )
-            if not hasattr(function, "_reward_scale"):
-                raise ValueError(
-                    f"Reward function {ppo_reward_function} is missing reward scale."
-                )
-            if function._reward_scale is None:
-                raise ValueError(
-                    f"Reward function {ppo_reward_function} has no reward scale. Please check @set_reward_scale decorator was used."
-                )
-            self.reward_scales[ppo_reward_function] = function._reward_scale * self.dt
-            self.reward_functions[ppo_reward_function] = getattr(
-                self, "_" + ppo_reward_function
+        for reward_function, reward_scale in reward_functions:
+            print("Adding reward function: ", reward_function.__name__)
+            print("Reward_scale = ", reward_scale)
+            print("Reward scale considering time delta = ", reward_scale * self.dt)
+            setattr(
+                self,
+                "_" + reward_function.__name__,
+                types.MethodType(reward_function, self),
             )
-            self.episode_sums[ppo_reward_function] = torch.zeros(
+            self.reward_scales[reward_function.__name__] = reward_scale * self.dt
+            self.reward_functions[reward_function.__name__] = getattr(
+                self, "_" + reward_function.__name__
+            )
+            self.episode_sums[reward_function.__name__] = torch.zeros(
                 (self.num_envs,), device=self.device, dtype=gs.tc_float
             )
+        print("Reward functions setup finished.")
 
         # initialize buffers
         self.base_lin_vel = torch.zeros(
@@ -420,62 +358,3 @@ class PPOEnv:
         self.reset_buf[:] = True
         self.reset_idx(torch.arange(self.num_envs, device=self.device))
         return self.obs_buf, None
-
-
-if __name__ == "__main__":
-    gs.init(logging_level="warning", backend=gs.cpu)
-
-    @genesis_entity
-    def add_plane():
-        return gs.morphs.Plane()
-
-    # ------------ reward functions----------------
-    @ppo_reward_function
-    @set_reward_scale(1.0)
-    def reward_tracking_lin_vel(self):
-        # Tracking of linear velocity commands (xy axes)
-        lin_vel_error = torch.sum(
-            torch.square(self.commands[:, :2] - self.base_lin_vel[:, :2]), dim=1
-        )
-        return torch.exp(-lin_vel_error / self.reward_cfg.tracking_sigma)
-
-    @ppo_reward_function
-    @set_reward_scale(0.2)
-    def reward_tracking_ang_vel(self):
-        # Tracking of angular velocity commands (yaw)
-        ang_vel_error = torch.square(self.commands[:, 2] - self.base_ang_vel[:, 2])
-        return torch.exp(-ang_vel_error / self.reward_cfg.tracking_sigma)
-
-    @ppo_reward_function
-    @set_reward_scale(-1.0)
-    def reward_lin_vel_z(self):
-        # Penalize z axis base linear velocity
-        return torch.square(self.base_lin_vel[:, 2])
-
-    @ppo_reward_function
-    @set_reward_scale(-0.005)
-    def reward_action_rate(self):
-        # Penalize changes in actions
-        return torch.sum(torch.square(self.last_actions - self.actions), dim=1)
-
-    @ppo_reward_function
-    @set_reward_scale(-0.1)
-    def reward_similar_to_default(self):
-        # Penalize joint poses far away from default pose
-        return torch.sum(torch.abs(self.dof_pos - self.default_dof_pos), dim=1)
-
-    @ppo_reward_function
-    @set_reward_scale(-50.0)
-    def reward_base_height(self):
-        # Penalize base height away from target
-        return torch.square(self.base_pos[:, 2] - self.reward_cfg.base_height_target)
-
-    env = PPOEnv(
-        1,
-        SimulationConfig(),
-        EnvironmentConfig(),
-        ObservationConfig(),
-        RewardConfig(),
-        CommandConfig(),
-        "urdf/go2/urdf/go2.urdf",
-    )

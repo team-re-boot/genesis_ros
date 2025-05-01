@@ -15,7 +15,10 @@ dependencies = [
     "torchvision==0.20.0; sys_platform == 'darwin'",
     "xacrodoc>=0.4.1",
     "genesis-world>=0.2.0",
-    "rsl-rl-lib>=2.3.1",
+    "rsl-rl-lib==2.2.4",
+    "trimesh>=4.6.8",
+    "dataclass-wizard>=0.22.3",
+    "taichi>=1.7.3",
 ]
 
 [build-system]
@@ -25,6 +28,8 @@ build-backend = "hatchling.build"
 [project.scripts]
 preprocess_urdf = "genesis_ros.preprocess_urdf:main"
 simulation = "genesis_ros.run_simulation:main"
+ppo_train = "genesis_ros.ppo.ppo_train:cli_entrypoint"
+ppo_eval = "genesis_ros.ppo.ppo_eval:cli_entrypoint"
 
 [tool.uv]
 find-links = [

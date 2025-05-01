@@ -1,82 +1,54 @@
-from genesis_ros.ppo.ppo_env import (
-    PPOEnv,
-    genesis_entity,
-    set_reward_scale,
-    ppo_reward_function,
-)
+from genesis_ros.ppo.ppo_env import PPOEnv
 import genesis as gs  # type: ignore
 import torch
 from genesis_ros.ppo.ppo_env_options import (
     SimulationConfig,
     EnvironmentConfig,
     ObservationConfig,
-    RewardConfig,
     CommandConfig,
 )
 from genesis_ros.ppo.ppo_train_options import TrainConfig, Algorithm, Policy, Runner
+from genesis_ros.util import call_function_in_another_file
 import pickle
 import shutil
 import os
 from rsl_rl.runners import OnPolicyRunner
 from dataclasses import asdict
+from pathlib import Path
+import argparse
 
 
-def main():
-    gs.init(logging_level="warning", backend=gs.cpu)
+def train(
+    device: str = "gpu",
+    config_directory: Path = Path(__file__).resolve(),
+    num_environments: int = 4096,
+    urdf_path: str = "urdf/go2/urdf/go2.urdf",
+):
+    if device == "cpu":
+        gs.init(logging_level="warning", backend=gs.cpu)
+    elif device == "gpu":
+        gs.init(logging_level="warning", backend=gs.gpu)
+    else:
+        raise ValueError("Invalid device specified. Choose 'cpu' or 'gpu'.")
 
-    @genesis_entity
-    def add_plane():
-        return gs.morphs.Plane()
+    env_cfg = EnvironmentConfig.safe_load(config_directory / "environment_config.yaml")
+    sim_cfg = SimulationConfig.safe_load(config_directory / "simulation_config.yaml")
+    obs_cfg = ObservationConfig.safe_load(config_directory / "observation_config.yaml")
+    command_cfg = CommandConfig.safe_load(config_directory / "command_config.yaml")
 
-    # ------------ reward functions----------------
-    @ppo_reward_function
-    @set_reward_scale(1.0)
-    def reward_tracking_lin_vel(self):
-        # Tracking of linear velocity commands (xy axes)
-        lin_vel_error = torch.sum(
-            torch.square(self.commands[:, :2] - self.base_lin_vel[:, :2]), dim=1
+    if (config_directory / "reward_functions.py").exists():
+        reward_functions = call_function_in_another_file(
+            config_directory / "reward_functions.py", "get_reward_functions"
         )
-        return torch.exp(-lin_vel_error / self.reward_cfg.tracking_sigma)
-
-    @ppo_reward_function
-    @set_reward_scale(0.2)
-    def reward_tracking_ang_vel(self):
-        # Tracking of angular velocity commands (yaw)
-        ang_vel_error = torch.square(self.commands[:, 2] - self.base_ang_vel[:, 2])
-        return torch.exp(-ang_vel_error / self.reward_cfg.tracking_sigma)
-
-    @ppo_reward_function
-    @set_reward_scale(-1.0)
-    def reward_lin_vel_z(self):
-        # Penalize z axis base linear velocity
-        return torch.square(self.base_lin_vel[:, 2])
-
-    @ppo_reward_function
-    @set_reward_scale(-0.005)
-    def reward_action_rate(self):
-        # Penalize changes in actions
-        return torch.sum(torch.square(self.last_actions - self.actions), dim=1)
-
-    @ppo_reward_function
-    @set_reward_scale(-0.1)
-    def reward_similar_to_default(self):
-        # Penalize joint poses far away from default pose
-        return torch.sum(torch.abs(self.dof_pos - self.default_dof_pos), dim=1)
-
-    @ppo_reward_function
-    @set_reward_scale(-50.0)
-    def reward_base_height(self):
-        # Penalize base height away from target
-        return torch.square(self.base_pos[:, 2] - self.reward_cfg.base_height_target)
-
-    env_cfg = EnvironmentConfig()
-    sim_cfg = SimulationConfig()
-    obs_cfg = ObservationConfig()
-    reward_cfg = RewardConfig()
-    command_cfg = CommandConfig()
+    else:
+        raise FileNotFoundError(
+            f"reward_functions.py not found in {config_directory}. Please provide the correct path."
+        )
 
     # ------------ Train config ----------------
-    train_cfg = TrainConfig()
+    train_cfg = TrainConfig.safe_load(
+        config_directory / "train_config.yaml",
+    )
     log_dir = f"logs/{train_cfg.runner.experiment_name}"
 
     if os.path.exists(log_dir):
@@ -84,18 +56,19 @@ def main():
     os.makedirs(log_dir, exist_ok=True)
 
     pickle.dump(
-        [env_cfg, obs_cfg, reward_cfg, command_cfg, train_cfg],
+        [env_cfg, obs_cfg, command_cfg, train_cfg],
         open(f"{log_dir}/cfgs.pkl", "wb"),
     )
 
     env = PPOEnv(
-        1,
+        [gs.morphs.Plane()],
+        reward_functions,
+        num_environments,
         sim_cfg,
         env_cfg,
         obs_cfg,
-        reward_cfg,
         command_cfg,
-        "urdf/go2/urdf/go2.urdf",
+        urdf_path,
     )
 
     runner = OnPolicyRunner(env, asdict(train_cfg), log_dir, device=gs.device)
@@ -104,7 +77,46 @@ def main():
         num_learning_iterations=train_cfg.runner.max_iterations,
         init_at_random_ep_len=True,
     )
+    gs.destroy()
+
+
+def cli_entrypoint():
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
+    parser.add_argument(
+        "-c",
+        "--config",
+        type=Path,
+        required=True,
+        help="Path to the config directory",
+        default=Path(__file__).resolve(),
+    )
+    parser.add_argument(
+        "-d",
+        "--device",
+        help="Specify device which you want to run PPO and simulation.",
+        type=str,
+        choices=["cpu", "gpu"],
+        required=True,
+    )
+    parser.add_argument(
+        "--num_environments", help="Number of environments", type=int, default=4096
+    )
+    parser.add_argument(
+        "--urdf_path",
+        help="Path to the URDF file",
+        type=str,
+        default="urdf/go2/urdf/go2.urdf",
+    )
+    args = parser.parse_args()
+    train(
+        device=args.device,
+        config_directory=args.config,
+        num_environments=args.num_environments,
+        urdf_path=args.urdf_path,
+    )
 
 
 if __name__ == "__main__":
-    main()
+    cli_entrypoint()

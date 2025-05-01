@@ -614,14 +614,17 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "amber-mcap", marker = "sys_platform == 'linux'" },
+    { name = "dataclass-wizard" },
     { name = "genesis-world" },
     { name = "rsl-rl-lib" },
+    { name = "taichi" },
     { name = "torch", version = "2.5.0", source = { registry = "https://download.pytorch.org/whl/cu124/torch" }, marker = "sys_platform == 'darwin'" },
     { name = "torch", version = "2.5.0+cu124", source = { registry = "https://download.pytorch.org/whl/cu124/torch" }, marker = "sys_platform == 'linux'" },
     { name = "torchaudio", version = "2.5.0", source = { registry = "https://pypi.org/simple" }, marker = "sys_platform == 'darwin'" },
     { name = "torchaudio", version = "2.5.0+cu124", source = { registry = "https://download.pytorch.org/whl/cu124/torchaudio" }, marker = "sys_platform == 'linux'" },
     { name = "torchvision", version = "0.20.0", source = { registry = "https://pypi.org/simple" }, marker = "sys_platform == 'darwin'" },
     { name = "torchvision", version = "0.20.0+cu124", source = { registry = "https://download.pytorch.org/whl/cu124/torchvision" }, marker = "sys_platform == 'linux'" },
+    { name = "trimesh" },
     { name = "xacrodoc" },
 ]
 
@@ -639,14 +642,17 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "amber-mcap", marker = "sys_platform == 'linux'", specifier = ">=0.6.0" },
+    { name = "dataclass-wizard", specifier = ">=0.22.3" },
     { name = "genesis-world", specifier = ">=0.2.0" },
-    { name = "rsl-rl-lib", specifier = ">=2.3.1" },
+    { name = "rsl-rl-lib", specifier = "==2.2.4" },
+    { name = "taichi", specifier = ">=1.7.3" },
     { name = "torch", marker = "sys_platform == 'darwin'", specifier = "==2.5.0" },
     { name = "torch", marker = "sys_platform == 'linux'", specifier = "==2.5.0+cu124" },
     { name = "torchaudio", marker = "sys_platform == 'darwin'", specifier = "==2.5.0" },
     { name = "torchaudio", marker = "sys_platform == 'linux'", specifier = "==2.5.0+cu124" },
     { name = "torchvision", marker = "sys_platform == 'darwin'", specifier = "==0.20.0" },
     { name = "torchvision", marker = "sys_platform == 'linux'", specifier = "==0.20.0+cu124" },
+    { name = "trimesh", specifier = ">=4.6.8" },
     { name = "xacrodoc", specifier = ">=0.4.1" },
 ]
 
@@ -2146,7 +2152,7 @@ wheels = [
 
 [[package]]
 name = "rsl-rl-lib"
-version = "2.3.1"
+version = "2.2.4"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "gitpython" },
@@ -2157,9 +2163,9 @@ dependencies = [
     { name = "torchvision", version = "0.20.0", source = { registry = "https://pypi.org/simple" }, marker = "sys_platform == 'darwin'" },
     { name = "torchvision", version = "0.20.0+cu124", source = { registry = "https://download.pytorch.org/whl/cu124/torchvision" }, marker = "sys_platform != 'darwin'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/ae/17/37681aae881195fd66dcd35ce054c7eab1d589534ed2d29f8ad14662167c/rsl_rl_lib-2.3.1.tar.gz", hash = "sha256:171e6de56123b36e1ca6efb03f649e399e8d3bd2af0008127d1e5c6df3ab82a5", size = 48380 }
+sdist = { url = "https://files.pythonhosted.org/packages/40/5f/4ce032d7878b4c45d074aab747ee42dafbc2250d0cb1c03285995fac782c/rsl_rl_lib-2.2.4.tar.gz", hash = "sha256:cf8042b625f7542789b337fd4b69361a9ea8356bd05d6f831d4b5e363286407f", size = 27625 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a1/7b/4a02a1c9672a1f1eec00306d3251785b8c612f2aef2c0fa886fcf7999eb8/rsl_rl_lib-2.3.1-py3-none-any.whl", hash = "sha256:ae2700cecd752d941dc2e93158f590cd3bc64eb3aeeb0822b818f8ee93fff6e7", size = 40840 },
+    { url = "https://files.pythonhosted.org/packages/de/5a/87803b6b3773a2d86a4fe686373482df495ac0b81e1d49030183d28ce5e8/rsl_rl_lib-2.2.4-py3-none-any.whl", hash = "sha256:76bb01c4b92a858ce8e39016684c502230b3c0bbe60fc4eb1d94d7e9e9a18fb6", size = 32050 },
 ]
 
 [[package]]
@@ -2620,6 +2626,18 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/f1/11/7414d5bc07690002ce4d7553602107bf969af85144bbd02830f9fb471236/transformers-4.51.3.tar.gz", hash = "sha256:e292fcab3990c6defe6328f0f7d2004283ca81a7a07b2de9a46d67fd81ea1409", size = 8941266 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/a9/b6/5257d04ae327b44db31f15cce39e6020cc986333c715660b1315a9724d82/transformers-4.51.3-py3-none-any.whl", hash = "sha256:fd3279633ceb2b777013234bbf0b4f5c2d23c4626b05497691f00cfda55e8a83", size = 10383940 },
+]
+
+[[package]]
+name = "trimesh"
+version = "4.6.8"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/75/30/0970d385327e2ea3fad8b2ec9453e48b802e97ba13d85fbda2c45ec20b8a/trimesh-4.6.8.tar.gz", hash = "sha256:d00b1834eaeea2b4326a2f3a98c9e28553f3508430e555bbc424c26a74e01154", size = 797733 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/32/80/c1b40335949fec3ca1ecea7ddb3f4977dfc104d84dc54e9384f7ccc52124/trimesh-4.6.8-py3-none-any.whl", hash = "sha256:a7b1073c001ff0498e30db8ae4cec9182bd36dd68be19dc6afeda6c0ebd9e54d", size = 709296 },
 ]
 
 [[package]]
