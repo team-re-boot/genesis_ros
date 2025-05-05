@@ -9,11 +9,13 @@ from genesis_ros.ppo.ppo_env_options import (
     CommandConfig,
 )
 from genesis_ros.ppo.ppo_train_options import TrainConfig, Algorithm, Policy, Runner
+from genesis_ros.ros2_interface.messages import Clock, Time
 import pickle
 import shutil
 import os
 from rsl_rl.runners import OnPolicyRunner
 from dataclasses import asdict
+import zenoh
 
 
 def eval(
@@ -52,14 +54,23 @@ def eval(
     runner.load(resume_path)
     policy = runner.get_inference_policy(device=gs.device)
 
-    obs, _ = env.reset()
-    step = 0
-    with torch.no_grad():
-        while step < max_steps:
-            actions = policy(obs)
-            obs, rews, dones, infos = env.step(actions)
-            step += 1
-    gs.destroy()
+    zenoh.init_log_from_env_or("error")
+    with zenoh.open(zenoh.Config()) as session:
+        pub = session.declare_publisher("clock")
+
+        obs, _ = env.reset()
+        step = 0
+        with torch.no_grad():
+            while step < max_steps:
+                sec = step * env.dt
+                clock = Clock(
+                    clock=Time(sec=int(sec), nanosec=int((sec - int(sec)) * 1e9))
+                )
+                pub.put(clock.serialize())
+                actions = policy(obs)
+                obs, rews, dones, infos = env.step(actions)
+                step += 1
+        gs.destroy()
 
 
 def cli_entrypoint():

@@ -488,6 +488,22 @@ wheels = [
 ]
 
 [[package]]
+name = "eclipse-zenoh"
+version = "1.3.4"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/27/82/297cc0ec787ba165eeb9e6c3eaee4f9de9b17cb7eaf169ff964a3503fd78/eclipse_zenoh-1.3.4.tar.gz", hash = "sha256:a1605475247752f8fa80e329c122d108e93c5c335c348b285fe78cb5878edf79", size = 124014 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/7b/95/31eb06658843df1d889364ef91582458628ffac4bb4302e0dd3eb5eb34e3/eclipse_zenoh-1.3.4-cp38-abi3-linux_armv6l.whl", hash = "sha256:e94f98f249a6bf215278d1275417695ec8126a8bc7b1e3c30d2adbcfe1bef837", size = 8410931 },
+    { url = "https://files.pythonhosted.org/packages/a3/d5/4c6995f996b48e3e5fa00097e05d3421a496f27406689b83c607bdccd41f/eclipse_zenoh-1.3.4-cp38-abi3-macosx_10_12_x86_64.macosx_11_0_arm64.macosx_10_12_universal2.whl", hash = "sha256:228521f0fc848d4119eed29432569a5acfd92a96177975b04f8e7c899a6d0d06", size = 15559173 },
+    { url = "https://files.pythonhosted.org/packages/38/9e/ef6c2933f772f21ef43644625a9417aeaaee70a480c59136ad2b33bc78f9/eclipse_zenoh-1.3.4-cp38-abi3-macosx_10_12_x86_64.whl", hash = "sha256:57b506d4f23d07f1470327542bd1adc3638a52770904b60c49d13a2d37ef4372", size = 7950161 },
+    { url = "https://files.pythonhosted.org/packages/24/60/0d15f15c38fa57e5dc28a61cae5881cca829b65e45c352a4037790f5a533/eclipse_zenoh-1.3.4-cp38-abi3-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:ccb8a12d6bed5ddda263f620da40288c3785765f728cc25919556b8fb012911f", size = 8305091 },
+    { url = "https://files.pythonhosted.org/packages/6b/54/64c2db7745d952c05f262a1aa263bea1e16934346c68467064d43baa710c/eclipse_zenoh-1.3.4-cp38-abi3-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:828e4f1722930c2a88e6c600c230cf5d2cbfe7c34b3ead9539c0bdf1fe8e7cd4", size = 9025546 },
+    { url = "https://files.pythonhosted.org/packages/ca/32/e5b1ca4727b6882f4089ac6396beeed6e636d9b65577de0f7f9ab1f37a50/eclipse_zenoh-1.3.4-cp38-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:c87a42f0ca8eb7b3d796bd93c21fe30f333a3264f89d93ec764348c7fbde542f", size = 8581071 },
+    { url = "https://files.pythonhosted.org/packages/2c/d2/4d1702c37a0f86777a53d9b7e21e7a9866f635677df82d9ef882888281b4/eclipse_zenoh-1.3.4-cp38-abi3-manylinux_2_28_aarch64.whl", hash = "sha256:b1703e277b2ac645521feef7362f56159382084ff20b00295563295058c98ac5", size = 8435269 },
+    { url = "https://files.pythonhosted.org/packages/ff/1f/5bb2ceec60b5206a03b01b2abbc08583c28fc55dcf52b4eed8185e6d8dc6/eclipse_zenoh-1.3.4-cp38-abi3-win_amd64.whl", hash = "sha256:742f9e03d20d3fcb169c0baa2796e4f3ce5fed66483acc99f5def1e7fa714a04", size = 7022514 },
+]
+
+[[package]]
 name = "etils"
 version = "1.12.2"
 source = { registry = "https://pypi.org/simple" }
@@ -615,7 +631,9 @@ source = { editable = "." }
 dependencies = [
     { name = "amber-mcap", marker = "sys_platform == 'linux'" },
     { name = "dataclass-wizard" },
+    { name = "eclipse-zenoh" },
     { name = "genesis-world" },
+    { name = "pycdr2" },
     { name = "rsl-rl-lib" },
     { name = "taichi" },
     { name = "torch", version = "2.5.0", source = { registry = "https://download.pytorch.org/whl/cu124/torch" }, marker = "sys_platform == 'darwin'" },
@@ -643,7 +661,9 @@ dev = [
 requires-dist = [
     { name = "amber-mcap", marker = "sys_platform == 'linux'", specifier = ">=0.6.0" },
     { name = "dataclass-wizard", specifier = ">=0.22.3" },
+    { name = "eclipse-zenoh", specifier = ">=1.3.4" },
     { name = "genesis-world", specifier = ">=0.2.0" },
+    { name = "pycdr2", specifier = ">=1.0.0" },
     { name = "rsl-rl-lib", specifier = "==2.2.4" },
     { name = "taichi", specifier = ">=1.7.3" },
     { name = "torch", marker = "sys_platform == 'darwin'", specifier = "==2.5.0" },
@@ -1735,6 +1755,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/d2/c1/72b9622fcb32ff98b054f724e213c7f70d6898baa714f4516288456ceaba/pybind11-2.13.6.tar.gz", hash = "sha256:ba6af10348c12b24e92fa086b39cfba0eff619b61ac77c406167d813b096d39a", size = 218403 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/13/2f/0f24b288e2ce56f51c920137620b4434a38fd80583dbbe24fc2a1656c388/pybind11-2.13.6-py3-none-any.whl", hash = "sha256:237c41e29157b962835d356b370ededd57594a26d5894a795960f0047cb5caf5", size = 243282 },
+]
+
+[[package]]
+name = "pycdr2"
+version = "1.0.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/6c/a0/f3915b7e0c073789a1b01967ebfcfb4491b8b09bd17b671529495f537ecb/pycdr2-1.0.0.tar.gz", hash = "sha256:e2b34aff7e9a536de7b4a2e367d154460d19b6319c1d1d5e068218b0dd539f7c", size = 45986 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/20/2f/13f6562950dbbc9d8b0f2303990dca507e250be3bdaa64ba160fa3d38e54/pycdr2-1.0.0-py3-none-any.whl", hash = "sha256:963e47351128804024dc931deaa3c4f6aea7f3d667ca8d02f61a8fd8411b7fba", size = 53456 },
 ]
 
 [[package]]
