@@ -286,12 +286,13 @@ class PPOEnv:
         # compute observations
         self.obs_buf = torch.cat(
             [
-                self.base_ang_vel * self.obs_scales.ang_vel,
-                self.projected_gravity,
-                self.commands * self.commands_scale,
-                (self.dof_pos - self.default_dof_pos) * self.obs_scales.dof_pos,
-                self.dof_vel * self.obs_scales.dof_vel,
-                self.actions,
+                self.base_ang_vel * self.obs_scales.ang_vel,  # 3
+                self.projected_gravity,  # 3
+                self.commands * self.commands_scale,  # 3
+                (self.dof_pos - self.default_dof_pos)
+                * self.obs_scales.dof_pos,  # self.num_actions
+                self.dof_vel * self.obs_scales.dof_vel,  # self.num_actions
+                self.actions,  # self.num_actions
             ],
             axis=-1,
         )
