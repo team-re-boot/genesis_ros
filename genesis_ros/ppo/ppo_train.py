@@ -8,6 +8,7 @@ from genesis_ros.ppo.ppo_env_options import (
     CommandConfig,
 )
 from genesis_ros.ppo.ppo_train_options import TrainConfig, Algorithm, Policy, Runner
+from genesis_ros.ppo.actor_policy import ActorPolicy
 from genesis_ros.util import call_function_in_another_file
 import pickle
 import shutil
@@ -85,8 +86,10 @@ def train(
         num_learning_iterations=train_cfg.runner.max_iterations,
         init_at_random_ep_len=True,
     )
-    torch.jit.script(runner.alg.actor_critic.actor).save(Path(log_dir) / "actor.pt")
-    torch.jit.script(runner.alg.actor_critic.critic).save(Path(log_dir) / "critic.pt")
+    torch.jit.trace(
+        ActorPolicy(runner.alg.actor_critic),
+        torch.zeros(env.num_actions * 3 + 3 * 3),
+    ).save(Path(log_dir) / "actor.pt")
     gs.destroy()
 
 
