@@ -21,7 +21,6 @@ def test_ppo_eval():
         device="cpu",
         exp_name="go2_walking",
         ckpt=100,
-        max_steps=100,
         show_viewer=False,
         urdf_path="urdf/go2/urdf/go2.urdf",
     )

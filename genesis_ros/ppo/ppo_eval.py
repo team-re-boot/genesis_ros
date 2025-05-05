@@ -21,7 +21,6 @@ import zenoh
 def eval(
     exp_name: str,
     ckpt: int,
-    max_steps: int = 100,
     show_viewer: bool = True,
     urdf_path: str = "urdf/go2/urdf/go2.urdf",
     device: str = "gpu",
@@ -61,7 +60,7 @@ def eval(
         obs, _ = env.reset()
         step = 0
         with torch.no_grad():
-            while step < max_steps:
+            while True:
                 sec = step * env.dt
                 clock = Clock(
                     clock=Time(sec=int(sec), nanosec=int((sec - int(sec)) * 1e9))
@@ -69,6 +68,8 @@ def eval(
                 pub.put(clock.serialize())
                 actions = policy(obs)
                 obs, rews, dones, infos = env.step(actions)
+                if dones[0]:
+                    break
                 step += 1
         gs.destroy()
 
@@ -84,9 +85,6 @@ def cli_entrypoint():
         required=True,
     )
     parser.add_argument("-e", "--exp_name", type=str, default="genesis_ros_ppo")
-    parser.add_argument(
-        "-m", "--max_steps", type=int, default=100, help="Max steps to run"
-    )
     parser.add_argument("--ckpt", type=int, default=100)
     parser.add_argument(
         "--urdf_path",
@@ -98,7 +96,6 @@ def cli_entrypoint():
     eval(
         exp_name=args.exp_name,
         ckpt=args.ckpt,
-        max_steps=args.max_steps,
         urdf_path=args.urdf_path,
         show_viewer=True,
         device=args.device,
