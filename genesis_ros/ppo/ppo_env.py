@@ -119,6 +119,16 @@ class PPOEnv:
         # PD control parameters
         self.robot.set_dofs_kp([self.env_cfg.kp] * self.num_actions, self.motor_dofs)
         self.robot.set_dofs_kv([self.env_cfg.kd] * self.num_actions, self.motor_dofs)
+        # Set default joint angle as robot position
+        default_joint_angles = [
+            self.env_cfg.default_joint_angles[name] for name in self.env_cfg.dof_names
+        ]
+
+        self.robot.set_dofs_position(
+            [default_joint_angles[:] for _ in range(num_envs)],
+            self.motor_dofs,
+            zero_velocity=True,
+        )
 
         # prepare reward functions and multiply reward scales by dt
         self.reward_functions = {}  # type: ignore
