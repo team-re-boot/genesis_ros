@@ -47,7 +47,7 @@ class INT8Tensor(IdlStruct, typename="torch_msgs/msg/INT8Tensor"):  # type: igno
 
 
 @dataclass
-class INT8Tensor(IdlStruct, typename="torch_msgs/msg/UINT8Tensor"):  # type: ignore
+class UINT8Tensor(IdlStruct, typename="torch_msgs/msg/UINT8Tensor"):  # type: ignore
     is_cuda: bool
     data: List[uint8]
     shape: List[int64]
