@@ -15,7 +15,12 @@ def test_rosgraph_msgs_clock():
 def test_torch_msgs_fp32_tensor():
     msg = torch_msgs.msg.FP32Tensor(is_cuda=False, data=[0.0], shape=[1])
     msg.serialize()
-    torch.tensor([1.0, 2.0, 3.0, 4.5], dtype=torch.float32)
+    assert isinstance(
+        torch_msgs.msg.from_torch_tensor(
+            torch.tensor([1.0, 2.0, 3.0, 4.5], dtype=torch.float32)
+        ),
+        torch_msgs.msg.FP32Tensor,
+    )
 
 
 def test_torch_msgs_fp64_tensor():
