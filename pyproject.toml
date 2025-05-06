@@ -19,6 +19,8 @@ dependencies = [
     "trimesh>=4.6.8",
     "dataclass-wizard>=0.22.3",
     "taichi>=1.7.3",
+    "eclipse-zenoh>=1.3.4",
+    "pycdr2>=1.0.0",
 ]
 
 [build-system]

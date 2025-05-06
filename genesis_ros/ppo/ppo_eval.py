@@ -9,20 +9,25 @@ from genesis_ros.ppo.ppo_env_options import (
     CommandConfig,
 )
 from genesis_ros.ppo.ppo_train_options import TrainConfig, Algorithm, Policy, Runner
+from genesis_ros.ros2_interface import builtin_interfaces, rosgraph_msgs
+from genesis_ros.ros2_interface import ROS2Interface
+from genesis_ros.topic_interfaces import TopicInterface, NopInterface
 import pickle
 import shutil
 import os
 from rsl_rl.runners import OnPolicyRunner
 from dataclasses import asdict
+from typing import Union
+import zenoh
 
 
 def eval(
     exp_name: str,
     ckpt: int,
-    max_steps: int = 100,
     show_viewer: bool = True,
     urdf_path: str = "urdf/go2/urdf/go2.urdf",
     device: str = "gpu",
+    interface: str = "python",
 ):
     if device == "cpu":
         gs.init(logging_level="warning", backend=gs.cpu)
@@ -30,6 +35,12 @@ def eval(
         gs.init(logging_level="warning", backend=gs.gpu)
     else:
         raise ValueError("Invalid device specified. Choose 'cpu' or 'gpu'.")
+
+    topic_interface: TopicInterface
+    if interface == "ros2":
+        topic_interface = ROS2Interface(zenoh_config=zenoh.Config())
+    if interface == "python":
+        topic_interface = NopInterface()
 
     log_dir = f"logs/{exp_name}"
     env_cfg, obs_cfg, command_cfg, train_cfg, entities = pickle.load(
@@ -55,9 +66,20 @@ def eval(
     obs, _ = env.reset()
     step = 0
     with torch.no_grad():
-        while step < max_steps:
+        while True:
+            sec = step * env.dt
+            topic_interface.publish(
+                "clock",
+                rosgraph_msgs.msg.Clock(
+                    clock=builtin_interfaces.msg.Time(
+                        sec=int(sec), nanosec=int((sec - int(sec)) * 1e9)
+                    )
+                ),
+            )
             actions = policy(obs)
             obs, rews, dones, infos = env.step(actions)
+            if dones[0]:
+                break
             step += 1
     gs.destroy()
 
@@ -73,9 +95,6 @@ def cli_entrypoint():
         required=True,
     )
     parser.add_argument("-e", "--exp_name", type=str, default="genesis_ros_ppo")
-    parser.add_argument(
-        "-m", "--max_steps", type=int, default=100, help="Max steps to run"
-    )
     parser.add_argument("--ckpt", type=int, default=100)
     parser.add_argument(
         "--urdf_path",
@@ -83,14 +102,22 @@ def cli_entrypoint():
         type=str,
         default="urdf/go2/urdf/go2.urdf",
     )
+    parser.add_argument(
+        "-i",
+        "--interface",
+        help="message passing interface",
+        type=str,
+        default="python",
+        choices=["python", "ros2"],
+    )
     args = parser.parse_args()
     eval(
         exp_name=args.exp_name,
         ckpt=args.ckpt,
-        max_steps=args.max_steps,
         urdf_path=args.urdf_path,
         show_viewer=True,
         device=args.device,
+        interface=args.interface,
     )
 
 
