@@ -78,43 +78,43 @@ def from_torch_tensor(
     if tensor.dtype == torch.float32:
         return FP32Tensor(
             is_cuda=is_cuda(tensor=tensor),
-            data=[float32(x) for x in tensor.tolist()],
+            data=[float32(x) for x in tensor.reshape(tensor.numel()).tolist()],
             shape=list(tensor.shape),
         )
     if tensor.dtype == torch.float64:
         return FP64Tensor(
             is_cuda=is_cuda(tensor=tensor),
-            data=[float64(x) for x in tensor.tolist()],
+            data=[float64(x) for x in tensor.reshape(tensor.numel()).tolist()],
             shape=list(tensor.shape),
         )
     if tensor.dtype == torch.int16:
         return INT16Tensor(
             is_cuda=is_cuda(tensor=tensor),
-            data=[int16(x) for x in tensor.tolist()],
+            data=[int16(x) for x in tensor.reshape(tensor.numel()).tolist()],
             shape=list(tensor.shape),
         )
     if tensor.dtype == torch.int32:
         return INT32Tensor(
             is_cuda=is_cuda(tensor=tensor),
-            data=[int32(x) for x in tensor.tolist()],
+            data=[int32(x) for x in tensor.reshape(tensor.numel()).tolist()],
             shape=list(tensor.shape),
         )
     if tensor.dtype == torch.int64:
         return INT64Tensor(
             is_cuda=is_cuda(tensor=tensor),
-            data=[int64(x) for x in tensor.tolist()],
+            data=[int64(x) for x in tensor.reshape(tensor.numel()).tolist()],
             shape=list(tensor.shape),
         )
     if tensor.dtype == torch.int8:
         return INT8Tensor(
             is_cuda=is_cuda(tensor=tensor),
-            data=[int8(x) for x in tensor.tolist()],
+            data=[int8(x) for x in tensor.reshape(tensor.numel()).tolist()],
             shape=list(tensor.shape),
         )
     if tensor.dtype == torch.uint8:
         return UINT8Tensor(
             is_cuda=is_cuda(tensor=tensor),
-            data=[uint8(x) for x in tensor.tolist()],
+            data=[uint8(x) for x in tensor.reshape(tensor.numel()).tolist()],
             shape=list(tensor.shape),
         )
     raise ValueError(
