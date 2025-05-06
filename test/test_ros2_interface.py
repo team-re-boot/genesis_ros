@@ -27,6 +27,13 @@ def test_ros2_interface():
         "clock",
         rosgraph_msgs.msg.Clock(clock=builtin_interfaces.msg.Time(sec=1, nanosec=1)),
     )
+
+
+@pytest.mark.skipif(
+    os.environ.get("ROS_DISTRO") is None, reason="ROS 2 was not installed"
+)
+def test_publish_invalid_data():
+    interface = ROS2Interface(zenoh_config=zenoh.Config())
     with pytest.raises(Exception) as excinfo:
         interface.add_publisher("clock", int)
     assert str(excinfo.value) == "Invalid message type, message type is <class 'int'>"
