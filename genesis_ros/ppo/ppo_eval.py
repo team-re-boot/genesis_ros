@@ -10,11 +10,14 @@ from genesis_ros.ppo.ppo_env_options import (
 )
 from genesis_ros.ppo.ppo_train_options import TrainConfig, Algorithm, Policy, Runner
 from genesis_ros.ros2_interface import builtin_interfaces, rosgraph_msgs
+from genesis_ros.ros2_interface import ROS2Interface
+from genesis_ros.topic_interfaces import TopicInterface, NopInterface
 import pickle
 import shutil
 import os
 from rsl_rl.runners import OnPolicyRunner
 from dataclasses import asdict
+from typing import Union
 import zenoh
 
 
@@ -24,6 +27,7 @@ def eval(
     show_viewer: bool = True,
     urdf_path: str = "urdf/go2/urdf/go2.urdf",
     device: str = "gpu",
+    interface: str = "python",
 ):
     if device == "cpu":
         gs.init(logging_level="warning", backend=gs.cpu)
@@ -31,6 +35,12 @@ def eval(
         gs.init(logging_level="warning", backend=gs.gpu)
     else:
         raise ValueError("Invalid device specified. Choose 'cpu' or 'gpu'.")
+
+    topic_interface: TopicInterface
+    if interface == "ros2":
+        topic_interface = ROS2Interface(zenoh_config=zenoh.Config())
+    if interface == "python":
+        topic_interface = NopInterface()
 
     log_dir = f"logs/{exp_name}"
     env_cfg, obs_cfg, command_cfg, train_cfg, entities = pickle.load(
@@ -53,27 +63,25 @@ def eval(
     runner.load(resume_path)
     policy = runner.get_inference_policy(device=gs.device)
 
-    zenoh.init_log_from_env_or("error")
-    with zenoh.open(zenoh.Config()) as session:
-        pub = session.declare_publisher("clock")
-
-        obs, _ = env.reset()
-        step = 0
-        with torch.no_grad():
-            while True:
-                sec = step * env.dt
-                clock = rosgraph_msgs.msg.Clock(
+    obs, _ = env.reset()
+    step = 0
+    with torch.no_grad():
+        while True:
+            sec = step * env.dt
+            topic_interface.publish(
+                "clock",
+                rosgraph_msgs.msg.Clock(
                     clock=builtin_interfaces.msg.Time(
                         sec=int(sec), nanosec=int((sec - int(sec)) * 1e9)
                     )
-                )
-                pub.put(clock.serialize())
-                actions = policy(obs)
-                obs, rews, dones, infos = env.step(actions)
-                if dones[0]:
-                    break
-                step += 1
-        gs.destroy()
+                ),
+            )
+            actions = policy(obs)
+            obs, rews, dones, infos = env.step(actions)
+            if dones[0]:
+                break
+            step += 1
+    gs.destroy()
 
 
 def cli_entrypoint():
@@ -94,6 +102,14 @@ def cli_entrypoint():
         type=str,
         default="urdf/go2/urdf/go2.urdf",
     )
+    parser.add_argument(
+        "-i",
+        "--interface",
+        help="message passing interface",
+        type=str,
+        default="python",
+        choices=["python", "ros2"],
+    )
     args = parser.parse_args()
     eval(
         exp_name=args.exp_name,
@@ -101,6 +117,7 @@ def cli_entrypoint():
         urdf_path=args.urdf_path,
         show_viewer=True,
         device=args.device,
+        interface=args.interface,
     )
 
 
