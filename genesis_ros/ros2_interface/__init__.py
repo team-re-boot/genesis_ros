@@ -5,7 +5,7 @@ from . import torch_msgs
 import zenoh
 import pycdr2
 from pycdr2 import IdlStruct
-from typing import Dict, Any
+from typing import Dict, Any, Callable
 
 from genesis_ros.topic_interfaces import TopicInterface
 
@@ -15,6 +15,9 @@ class ROS2Interface(TopicInterface):
         zenoh.init_log_from_env_or("error")
         self.session = zenoh.open(zenoh_config)
         self.publishers: Dict[str, zenoh.Publisher] = {}
+        self.subscribers: Dict[str, zenoh.subscriber] = {}
+        self.subscribed_data: Dict[str, Any] = {}
+        self.subscribed_data_type: Dict[str, Any] = {}
 
     def add_publisher(self, topic_name: str, message_type: Any):
         if not issubclass(message_type, IdlStruct):
@@ -27,6 +30,29 @@ class ROS2Interface(TopicInterface):
         if not topic_name in self.publishers:
             self.add_publisher(topic_name=topic_name, message_type=type(message))
         self.publishers[topic_name].put(message.serialize())
+
+    def add_subscriber(self, topic_name: str, message_type: Any):
+        if not issubclass(message_type, IdlStruct):
+            raise Exception(
+                "Invalid message type, message type is " + str(message_type)
+            )
+
+        def callback(data: Any):
+            self.subscribed_data[topic_name] = data.payload()
+
+        self.subscribed_data[topic_name] = None
+        self.subscribed_data_type[topic_name] = message_type
+        self.subscribers[topic_name] = self.session.declare_subscriber(
+            topic_name, callback
+        )
+
+    def get_subscribed_data(self, topic_name: str) -> Any:
+        if self.subscribed_data[topic_name] == None:
+            return None
+        else:
+            return self.subscribed_data_type[topic_name].deserialize(
+                self.subscribed_data[topic_name]
+            )
 
     def __del__(self):
         self.session.close()
