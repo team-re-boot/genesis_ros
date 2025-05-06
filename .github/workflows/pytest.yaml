@@ -62,8 +62,9 @@ jobs:
           required-ros-distributions: ${{ matrix.ros2_distro }}
       - name: Install OpenCV/libegl/git related libraries
         run: |
+          echo "deb [trusted=yes] https://download.eclipse.org/zenoh/debian-repo/ /" | sudo tee -a /etc/apt/sources.list > /dev/null
           sudo apt-get update
-          sudo apt-get install -y ffmpeg libsm6 libxext6 libegl-dev xvfb mesa-utils
+          sudo apt-get install -y ffmpeg libsm6 libxext6 libegl-dev xvfb mesa-utils zenoh-bridge-ros2dds zenoh
           Xvfb :99 -screen 0 1024x768x24 &
           export DISPLAY=:99
       - name: make workspace
