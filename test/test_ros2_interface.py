@@ -1,4 +1,5 @@
 from genesis_ros.ros2_interface import builtin_interfaces, rosgraph_msgs, torch_msgs
+import torch
 
 
 def test_builtin_interfaces_time():
@@ -14,6 +15,7 @@ def test_rosgraph_msgs_clock():
 def test_torch_msgs_fp32_tensor():
     msg = torch_msgs.msg.FP32Tensor(is_cuda=False, data=[0.0], shape=[1])
     msg.serialize()
+    torch.tensor([1.0, 2.0, 3.0, 4.5], dtype=torch.float32)
 
 
 def test_torch_msgs_fp64_tensor():
