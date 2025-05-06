@@ -6,6 +6,7 @@ from genesis_ros.ros2_interface import ROS2Interface
 import zenoh
 import pytest
 import os
+import time
 
 
 def test_nop_interface():
@@ -23,20 +24,17 @@ def test_nop_interface():
 def test_ros2_interface():
     interface = ROS2Interface(zenoh_config=zenoh.Config())
     interface.add_publisher("clock", rosgraph_msgs.msg.Clock)
+    interface.subscribe("clock", rosgraph_msgs.msg.Clock)
     interface.publish(
         "clock",
         rosgraph_msgs.msg.Clock(clock=builtin_interfaces.msg.Time(sec=1, nanosec=1)),
     )
-
-
-@pytest.mark.skipif(
-    os.environ.get("ROS_DISTRO") is None, reason="ROS 2 was not installed"
-)
-def test_publish_invalid_data():
-    interface = ROS2Interface(zenoh_config=zenoh.Config())
     with pytest.raises(Exception) as excinfo:
         interface.add_publisher("clock", int)
     assert str(excinfo.value) == "Invalid message type, message type is <class 'int'>"
+    time.sleep(3)  # Waiting for subscribed data reached
+    assert interface.get_subscribed_data("clock") != None
+    interface.__del__()
 
 
 def test_builtin_interfaces_time():

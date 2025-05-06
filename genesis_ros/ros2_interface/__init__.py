@@ -5,7 +5,7 @@ from . import torch_msgs
 import zenoh
 import pycdr2
 from pycdr2 import IdlStruct
-from typing import Dict, Any, Callable
+from typing import Dict, Any, Callable, Optional
 
 from genesis_ros.topic_interfaces import TopicInterface
 
@@ -16,7 +16,7 @@ class ROS2Interface(TopicInterface):
         self.session = zenoh.open(zenoh_config)
         self.publishers: Dict[str, zenoh.Publisher] = {}
         self.subscribers: Dict[str, zenoh.subscriber] = {}
-        self.subscribed_data: Dict[str, Any] = {}
+        self.subscribed_data: Dict[str, Optional[bytes]] = {}
         self.subscribed_data_type: Dict[str, Any] = {}
 
     def add_publisher(self, topic_name: str, message_type: Any):
@@ -31,14 +31,14 @@ class ROS2Interface(TopicInterface):
             self.add_publisher(topic_name=topic_name, message_type=type(message))
         self.publishers[topic_name].put(message.serialize())
 
-    def add_subscriber(self, topic_name: str, message_type: Any):
+    def subscribe(self, topic_name: str, message_type: Any):
         if not issubclass(message_type, IdlStruct):
             raise Exception(
                 "Invalid message type, message type is " + str(message_type)
             )
 
         def callback(data: Any):
-            self.subscribed_data[topic_name] = data.payload()
+            self.subscribed_data[topic_name] = data.payload.to_bytes()
 
         self.subscribed_data[topic_name] = None
         self.subscribed_data_type[topic_name] = message_type
@@ -46,13 +46,13 @@ class ROS2Interface(TopicInterface):
             topic_name, callback
         )
 
-    def get_subscribed_data(self, topic_name: str) -> Any:
-        if self.subscribed_data[topic_name] == None:
-            return None
-        else:
+    def get_subscribed_data(self, topic_name: str) -> Optional[Any]:
+        if self.subscribed_data[topic_name]:
             return self.subscribed_data_type[topic_name].deserialize(
                 self.subscribed_data[topic_name]
             )
+        else:
+            return None
 
     def __del__(self):
         self.session.close()
