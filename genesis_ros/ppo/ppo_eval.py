@@ -9,7 +9,7 @@ from genesis_ros.ppo.ppo_env_options import (
     CommandConfig,
 )
 from genesis_ros.ppo.ppo_train_options import TrainConfig, Algorithm, Policy, Runner
-from genesis_ros.ros2_interface import builtin_interfaces, rosgraph_msgs
+from genesis_ros.ros2_interface import builtin_interfaces, rosgraph_msgs, torch_msgs
 from genesis_ros.ros2_interface import ROS2Interface
 from genesis_ros.topic_interfaces import TopicInterface, NopInterface
 import pickle
@@ -75,6 +75,9 @@ def eval(
                         sec=int(sec), nanosec=int((sec - int(sec)) * 1e9)
                     )
                 ),
+            )
+            topic_interface.publish(
+                "control/observation", torch_msgs.msg.from_torch_tensor(obs)
             )
             actions = policy(obs)
             obs, rews, dones, infos = env.step(actions)
