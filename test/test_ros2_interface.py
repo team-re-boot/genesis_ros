@@ -5,6 +5,7 @@ from genesis_ros.topic_interfaces import NopInterface
 from genesis_ros.ros2_interface import ROS2Interface
 import zenoh
 import pytest
+import os
 
 
 def test_nop_interface():
@@ -16,6 +17,9 @@ def test_nop_interface():
     )
 
 
+@pytest.mark.skipif(
+    os.environ.get("ROS_DISTRO") is None, reason="ROS 2 was not installed"
+)
 def test_ros2_interface():
     interface = ROS2Interface(zenoh_config=zenoh.Config())
     interface.add_publisher("clock", rosgraph_msgs.msg.Clock)
