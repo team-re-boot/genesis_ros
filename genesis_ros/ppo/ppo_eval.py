@@ -9,7 +9,7 @@ from genesis_ros.ppo.ppo_env_options import (
     CommandConfig,
 )
 from genesis_ros.ppo.ppo_train_options import TrainConfig, Algorithm, Policy, Runner
-from genesis_ros.ros2_interface.messages import Clock, Time
+from genesis_ros.ros2_interface import builtin_interfaces, rosgraph_msgs
 import pickle
 import shutil
 import os
@@ -62,8 +62,10 @@ def eval(
         with torch.no_grad():
             while True:
                 sec = step * env.dt
-                clock = Clock(
-                    clock=Time(sec=int(sec), nanosec=int((sec - int(sec)) * 1e9))
+                clock = rosgraph_msgs.msg.Clock(
+                    clock=builtin_interfaces.msg.Time(
+                        sec=int(sec), nanosec=int((sec - int(sec)) * 1e9)
+                    )
                 )
                 pub.put(clock.serialize())
                 actions = policy(obs)
