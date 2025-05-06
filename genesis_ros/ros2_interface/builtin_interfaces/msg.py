@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from pycdr2 import IdlStruct
-from pycdr2.types import int8, int32, uint32, float64
+from pycdr2.types import int32, uint32
 
 
 @dataclass
