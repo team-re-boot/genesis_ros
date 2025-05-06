@@ -1,6 +1,32 @@
 from genesis_ros.ros2_interface import builtin_interfaces, rosgraph_msgs, torch_msgs
 import torch
 
+from genesis_ros.topic_interfaces import NopInterface
+from genesis_ros.ros2_interface import ROS2Interface
+import zenoh
+import pytest
+
+
+def test_nop_interface():
+    interface = NopInterface()
+    interface.add_publisher("clock", rosgraph_msgs.msg.Clock)
+    interface.publish(
+        "clock",
+        rosgraph_msgs.msg.Clock(clock=builtin_interfaces.msg.Time(sec=1, nanosec=1)),
+    )
+
+
+def test_ros2_interface():
+    interface = ROS2Interface(zenoh_config=zenoh.Config())
+    interface.add_publisher("clock", rosgraph_msgs.msg.Clock)
+    interface.publish(
+        "clock",
+        rosgraph_msgs.msg.Clock(clock=builtin_interfaces.msg.Time(sec=1, nanosec=1)),
+    )
+    with pytest.raises(Exception) as excinfo:
+        interface.add_publisher("clock", int)
+    assert str(excinfo.value) == "Invalid message type, message type is <class 'int'>"
+
 
 def test_builtin_interfaces_time():
     msg = builtin_interfaces.msg.Time(sec=1, nanosec=1)
