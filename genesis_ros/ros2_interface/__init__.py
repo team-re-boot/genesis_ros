@@ -4,6 +4,7 @@ from . import torch_msgs
 
 import zenoh
 import pycdr2
+import time
 from pycdr2 import IdlStruct
 from typing import Dict, Any, Callable, Optional
 
@@ -53,6 +54,9 @@ class ROS2Interface(TopicInterface):
             )
         else:
             return None
+
+    def spin(self, timeout: float = 0.02) -> None:
+        time.sleep(timeout)
 
     def __del__(self):
         self.session.close()
