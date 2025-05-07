@@ -11,12 +11,32 @@ class FP32Tensor(IdlStruct, typename="torch_msgs/msg/FP32Tensor"):  # type: igno
     data: List[float32]
     shape: List[int64]
 
+    def to_torch_tensor(self) -> torch.Tensor:
+        if self.is_cuda:
+            return (
+                torch.tensor(self.data, dtype=torch.float32).reshape(*self.shape).cuda()
+            )
+        else:
+            return (
+                torch.tensor(self.data, dtype=torch.float32).reshape(*self.shape).cpu()
+            )
+
 
 @dataclass
 class FP64Tensor(IdlStruct, typename="torch_msgs/msg/FP64Tensor"):  # type: ignore
     is_cuda: bool
     data: List[float64]
     shape: List[int64]
+
+    def to_torch_tensor(self) -> torch.Tensor:
+        if self.is_cuda:
+            return (
+                torch.tensor(self.data, dtype=torch.float64).reshape(*self.shape).cuda()
+            )
+        else:
+            return (
+                torch.tensor(self.data, dtype=torch.float64).reshape(*self.shape).cpu()
+            )
 
 
 @dataclass
@@ -25,12 +45,28 @@ class INT16Tensor(IdlStruct, typename="torch_msgs/msg/INT16Tensor"):  # type: ig
     data: List[int16]
     shape: List[int64]
 
+    def to_torch_tensor(self) -> torch.Tensor:
+        if self.is_cuda:
+            return (
+                torch.tensor(self.data, dtype=torch.int16).reshape(*self.shape).cuda()
+            )
+        else:
+            return torch.tensor(self.data, dtype=torch.int16).reshape(*self.shape).cpu()
+
 
 @dataclass
 class INT32Tensor(IdlStruct, typename="torch_msgs/msg/INT32Tensor"):  # type: ignore
     is_cuda: bool
     data: List[int32]
     shape: List[int64]
+
+    def to_torch_tensor(self) -> torch.Tensor:
+        if self.is_cuda:
+            return (
+                torch.tensor(self.data, dtype=torch.int32).reshape(*self.shape).cuda()
+            )
+        else:
+            return torch.tensor(self.data, dtype=torch.int32).reshape(*self.shape).cpu()
 
 
 @dataclass
@@ -39,6 +75,14 @@ class INT64Tensor(IdlStruct, typename="torch_msgs/msg/INT64Tensor"):  # type: ig
     data: List[int64]
     shape: List[int64]
 
+    def to_torch_tensor(self) -> torch.Tensor:
+        if self.is_cuda:
+            return (
+                torch.tensor(self.data, dtype=torch.int64).reshape(*self.shape).cuda()
+            )
+        else:
+            return torch.tensor(self.data, dtype=torch.int64).reshape(*self.shape).cpu()
+
 
 @dataclass
 class INT8Tensor(IdlStruct, typename="torch_msgs/msg/INT8Tensor"):  # type: ignore
@@ -46,12 +90,26 @@ class INT8Tensor(IdlStruct, typename="torch_msgs/msg/INT8Tensor"):  # type: igno
     data: List[int8]
     shape: List[int64]
 
+    def to_torch_tensor(self) -> torch.Tensor:
+        if self.is_cuda:
+            return torch.tensor(self.data, dtype=torch.int8).reshape(*self.shape).cuda()
+        else:
+            return torch.tensor(self.data, dtype=torch.int8).reshape(*self.shape).cpu()
+
 
 @dataclass
 class UINT8Tensor(IdlStruct, typename="torch_msgs/msg/UINT8Tensor"):  # type: ignore
     is_cuda: bool
     data: List[uint8]
     shape: List[int64]
+
+    def to_torch_tensor(self) -> torch.Tensor:
+        if self.is_cuda:
+            return (
+                torch.tensor(self.data, dtype=torch.uint8).reshape(*self.shape).cuda()
+            )
+        else:
+            return torch.tensor(self.data, dtype=torch.uint8).reshape(*self.shape).cpu()
 
 
 def from_torch_tensor(

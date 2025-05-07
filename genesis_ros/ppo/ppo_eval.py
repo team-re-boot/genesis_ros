@@ -85,7 +85,9 @@ def eval(
                 actions = policy(obs)
             elif type(topic_interface) == ROS2Interface:
                 topic_interface.spin()
-                action_msg = topic_interface.get_subscribed_data("control/action")
+                action_msg = topic_interface.spin_until_subscribe_new_data(
+                    "control/action"
+                )
             obs, rews, dones, infos = env.step(actions)
             if dones[0]:
                 break
