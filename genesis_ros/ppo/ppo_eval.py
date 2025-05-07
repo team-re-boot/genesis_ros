@@ -11,6 +11,7 @@ from genesis_ros.ppo.ppo_env_options import (
 from genesis_ros.ppo.ppo_train_options import TrainConfig, Algorithm, Policy, Runner
 from genesis_ros.ros2_interface import builtin_interfaces, rosgraph_msgs, torch_msgs
 from genesis_ros.ros2_interface import ROS2Interface
+from genesis_ros.ros2_interface import torch_msgs
 from genesis_ros.topic_interfaces import TopicInterface, NopInterface
 import pickle
 import shutil
@@ -66,6 +67,7 @@ def eval(
     obs, _ = env.reset()
     step = 0
     with torch.no_grad():
+        topic_interface.subscribe("control/action", torch_msgs.msg.FP32Tensor)
         while True:
             sec = step * env.dt
             topic_interface.publish(
@@ -79,7 +81,11 @@ def eval(
             topic_interface.publish(
                 "control/observation", torch_msgs.msg.from_torch_tensor(obs)
             )
-            actions = policy(obs)
+            if type(topic_interface) == NopInterface:
+                actions = policy(obs)
+            elif type(topic_interface) == ROS2Interface:
+                topic_interface.spin()
+                action_msg = topic_interface.get_subscribed_data("control/action")
             obs, rews, dones, infos = env.step(actions)
             if dones[0]:
                 break

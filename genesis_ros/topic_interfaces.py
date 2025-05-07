@@ -23,6 +23,10 @@ class TopicInterface(metaclass=ABCMeta):
     def spin(self, timeout: float = 0.02) -> None:
         raise NotImplementedError()
 
+    @abstractmethod
+    def spin_until_subscribe_new_data(self, topic_name: str) -> Any:
+        raise NotImplementedError()
+
 
 class NopInterface(TopicInterface):
     def add_publisher(self, topic_name: str, message_type: Any):
@@ -38,4 +42,7 @@ class NopInterface(TopicInterface):
         pass
 
     def spin(self, timeout: float = 0.02) -> None:
+        pass
+
+    def spin_until_subscribe_new_data(self, topic_name: str) -> Any:
         pass
