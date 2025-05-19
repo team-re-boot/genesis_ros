@@ -4,6 +4,7 @@ from . import torch_msgs
 
 import zenoh
 import pycdr2
+import time
 from pycdr2 import IdlStruct
 from typing import Dict, Any, Callable, Optional
 
@@ -48,11 +49,23 @@ class ROS2Interface(TopicInterface):
 
     def get_subscribed_data(self, topic_name: str) -> Optional[Any]:
         if self.subscribed_data[topic_name]:
-            return self.subscribed_data_type[topic_name].deserialize(
+            data = self.subscribed_data_type[topic_name].deserialize(
                 self.subscribed_data[topic_name]
             )
+            self.subscribed_data[topic_name] = None
+            return data
         else:
             return None
+
+    def spin(self, timeout: float = 0.02) -> None:
+        time.sleep(timeout)
+
+    def spin_until_subscribe_new_data(self, topic_name: str) -> Any:
+        while True:
+            self.spin()
+            data = self.get_subscribed_data(topic_name)
+            if data is not None:
+                return data
 
     def __del__(self):
         self.session.close()

@@ -87,8 +87,8 @@ def train(
         init_at_random_ep_len=True,
     )
     torch.jit.trace(
-        ActorPolicy(runner.alg.actor_critic),
-        torch.zeros(env.num_actions * 3 + 3 * 3).to(device=gs.device),
+        ActorPolicy(runner.alg.actor_critic).to(device="cpu"),
+        torch.zeros(env.num_actions * 3 + 3 * 3).to(device="cpu"),
     ).save(Path(log_dir) / "actor.pt")
     gs.destroy()
 
