@@ -34,6 +34,7 @@ extra_css:
   - https://use.fontawesome.com/releases/v5.15.0/css/all.css
 
 markdown_extensions:
+  - admonition
   - pymdownx.highlight:
       anchor_linenums: true
       line_spans: __span

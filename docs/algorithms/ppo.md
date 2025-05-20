@@ -28,6 +28,9 @@ Example source code is in [this directory.](https://github.com/team-re-boot/gene
 
 ### command_config.yaml
 
+!!! note
+    This yaml file is optional for the experiment.
+
 ```yaml
 num_commands: 3 # number of commands
 lin_vel_x_range: [0.5, 0.5] # range of linear velocity in x direction
@@ -43,6 +46,9 @@ The speed commands are given in the forward and backward directions and in the d
 
 ### entities.py
 
+!!! warning
+    This python script is required for the experiment.
+
 ```python
 import genesis as gs
 from typing import List
@@ -57,6 +63,9 @@ This python script describes the configuration for the entities inside simulatio
 This script must contain function named `get_entities()` with `List[gs.morphs.Morph]` return type.
 
 ### environment_config.yaml
+
+!!! note
+    This yaml file is optional for the experiment.
 
 ```yaml
 default_joint_angles: # The default joint angles for the robot
@@ -84,3 +93,85 @@ clip_action: 100.0 # Clip the action to a certain range
 ```
 
 This file describes the configuration for the simulation environment.
+
+The initial posture of the robot, hyperparameter of the PPO algorithm, etc. can be set.
+
+### observation_config.yaml
+
+!!! note
+    This yaml file is optional for the experiment.
+
+```yaml
+obs_scales: # Scale for each observation
+  lin_vel: 2.0 # Scale for linear velocity
+  ang_vel: 0.25 # Scale for angular velocity
+  dof_pos: 1.0 # Scale for joint position
+  dof_vel: 0.05 # Scale for joint velocity
+```
+
+This file describes the configuration for the observation.
+
+Currently, only the Observation scale can be set.
+
+### reward_functions.py
+
+!!! warning
+    This python script is required for the experiment.
+
+```python
+import torch
+
+
+def get_reward_functions():
+    reward_functions = []
+
+    # ------------ reward functions----------------
+    def reward_tracking_lin_vel(self):
+        # Tracking of linear velocity commands (xy axes)
+        lin_vel_error = torch.sum(
+            torch.square(self.commands[:, :2] - self.base_lin_vel[:, :2]), dim=1
+        )
+        return torch.exp(-lin_vel_error / 0.25)
+
+    reward_functions.append((reward_tracking_lin_vel, 1.0))
+
+    def reward_tracking_ang_vel(self):
+        # Tracking of angular velocity commands (yaw)
+        ang_vel_error = torch.square(self.commands[:, 2] - self.base_ang_vel[:, 2])
+        return torch.exp(-ang_vel_error / 0.25)
+
+    reward_functions.append((reward_tracking_ang_vel, 0.2))
+
+    def reward_lin_vel_z(self):
+        # Penalize z axis base linear velocity
+        return torch.square(self.base_lin_vel[:, 2])
+
+    reward_functions.append((reward_lin_vel_z, -1.0))
+
+    def reward_action_rate(self):
+        # Penalize changes in actions
+        return torch.sum(torch.square(self.last_actions - self.actions), dim=1)
+
+    reward_functions.append((reward_action_rate, -0.005))
+
+    def reward_similar_to_default(self):
+        # Penalize joint poses far away from default pose
+        return torch.sum(torch.abs(self.dof_pos - self.default_dof_pos), dim=1)
+
+    reward_functions.append((reward_similar_to_default, -0.1))
+
+    def reward_base_height(self):
+        # Penalize base height away from target
+        return torch.square(self.base_pos[:, 2] - 0.3)
+
+    reward_functions.append((reward_base_height, -50.0))
+
+    return reward_functions
+
+```
+
+This python script defines the reward functions in this experiment.
+
+This python script must contain `get_reward_functions()` function with the return value is a function object that takes self as its first argument and changes torch.Tensor to a list of tuples of type float.
+
+1st element of the tuple means the each reward function, 2nd element of the tuple means the scale of the each reward function.
