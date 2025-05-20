@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <url>
+         <loc>https://team-re-boot/genesis_ros/</loc>
+         <lastmod>2025-05-20</lastmod>
+    </url>
+    <url>
+         <loc>https://team-re-boot/genesis_ros/setup/</loc>
+         <lastmod>2025-05-20</lastmod>
+    </url>
+    <url>
+         <loc>https://team-re-boot/genesis_ros/algorithms/ppo/</loc>
+         <lastmod>2025-05-20</lastmod>
+    </url>
+</urlset>
