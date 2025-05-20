@@ -15,10 +15,13 @@ Example source code is in [this directory.](https://github.com/team-re-boot/gene
 ```bash
 .
 └── go2_walking # Name of the experiment
+    ├── command_config.yaml # Configuration for the robot command
     ├── entities.py # Python script for listing up entities inside experiment
     ├── environment_config.yaml # Configuration for the environment
+    ├── observation_config.yaml # Configuration for the observation
     ├── reward_functions.py # Python script for define reward functions
+    ├── simulation_config.yaml # Configuration for the simulation
     └── train_config.yaml # Configuration for the training
 
-1 directory, 4 files
+1 directory, 7 files
 ```
