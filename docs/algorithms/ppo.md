@@ -36,7 +36,10 @@ ang_vel_range: [0.0, 0.0] # range of angular velocity
 ```
 
 This file describes the configuration for the robot command.
-In this experiment, the robot can be given a speed command. The speed commands are given in the forward and backward directions and in the direction of rotation.
+
+In this experiment, the robot can be given a speed command.
+
+The speed commands are given in the forward and backward directions and in the direction of rotation.
 
 ### entities.py
 
@@ -50,4 +53,34 @@ def get_entities() -> List[gs.morphs.Morph]:
 ```
 
 This python script describes the configuration for the entities inside simulation.
+
 This script must contain function named `get_entities()` with `List[gs.morphs.Morph]` return type.
+
+### environment_config.yaml
+
+```yaml
+default_joint_angles: # The default joint angles for the robot
+  FL_hip_joint: 0.0 # Front left hip joint, this name comes from the robot URDF
+  FR_hip_joint: 0.0
+  RL_hip_joint: 0.0
+  RR_hip_joint: 0.0
+  FL_thigh_joint: 0.8
+  FR_thigh_joint: 0.8
+  RL_thigh_joint: 1.0
+  RR_thigh_joint: 1.0
+  FL_calf_joint: -1.5
+  FR_calf_joint: -1.5
+  RL_calf_joint: -1.5
+  RR_calf_joint: -1.5
+kp: 20.0 # Proportional gain for the PD controller
+kd: 0.5 # Derivative gain for the PD controller
+base_init_pos: [0.0, 0.0, 0.42] # Initial position of the robot base
+base_init_quat: [1.0, 0.0, 0.0, 0.0] # Initial orientation of the robot base
+episode_length_seconds: 20.0 # Length of the episode in seconds
+resampling_time_seconds: 4.0 # Time between resampling the action
+action_scale: 0.25 # Scale for the action space
+simulate_action_latency: true # Whether to simulate action latency
+clip_action: 100.0 # Clip the action to a certain range
+```
+
+This file describes the configuration for the simulation environment.
