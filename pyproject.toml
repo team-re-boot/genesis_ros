@@ -76,4 +76,6 @@ dev = [
     "lark>=1.2.2",
     "pytest-cov>=6.1.1",
     "pytest-testmon>=2.1.3",
+    "mkdocs>=1.6.1",
+    "mkdocs-material>=9.6.14",
 ]

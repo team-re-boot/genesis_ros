@@ -1,0 +1,4 @@
+num_commands: 3 # number of commands
+lin_vel_x_range: [0.5, 0.5] # range of linear velocity in x direction
+lin_vel_y_range: [0.0, 0.0] # range of linear velocity in y direction
+ang_vel_range: [0.0, 0.0] # range of angular velocity
