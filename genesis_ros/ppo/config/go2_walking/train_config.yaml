@@ -4,7 +4,7 @@ policy: # Settings for the policy. See also, https://github.com/leggedrobotics/r
   activation: elu # Activation function for the policy network
   actor_hidden_dims: [512, 256, 128] # Hidden dimensions for the actor network
   critic_hidden_dims: [512, 256, 128] # Hidden dimensions for the critic network
-  init_noise_std: float = 1.0 # Initial noise standard deviation
+  init_noise_std: 1.0 # Initial noise standard deviation
   class_name: ActorCritic # Loading the ActorCritic class
 
 runner:
