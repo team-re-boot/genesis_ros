@@ -175,3 +175,33 @@ This python script defines the reward functions in this experiment.
 This python script must contain `get_reward_functions()` function with the return value is a function object that takes self as its first argument and changes torch.Tensor to a list of tuples of type float.
 
 1st element of the tuple means the each reward function, 2nd element of the tuple means the scale of the each reward function.
+
+<div class="iframely-embed"><div class="iframely-responsive" style="height: 140px; padding-bottom: 0;"><a href="https://github.com/team-re-boot/genesis_ros/blob/master/genesis_ros/ppo/ppo_env.py" data-iframely-url="//iframely.net/9xjFkyjT?card=small"></a></div></div><script async src="//iframely.net/embed.js"></script>
+
+The functions defined in this script are added as member functions of the PPOEnv class defined in ppo_env.py and executed at each simulation frame.
+
+### simulation_config.yaml
+
+!!! note
+    This yaml file is optional for the experiment.
+
+```yaml
+simulate_action_latency: True # Whether to simulate action latency
+dt: 0.02  # Time step for the simulation
+```
+
+This file describes the configuration for the simulation latency and time step.
+
+### train_config.yaml
+
+!!! note
+    This yaml file is optional for the experiment.
+
+```yaml
+runner:
+  experiment_name: go2_walking # Name of the experiment
+```
+
+This file describes the configuration for the training.
+
+This file only needs while training.

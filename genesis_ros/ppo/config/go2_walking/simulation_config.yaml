@@ -1,2 +1,2 @@
-simulate_action_latency: True
-dt: 0.02
+simulate_action_latency: True # Whether to simulate action latency
+dt: 0.02  # Time step for the simulation
