@@ -384,3 +384,11 @@ uv run tensorboard --logdir logs
 ```
 
 ![tensorboard](../img/tensorboard.png "tensorboard")
+
+## Evaluation
+
+```bash
+uv run ppo_eval -e go2_walking -d gpu --ckpt 100
+```
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/Ki_byXYWyBQ?si=ItZb2lhKbmzdJaqq&amp;start=20" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
