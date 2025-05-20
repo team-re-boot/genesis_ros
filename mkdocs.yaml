@@ -45,3 +45,5 @@ markdown_extensions:
 nav:
   - Home: index.md
   - Setup: setup.md
+  - Algorithms:
+    - PPO: algorithms/ppo.md

@@ -8,10 +8,9 @@ Please follow UV official documentation.
 
 ## Setup genesis_ros
 
-Clone source code from [genesis_ros github repository.](https://github.com/team-re-boot/genesis_ros)
+Clone source code from genesis_ros github repository.
 
-<div class="iframely-embed"><div class="iframely-responsive" style="padding-bottom: 50%; padding-top: 120px;"><a href="https://github.com/team-re-boot/genesis_ros" data-iframely-url="//iframely.net/12Kj7bJc"></a></div></div><script async src="//iframely.net/embed.js"></script>
-
+<div class="iframely-embed"><div class="iframely-responsive" style="height: 140px; padding-bottom: 0;"><a href="https://github.com/team-re-boot/genesis_ros" data-iframely-url="//iframely.net/12Kj7bJc?card=small"></a></div></div><script async src="//iframely.net/embed.js"></script>
 ```bash
 git clone https://github.com/team-re-boot/genesis_ros.git
 cd genesis_ros
