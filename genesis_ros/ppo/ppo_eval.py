@@ -55,7 +55,7 @@ def eval(
         env_cfg=env_cfg,
         obs_cfg=obs_cfg,
         command_cfg=command_cfg,
-        urdf_path="urdf/go2/urdf/go2.urdf",
+        urdf_path=urdf_path,
         show_viewer=show_viewer,
     )
 
