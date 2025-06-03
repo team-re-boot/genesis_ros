@@ -20,6 +20,7 @@ from rsl_rl.runners import OnPolicyRunner
 from dataclasses import asdict
 from typing import Union
 import zenoh
+import time
 
 
 def eval(
@@ -88,10 +89,12 @@ def eval(
                 actions = topic_interface.spin_until_subscribe_new_data(
                     "control/action"
                 ).to_torch_tensor()
+            # print(actions)
             obs, rews, dones, infos = env.step(actions)
             if dones[0]:
                 break
             step += 1
+            time.sleep(0.1)
     gs.destroy()
 
 

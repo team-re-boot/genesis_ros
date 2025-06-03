@@ -7,14 +7,15 @@ default_joint_angles: # The default joint angles for the robot
   r_leg_hpy: 0.17453292519943295
   r_leg_kny: -0.34906585039886
   r_leg_aky: 0.17453292519943295
-kp: 20.0 # Proportional gain for the PD controller
-kd: 0.5 # Derivative gain for the PD controller
-base_init_pos: [0.0, 0.0, 1.0] # Initial position of the robot base
+  back_bky: 0.17453292519943295
+kp: 2000.0 # Proportional gain for the PD controller
+kd: 10.0 # Derivative gain for the PD controller
+base_init_pos: [0.0, 0.0, 0.9] # Initial position of the robot base
 base_init_quat: [1.0, 0.0, 0.0, 0.0] # Initial orientation of the robot base
 episode_length_seconds: 20.0 # Length of the episode in seconds
 resampling_time_seconds: 4.0 # Time between resampling the action
 action_scale: 0.25 # Scale for the action space
 simulate_action_latency: true # Whether to simulate action latency
-clip_action: 100.0 # Clip the action to a certain range
+clip_actions: 100.0 # Clip the action to a certain range
 termination_if_roll_greater_than: 50.0
 termination_if_pitch_greater_than: 50.0

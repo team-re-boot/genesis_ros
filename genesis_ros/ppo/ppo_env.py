@@ -273,8 +273,6 @@ class PPOEnv:
             torch.abs(self.base_euler[:, 0])
             > self.env_cfg.termination_if_roll_greater_than
         )
-        # print("Pitch", self.base_euler[:, 1])
-        # print("Roll", self.base_euler[:, 0])
 
         time_out_idx = (
             (self.episode_length_buf > self.max_episode_length)
