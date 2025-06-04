@@ -6,3 +6,4 @@ __pycache__
 .coverage*
 _htmlcov
 logs
+site

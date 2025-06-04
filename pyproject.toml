@@ -56,6 +56,13 @@ exclude_lines = [
     "return NotImplemented",
 ]
 
+[tool.coverage.run]
+omit = [
+    "test/*",
+    "*/*_test.py",
+    "*/test_*.py",
+]
+
 [tool.pytest.ini_options]
 addopts = [
     "--cov-report=html",
