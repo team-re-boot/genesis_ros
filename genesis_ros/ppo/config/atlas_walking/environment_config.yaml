@@ -16,6 +16,6 @@ episode_length_seconds: 20.0 # Length of the episode in seconds
 resampling_time_seconds: 4.0 # Time between resampling the action
 action_scale: 0.25 # Scale for the action space
 simulate_action_latency: true # Whether to simulate action latency
-clip_actions: 100.0 # Clip the action to a certain range
+clip_actions: 1.0 # Clip the action to a certain range
 termination_if_roll_greater_than: 50.0
 termination_if_pitch_greater_than: 50.0

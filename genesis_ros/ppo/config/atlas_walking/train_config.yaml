@@ -2,8 +2,8 @@ algorithm: ppo # Algorithm to use
 
 policy: # Settings for the policy. See also, https://github.com/leggedrobotics/rsl_rl
   activation: elu # Activation function for the policy network
-  actor_hidden_dims: [756, 512, 256] # Hidden dimensions for the actor network
-  critic_hidden_dims: [756, 512, 256] # Hidden dimensions for the critic network
+  actor_hidden_dims: [1024, 756, 512] # Hidden dimensions for the actor network
+  critic_hidden_dims: [1024, 756, 512] # Hidden dimensions for the critic network
   init_noise_std: 1.0 # Initial noise standard deviation
   class_name: ActorCritic # Loading the ActorCritic class
 
