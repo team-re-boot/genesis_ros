@@ -48,31 +48,4 @@ def get_reward_functions():
 
     reward_functions.append((reward_base_stability, -0.01))
 
-    def reward_excessive_contacts(self):
-        left_foot_contact = self.robot.get_link("l_foot").get_pos()[:, 2] < 0.07
-        left_foot_flat = (
-            self.robot.get_link("l_foot").get_ang()[:, 1] < 0.17453292519943
-        )  # 10 degrees in radians
-        right_foot_contact = self.robot.get_link("r_foot").get_pos()[:, 2] < 0.07
-        right_foot_flat = (
-            self.robot.get_link("r_foot").get_ang()[:, 1] < 0.17453292519943
-        )  # 10 degrees in radians
-
-        left_foot_is_supported = (
-            left_foot_contact & left_foot_flat & (~right_foot_contact)
-        )
-        right_foot_is_supported = (
-            right_foot_contact & right_foot_flat & (~left_foot_contact)
-        )
-
-        num_supported = left_foot_is_supported.float() + right_foot_is_supported.float()
-        reward = torch.where(
-            num_supported == 1.0,
-            torch.tensor(1.0, device=self.device),
-            torch.tensor(0.0, device=self.device),
-        )
-        return reward
-
-    reward_functions.append((reward_excessive_contacts, 100.0))
-
     return reward_functions
