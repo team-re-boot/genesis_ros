@@ -20,6 +20,7 @@ from rsl_rl.runners import OnPolicyRunner
 from dataclasses import asdict
 from typing import Union
 import zenoh
+import time
 
 
 def eval(
@@ -92,6 +93,7 @@ def eval(
             if dones[0]:
                 break
             step += 1
+            # time.sleep(0.1)
     gs.destroy()
 
 
