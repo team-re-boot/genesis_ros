@@ -10,6 +10,7 @@ from genesis.utils.geom import (
     transform_by_quat,
     inv_quat,
     transform_quat_by_quat,
+    quat_to_R,
 )
 from typing import Any, List, Tuple, Optional, Dict, Callable
 import functools
@@ -109,24 +110,45 @@ class PPOEnv:
         ]
         print("Number of joints: ", len(self.env_cfg.dof_names))
         print("Joints : ", self.env_cfg.dof_names)
+        print("Number of joints ", len(self.env_cfg.dof_names))
+        print("Fixed joints: ", self.env_cfg.fix_joints)
+        print("Number of fixed joints: ", len(self.env_cfg.fix_joints))
         self.num_actions = len(self.env_cfg.dof_names)
         print("Number of actions: ", self.num_actions)
-        self.num_obs = 9 + 3 * self.num_actions
+        self.num_obs = 9 + 3 * self.num_actions + 2 * len(self.env_cfg.fix_joints)
         self.motor_dofs = [
             self.robot.get_joint(name).dof_idx_local for name in self.env_cfg.dof_names
+        ]
+        self.fixed_dofs = [
+            self.robot.get_joint(name).dof_idx_local for name in self.env_cfg.fix_joints
         ]
 
         # PD control parameters
         self.robot.set_dofs_kp([self.env_cfg.kp] * self.num_actions, self.motor_dofs)
         self.robot.set_dofs_kv([self.env_cfg.kd] * self.num_actions, self.motor_dofs)
+        self.robot.set_dofs_kp(
+            [self.env_cfg.kp] * len(self.env_cfg.fix_joints), self.fixed_dofs
+        )
+        self.robot.set_dofs_kv(
+            [self.env_cfg.kd] * len(self.env_cfg.fix_joints), self.fixed_dofs
+        )
+
         # Set default joint angle as robot position
         default_joint_angles = [
             self.env_cfg.default_joint_angles[name] for name in self.env_cfg.dof_names
+        ]
+        self.fixed_joint_angles = [
+            self.env_cfg.default_joint_angles[name] for name in self.env_cfg.fix_joints
         ]
 
         self.robot.set_dofs_position(
             [default_joint_angles[:] for _ in range(num_envs)],
             self.motor_dofs,
+            zero_velocity=True,
+        )
+        self.robot.set_dofs_position(
+            [self.fixed_joint_angles[:] for _ in range(num_envs)],
+            self.fixed_dofs,
             zero_velocity=True,
         )
 
@@ -192,9 +214,16 @@ class PPOEnv:
         self.actions = torch.zeros(
             (self.num_envs, self.num_actions), device=self.device, dtype=gs.tc_float
         )
+        self.fixed_actions = torch.zeros(
+            (self.num_envs, len(self.env_cfg.fix_joints)),
+            device=self.device,
+            dtype=gs.tc_float,
+        )
         self.last_actions = torch.zeros_like(self.actions)
         self.dof_pos = torch.zeros_like(self.actions)
+        self.dof_pos_fixed = torch.zeros_like(self.fixed_actions)
         self.dof_vel = torch.zeros_like(self.actions)
+        self.dof_vel_fixed = torch.zeros_like(self.fixed_actions)
         self.last_dof_vel = torch.zeros_like(self.actions)
         self.base_pos = torch.zeros(
             (self.num_envs, 3), device=self.device, dtype=gs.tc_float
@@ -234,7 +263,13 @@ class PPOEnv:
         )
         target_dof_pos = exec_actions * self.env_cfg.action_scale + self.default_dof_pos
         self.robot.control_dofs_position(target_dof_pos, self.motor_dofs)
+
+        self.robot.control_dofs_position(
+            [self.fixed_joint_angles[:] for _ in range(self.num_envs)], self.fixed_dofs
+        )
+
         self.scene.step()
+
         # update buffers
         self.episode_length_buf += 1
         self.base_pos[:] = self.robot.get_pos()
@@ -251,6 +286,8 @@ class PPOEnv:
         self.projected_gravity = transform_by_quat(self.global_gravity, inv_base_quat)
         self.dof_pos[:] = self.robot.get_dofs_position(self.motor_dofs)
         self.dof_vel[:] = self.robot.get_dofs_velocity(self.motor_dofs)
+        self.dof_pos_fixed[:] = self.robot.get_dofs_position(self.fixed_dofs)
+        self.dof_vel_fixed[:] = self.robot.get_dofs_velocity(self.fixed_dofs)
 
         # resample commands
         envs_idx = (
@@ -265,6 +302,10 @@ class PPOEnv:
         self._resample_commands(envs_idx)
         # check termination and reset
         self.reset_buf = self.episode_length_buf > self.max_episode_length
+
+        # print("penalty : ", self.get_base_stability_penalty())
+        # print("reward : ", self.reward_tracking_lin_vel())
+
         self.reset_buf |= (
             torch.abs(self.base_euler[:, 1])
             > self.env_cfg.termination_if_pitch_greater_than
@@ -301,7 +342,13 @@ class PPOEnv:
                 self.commands * self.commands_scale,  # 3
                 (self.dof_pos - self.default_dof_pos)
                 * self.obs_scales.dof_pos,  # self.num_actions
+                (
+                    self.dof_pos_fixed
+                    - torch.Tensor(self.fixed_joint_angles).to(self.device)
+                )
+                * self.obs_scales.dof_pos,
                 self.dof_vel * self.obs_scales.dof_vel,  # self.num_actions
+                self.dof_vel_fixed * self.obs_scales.dof_vel,
                 self.actions,  # self.num_actions
             ],
             axis=-1,
@@ -333,6 +380,11 @@ class PPOEnv:
             dofs_idx_local=self.motor_dofs,
             zero_velocity=True,
             envs_idx=envs_idx,
+        )
+        self.robot.set_dofs_position(
+            [self.fixed_joint_angles[:] for _ in range(self.num_envs)],
+            self.fixed_dofs,
+            zero_velocity=True,
         )
 
         # reset base

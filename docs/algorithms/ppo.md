@@ -81,6 +81,7 @@ default_joint_angles: # The default joint angles for the robot
   FR_calf_joint: -1.5
   RL_calf_joint: -1.5
   RR_calf_joint: -1.5
+fix_joints: [] # Joints which is fixed during experiment
 kp: 20.0 # Proportional gain for the PD controller
 kd: 0.5 # Derivative gain for the PD controller
 base_init_pos: [0.0, 0.0, 0.42] # Initial position of the robot base

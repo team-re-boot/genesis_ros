@@ -93,7 +93,7 @@ def eval(
             if dones[0]:
                 break
             step += 1
-            # time.sleep(0.1)
+            time.sleep(0.1)
     gs.destroy()
 
 

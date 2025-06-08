@@ -1,9 +1,22 @@
-# default_joint_angles: # The default joint angles for the robot
-#   r_sho_roll: -1.42
-#   l_sho_roll: 1.42
+default_joint_angles: # The default joint angles for the robot
+  right_hip_pitch_joint: -0.35
+  left_hip_pitch_joint: -0.35
+  right_knee_joint: 1.11
+  left_knee_joint: 1.11
+  right_ankle_joint: -0.87
+  left_ankle_joint: -0.87
+fix_joints: # Joints which is fixed during experiment
+  - left_shoulder_pitch_joint
+  - right_shoulder_pitch_joint
+  - left_shoulder_roll_joint
+  - right_shoulder_roll_joint
+  - left_shoulder_yaw_joint
+  - right_shoulder_yaw_joint
+  - left_elbow_joint
+  - right_elbow_joint
 kp: 20.0 # Proportional gain for the PD controller
 kd: 0.5 # Derivative gain for the PD controller
-base_init_pos: [0.0, 0.0, 1.1] # Initial position of the robot base
+base_init_pos: [0.0, 0.0, 1.0] # Initial position of the robot base
 base_init_quat: [1.0, 0.0, 0.0, 0.0] # Initial orientation of the robot base
 episode_length_seconds: 20.0 # Length of the episode in seconds
 resampling_time_seconds: 1.0 # Time between resampling the action

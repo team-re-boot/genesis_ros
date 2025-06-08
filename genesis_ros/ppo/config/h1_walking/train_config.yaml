@@ -12,6 +12,6 @@ runner:
   checkpoint: -1 # Checkpoint to load, -1 means the latest checkpoint
   load_run: -1 # Load run number, -1 means the latest run
   log_interval: 1 # Interval for logging
-  max_iterations: 801 # Maximum number of iterations
+  max_iterations: 2001 # Maximum number of iterations
 
 runner_class_name: OnPolicyRunner # Class name for the runner. See also, https://github.com/leggedrobotics/rsl_rl

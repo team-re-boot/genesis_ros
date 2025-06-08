@@ -21,6 +21,7 @@ class SimulationConfig(YAMLWizard):
 class EnvironmentConfig(YAMLWizard):
     default_joint_angles: Dict[str, float] = field(default_factory=dict)
     dof_names: List[str] = field(default_factory=list)
+    fix_joints: List[str] = field(default_factory=list)
     # PD
     kp: float = 20.0
     kd: float = 0.5
@@ -39,7 +40,7 @@ class EnvironmentConfig(YAMLWizard):
     clip_actions: float = 100.0
 
     def append_joint(self, joint: Tuple[str, float]) -> None:
-        if not joint[0] in self.dof_names:
+        if not joint[0] in self.dof_names and joint[0] not in self.fix_joints:
             self.dof_names.append(joint[0])
         if not joint[0] in self.default_joint_angles:
             self.default_joint_angles[joint[0]] = joint[1]
