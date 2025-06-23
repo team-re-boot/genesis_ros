@@ -14,9 +14,9 @@ fix_joints: # Joints which is fixed during experiment
   - right_shoulder_yaw_joint
   - left_elbow_joint
   - right_elbow_joint
-kp: 20.0 # Proportional gain for the PD controller
+kp: 50.0 # Proportional gain for the PD controller
 kd: 0.5 # Derivative gain for the PD controller
-base_init_pos: [0.0, 0.0, 1.0] # Initial position of the robot base
+base_init_pos: [0.0, 0.0, 0.85] # Initial position of the robot base
 base_init_quat: [1.0, 0.0, 0.0, 0.0] # Initial orientation of the robot base
 episode_length_seconds: 20.0 # Length of the episode in seconds
 resampling_time_seconds: 1.0 # Time between resampling the action
