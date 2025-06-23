@@ -6,17 +6,17 @@ def get_reward_functions():
     reward_functions = []
 
     # ------------ reward functions----------------
-    # def reward_base_height(self):
-    #     # Penalize base height away from target
-    #     return torch.square(self.base_pos[:, 2] - 1.0)
-
-    # reward_functions.append((reward_base_height, -100.0))
-
-    def penalty_base_height(self):
+    def reward_base_height(self):
         # Penalize base height away from target
         return torch.square(self.base_pos[:, 2] - 0.8)
 
-    reward_functions.append((penalty_base_height, -1.0))
+    reward_functions.append((reward_base_height, -1.0))
+
+    # def penalty_base_height(self):
+    #     # Penalize base height away from target
+    #     return torch.square(self.base_pos[:, 2] - 0.8)
+
+    # reward_functions.append((penalty_base_height, -1.0))
 
     # def reward_tracking_lin_vel(self):
     #     # Tracking of linear velocity commands (xy axes)
@@ -40,11 +40,11 @@ def get_reward_functions():
 
     reward_functions.append((reward_lin_vel_z, -1.0))
 
-    # def reward_action_rate(self):
-    #     # Penalize changes in actions
-    #     return torch.sum(torch.square(self.last_actions - self.actions), dim=1)
+    def reward_action_rate(self):
+        # Penalize changes in actions
+        return torch.sum(torch.square(self.last_actions - self.actions), dim=1)
 
-    # reward_functions.append((reward_action_rate, -0.5))
+    reward_functions.append((reward_action_rate, -0.5))
 
     def reward_similar_to_default(self):
         # Penalize joint poses far away from default pose

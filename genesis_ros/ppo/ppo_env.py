@@ -346,9 +346,10 @@ class PPOEnv:
                     self.dof_pos_fixed
                     - torch.Tensor(self.fixed_joint_angles).to(self.device)
                 )
-                * self.obs_scales.dof_pos,
+                * self.obs_scales.dof_pos,  # len(self.env_cfg.fix_joints)
                 self.dof_vel * self.obs_scales.dof_vel,  # self.num_actions
-                self.dof_vel_fixed * self.obs_scales.dof_vel,
+                self.dof_vel_fixed
+                * self.obs_scales.dof_vel,  # len(self.env_cfg.fix_joints)
                 self.actions,  # self.num_actions
             ],
             axis=-1,
