@@ -38,4 +38,9 @@ def get_reward_functions():
 
     reward_functions.append((reward_base_roll_pitch, 0.1))
 
+    def reward_alive(self):
+        return 1
+
+    reward_functions.append((reward_alive, 1.0))
+
     return reward_functions

@@ -219,6 +219,11 @@ class PPOEnv:
             device=self.device,
             dtype=gs.tc_float,
         )
+        self.contact_forces = torch.zeros(
+            (self.num_envs, len(self.env_cfg.foot_links), 3),
+            device=self.device,
+            dtype=gs.tc_float,
+        )
         self.last_actions = torch.zeros_like(self.actions)
         self.dof_pos = torch.zeros_like(self.actions)
         self.dof_pos_fixed = torch.zeros_like(self.fixed_actions)
@@ -269,6 +274,11 @@ class PPOEnv:
         )
 
         self.scene.step()
+
+        for i, foot_link in enumerate(self.env_cfg.foot_links):
+            self.contact_forces[:, i, :] = self.robot.get_links_net_contact_force()[
+                :, self.robot.get_link(foot_link).idx_local, :
+            ]
 
         # update buffers
         self.episode_length_buf += 1

@@ -14,6 +14,9 @@ fix_joints: # Joints which is fixed during experiment
   - right_shoulder_yaw_joint
   - left_elbow_joint
   - right_elbow_joint
+foot_links: # Links which are considered as feet
+  - left_ankle_link
+  - right_ankle_link
 kp: 50.0 # Proportional gain for the PD controller
 kd: 0.5 # Derivative gain for the PD controller
 base_init_pos: [0.0, 0.0, 0.9] # Initial position of the robot base
