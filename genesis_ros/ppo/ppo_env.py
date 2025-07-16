@@ -259,6 +259,16 @@ class PPOEnv:
             *self.command_cfg.ang_vel_range, (len(envs_idx),), self.device
         )
 
+    def _update_phase(self):
+        period = self.env_cfg.leg_phase.period
+        offset = self.env_cfg.leg_phase.offset
+        phase = (self.episode_length_buf * self.dt) % period / period
+        phase_left = phase
+        phase_right = (phase + offset) % 1
+        self.leg_phase = torch.cat(
+            [phase_left.unsqueeze(1), phase_right.unsqueeze(1)], dim=-1
+        )
+
     def step(self, actions):
         self.actions = torch.clip(
             actions, -self.env_cfg.clip_actions, self.env_cfg.clip_actions
@@ -274,6 +284,7 @@ class PPOEnv:
         )
 
         self.scene.step()
+        self._update_phase()
 
         for i, foot_link in enumerate(self.env_cfg.foot_links):
             self.contact_forces[:, i, :] = self.robot.get_links_net_contact_force()[

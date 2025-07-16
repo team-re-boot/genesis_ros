@@ -18,11 +18,18 @@ class SimulationConfig(YAMLWizard):
 
 
 @dataclass
+class LegPhaseConfig(YAMLWizard):
+    period: float = 0.8  # seconds
+    offset: float = 0.5  # seconds
+
+
+@dataclass
 class EnvironmentConfig(YAMLWizard):
     default_joint_angles: Dict[str, float] = field(default_factory=dict)
     dof_names: List[str] = field(default_factory=list)
     fix_joints: List[str] = field(default_factory=list)
     foot_links: List[str] = field(default_factory=list)  # Foot links of the robot
+    leg_phase: LegPhaseConfig = LegPhaseConfig()
     # PD
     kp: float = 20.0
     kd: float = 0.5

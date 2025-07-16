@@ -43,4 +43,14 @@ def get_reward_functions():
 
     reward_functions.append((reward_alive, 1.0))
 
+    def reward_contact(self):
+        reward = torch.zeros(self.num_envs, dtype=torch.float, device=self.device)
+        for i in range(len(self.env_cfg.foot_links)):
+            is_stance = self.leg_phase[:, i] < 0.55
+            contact = self.contact_forces[:, i, 2] > 1
+            reward += ~(contact ^ is_stance)
+        return reward
+
+    reward_functions.append((reward_contact, 1.0))
+
     return reward_functions
