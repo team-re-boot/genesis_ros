@@ -17,13 +17,13 @@ fix_joints: # Joints which is fixed during experiment
 foot_links: # Links which are considered as feet
   - left_ankle_link
   - right_ankle_link
-kp: 50.0 # Proportional gain for the PD controller
-kd: 0.5 # Derivative gain for the PD controller
+kp: 500.0 # Proportional gain for the PD controller
+kd: 2.0 # Derivative gain for the PD controller
 base_init_pos: [0.0, 0.0, 0.9] # Initial position of the robot base
 base_init_quat: [1.0, 0.0, 0.0, 0.0] # Initial orientation of the robot base
 episode_length_seconds: 20.0 # Length of the episode in seconds
 resampling_time_seconds: 0.5 # Time between resampling the action
-action_scale: 0.2 # Scale for the action space
+action_scale: 0.5 # Scale for the action space
 simulate_action_latency: true # Whether to simulate action latency
 clip_action: 100.0 # Clip the action to a certain range
 termination_if_roll_greater_than: 10.0

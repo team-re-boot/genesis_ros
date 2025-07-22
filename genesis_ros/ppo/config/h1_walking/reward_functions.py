@@ -34,7 +34,9 @@ def get_reward_functions():
         # Penalize base roll and pitch angles
         pitch = self.base_euler[:, 1]
         roll = self.base_euler[:, 0]
-        return 1 / torch.square(pitch) + torch.square(roll)
+        return torch.nn.functional.sigmoid(
+            1 / (torch.square(pitch) + torch.square(roll))
+        )
 
     reward_functions.append((reward_base_roll_pitch, 0.1))
 
@@ -52,5 +54,12 @@ def get_reward_functions():
         return reward
 
     reward_functions.append((reward_contact, 1.0))
+
+    def reward_feet_swing_height(self):
+        contact = torch.norm(self.contact_forces[:, :, :3], dim=2) > 1.0
+        pos_error = torch.square(self.feet_pos[:, :, 2] - 0.08) * ~contact
+        return torch.sum(pos_error, dim=(1))
+
+    reward_functions.append((reward_feet_swing_height, -0.1))
 
     return reward_functions
