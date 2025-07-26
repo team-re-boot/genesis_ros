@@ -224,6 +224,11 @@ class PPOEnv:
             device=self.device,
             dtype=gs.tc_float,
         )
+        self.feet_vel = torch.zeros(
+            (self.num_envs, len(self.env_cfg.foot_links), 3),
+            device=self.device,
+            dtype=gs.tc_float,
+        )
         self.contact_forces = torch.zeros(
             (self.num_envs, len(self.env_cfg.foot_links), 3),
             device=self.device,
@@ -231,6 +236,24 @@ class PPOEnv:
         )
         self.last_actions = torch.zeros_like(self.actions)
         self.dof_pos = torch.zeros_like(self.actions)
+        self.dof_pos_limits_lower = torch.zeros(
+            (len(self.env_cfg.dof_names)), device=self.device, dtype=gs.tc_float
+        )
+        self.dof_pos_limits_upper = torch.zeros(
+            (len(self.env_cfg.dof_names)), device=self.device, dtype=gs.tc_float
+        )
+        for i, name in enumerate(self.env_cfg.dof_names):
+            self.dof_pos_limits_lower[i] = torch.tensor(
+                self.robot.get_joint(name).dofs_limit[0][0],
+                device=self.device,
+                dtype=gs.tc_float,
+            )
+            self.dof_pos_limits_upper[i] = torch.tensor(
+                self.robot.get_joint(name).dofs_limit[0][1],
+                device=self.device,
+                dtype=gs.tc_float,
+            )
+
         self.dof_pos_fixed = torch.zeros_like(self.fixed_actions)
         self.dof_vel = torch.zeros_like(self.actions)
         self.dof_vel_fixed = torch.zeros_like(self.fixed_actions)
@@ -293,6 +316,7 @@ class PPOEnv:
 
         for i, foot_link in enumerate(self.env_cfg.foot_links):
             self.feet_pos[:, i, :] = self.robot.get_link(foot_link).get_pos()
+            self.feet_vel[:, i, :] = self.robot.get_link(foot_link).get_vel()
             self.contact_forces[:, i, :] = self.robot.get_links_net_contact_force()[
                 :, self.robot.get_link(foot_link).idx_local, :
             ]
