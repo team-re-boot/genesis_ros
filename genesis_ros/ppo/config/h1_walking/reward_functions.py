@@ -8,49 +8,45 @@ def get_reward_functions():
     # ------------ reward functions----------------
     def reward_base_height(self):
         # Penalize base height away from target
-        return torch.square(self.base_pos[:, 2] - 0.9)
+        return torch.square(self.base_pos[:, 2] - 1.05)
 
-    reward_functions.append((reward_base_height, -1.0))
+    reward_functions.append((reward_base_height, -10.0))
 
-    # def reward_tracking_lin_vel(self):
-    #     # Tracking of linear velocity commands (xy axes)
-    #     lin_vel_error = torch.sum(
-    #         torch.square(self.commands[:, :2] - self.base_lin_vel[:, :2]), dim=1
-    #     )
-    #     return torch.exp(-lin_vel_error / 0.25)
+    def reward_tracking_lin_vel(self):
+        # Tracking of linear velocity commands (xy axes)
+        lin_vel_error = torch.sum(
+            torch.square(self.commands[:, :2] - self.base_lin_vel[:, :2]), dim=1
+        )
+        return torch.exp(-lin_vel_error / 0.25)
 
-    # reward_functions.append((reward_tracking_lin_vel, 1.0))
+    reward_functions.append((reward_tracking_lin_vel, 1.0))
 
-    # def reward_lin_vel_z(self):
-    #     # Penalize z axis base linear velocity
-    #     return torch.square(self.base_lin_vel[:, 2])
+    def reward_tracking_ang_vel(self):
+        # Tracking of angular velocity commands (yaw)
+        ang_vel_error = torch.square(self.commands[:, 2] - self.base_ang_vel[:, 2])
+        return torch.exp(-ang_vel_error / 0.25)
 
-    # reward_functions.append((reward_lin_vel_z, 0.2))
+    reward_functions.append((reward_tracking_ang_vel, 0.5))
+
+    def reward_lin_vel_z(self):
+        # Penalize z axis base linear velocity
+        return torch.square(self.base_lin_vel[:, 2])
+
+    reward_functions.append((reward_lin_vel_z, -2.0))
+
+    def reward_ang_vel_xy(self):
+        # Penalize xy axes base angular velocity
+        return torch.sum(torch.square(self.base_ang_vel[:, :2]), dim=1)
+
+    reward_functions.append((reward_ang_vel_xy, -0.05))
 
     def reward_action_rate(self):
         # Penalize changes in actions
         return torch.sum(torch.square(self.last_actions - self.actions), dim=1)
 
-    reward_functions.append((reward_action_rate, -0.5))
-
-    def reward_similar_to_default(self):
-        # Penalize joint poses far away from default pose
-        return torch.sum(torch.abs(self.dof_pos - self.default_dof_pos), dim=1)
-
-    reward_functions.append((reward_similar_to_default, -0.1))
-
-    # def reward_base_roll_pitch(self):
-    #     # Penalize base roll and pitch angles
-    #     pitch = self.base_euler[:, 1]
-    #     roll = self.base_euler[:, 0]
-    #     return torch.nn.functional.sigmoid(
-    #         1 / (torch.square(pitch) + torch.square(roll))
-    #     )
-
-    # reward_functions.append((reward_base_roll_pitch, 0.1))
+    reward_functions.append((reward_action_rate, -0.01))
 
     def reward_dof_pos_limits(self):
-        print(self.dof_pos)
         out_of_limits = -(self.dof_pos - self.dof_pos_limits_lower).clip(
             max=0.0
         )  # lower limit
@@ -89,5 +85,16 @@ def get_reward_functions():
         return torch.sum(penalize, dim=(1, 2))
 
     reward_functions.append((reward_contact_no_vel, -0.2))
+
+    def reward_orientation(self):
+        # Penalize non flat base orientation
+        return torch.sum(torch.square(self.projected_gravity[:, :2]), dim=1)
+
+    reward_functions.append((reward_orientation, -1.0))
+
+    def reward_hip_pos(self):
+        return torch.sum(torch.square(self.hip_dof_pos), dim=1)
+
+    reward_functions.append((reward_hip_pos, -1.0))
 
     return reward_functions

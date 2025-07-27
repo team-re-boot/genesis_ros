@@ -124,14 +124,22 @@ class PPOEnv:
         ]
 
         # PD control parameters
-        self.robot.set_dofs_kp([self.env_cfg.kp] * self.num_actions, self.motor_dofs)
-        self.robot.set_dofs_kv([self.env_cfg.kd] * self.num_actions, self.motor_dofs)
-        self.robot.set_dofs_kp(
-            [self.env_cfg.kp] * len(self.env_cfg.fix_joints), self.fixed_dofs
-        )
-        self.robot.set_dofs_kv(
-            [self.env_cfg.kd] * len(self.env_cfg.fix_joints), self.fixed_dofs
-        )
+        for name in self.env_cfg.dof_names:
+            motor_dof = self.robot.get_joint(name).dof_idx_local
+            self.robot.set_dofs_kp(
+                [self.env_cfg.pd_controller.get_kp(name)], [motor_dof]
+            )
+            self.robot.set_dofs_kv(
+                [self.env_cfg.pd_controller.get_kd(name)], [motor_dof]
+            )
+        for name in self.env_cfg.fix_joints:
+            motor_dof = self.robot.get_joint(name).dof_idx_local
+            self.robot.set_dofs_kp(
+                [self.env_cfg.pd_controller.get_kp(name)], [motor_dof]
+            )
+            self.robot.set_dofs_kv(
+                [self.env_cfg.pd_controller.get_kd(name)], [motor_dof]
+            )
 
         # Set default joint angle as robot position
         default_joint_angles = [
@@ -253,6 +261,11 @@ class PPOEnv:
                 device=self.device,
                 dtype=gs.tc_float,
             )
+        self.hip_dof_pos = torch.zeros(
+            (self.num_envs, len(self.env_cfg.hip_joints)),
+            device=self.device,
+            dtype=gs.tc_float,
+        )
 
         self.dof_pos_fixed = torch.zeros_like(self.fixed_actions)
         self.dof_vel = torch.zeros_like(self.actions)
@@ -320,6 +333,11 @@ class PPOEnv:
             self.contact_forces[:, i, :] = self.robot.get_links_net_contact_force()[
                 :, self.robot.get_link(foot_link).idx_local, :
             ]
+
+        for i, hip_joint in enumerate(self.env_cfg.hip_joints):
+            self.hip_dof_pos[:, i] = self.robot.get_dofs_position(
+                [self.robot.get_joint(hip_joint).dof_idx_local]
+            )[0]
 
         # update buffers
         self.episode_length_buf += 1

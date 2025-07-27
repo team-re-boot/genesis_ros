@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Dict, List, Tuple, Any
+from typing import Dict, List, Tuple, Any, Union
 from dataclass_wizard import YAMLWizard
 from pathlib import Path
 
@@ -24,15 +24,35 @@ class LegPhaseConfig(YAMLWizard):
 
 
 @dataclass
+class PDCcontrollerConfig(YAMLWizard):
+    kp: float = 20.0
+    kp_values: Dict[str, float] = field(default_factory=dict)
+    kd: float = 0.5
+    kd_values: Dict[str, float] = field(default_factory=dict)
+
+    def get_kp(self, joint_name: str) -> float:
+        if joint_name in self.kp_values:
+            return self.kp_values[joint_name]
+        else:
+            return self.kp
+
+    def get_kd(self, joint_name: str) -> float:
+        if joint_name in self.kd_values:
+            return self.kd_values[joint_name]
+        else:
+            return self.kd
+
+
+@dataclass
 class EnvironmentConfig(YAMLWizard):
     default_joint_angles: Dict[str, float] = field(default_factory=dict)
     dof_names: List[str] = field(default_factory=list)
     fix_joints: List[str] = field(default_factory=list)
     foot_links: List[str] = field(default_factory=list)  # Foot links of the robot
+    hip_joints: List[str] = field(default_factory=list)  # Hip joints of the robot
     leg_phase: LegPhaseConfig = LegPhaseConfig()
     # PD
-    kp: float = 20.0
-    kd: float = 0.5
+    pd_controller: PDCcontrollerConfig = PDCcontrollerConfig()
     # termination
     termination_if_roll_greater_than: float = 10  # degree
     termination_if_pitch_greater_than: float = 10.0  # degree

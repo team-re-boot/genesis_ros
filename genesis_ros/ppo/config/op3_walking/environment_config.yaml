@@ -1,8 +1,9 @@
 default_joint_angles: # The default joint angles for the robot
   r_sho_roll: -1.42
   l_sho_roll: 1.42
-kp: 20.0 # Proportional gain for the PD controller
-kd: 0.5 # Derivative gain for the PD controller
+pd_controller:
+  kp: 20.0 # Proportional gain for the PD controller
+  kd: 0.5 # Derivative gain for the PD controller
 base_init_pos: [0.0, 0.0, 0.42] # Initial position of the robot base
 base_init_quat: [1.0, 0.0, 0.0, 0.0] # Initial orientation of the robot base
 episode_length_seconds: 20.0 # Length of the episode in seconds

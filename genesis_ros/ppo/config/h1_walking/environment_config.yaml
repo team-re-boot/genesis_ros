@@ -1,25 +1,61 @@
 default_joint_angles: # The default joint angles for the robot
-  right_hip_pitch_joint: -0.35
-  left_hip_pitch_joint: -0.35
-  right_knee_joint: 1.11
-  left_knee_joint: 1.11
-  right_ankle_joint: -0.87
-  left_ankle_joint: -0.87
-fix_joints: # Joints which is fixed during experiment
-  - left_shoulder_pitch_joint
-  - right_shoulder_pitch_joint
-  - left_shoulder_roll_joint
-  - right_shoulder_roll_joint
-  - left_shoulder_yaw_joint
-  - right_shoulder_yaw_joint
-  - left_elbow_joint
-  - right_elbow_joint
+  right_hip_pitch_joint: -0.1
+  left_hip_pitch_joint: -0.1
+  right_knee_joint: 0.3
+  left_knee_joint: 0.3
+  right_ankle_joint: -0.2
+  left_ankle_joint: -0.2
+# fix_joints: # Joints which is fixed during experiment
+#   - left_shoulder_pitch_joint
+#   - right_shoulder_pitch_joint
+#   - left_shoulder_roll_joint
+#   - right_shoulder_roll_joint
+#   - left_shoulder_yaw_joint
+#   - right_shoulder_yaw_joint
+#   - left_elbow_joint
+#   - right_elbow_joint
 foot_links: # Links which are considered as feet
   - left_ankle_link
   - right_ankle_link
-kp: 1000.0 # Proportional gain for the PD controller
-kd: 1.0 # Derivative gain for the PD controller
-base_init_pos: [0.0, 0.0, 0.9] # Initial position of the robot base
+pd_controller:
+  kp: 100.0 # Proportional gain for the PD controller
+  # See also https://github.com/unitreerobotics/unitree_rl_gym/blob/276801e46c5d433564f24658bac64f254b7d2d4b/legged_gym/envs/h1_2/h1_2_config.py#L48-L53
+  kp_values:
+    right_hip_yaw_joint: 200.0
+    right_hip_roll_joint: 200.0
+    right_hip_pitch_joint: 200.0
+    right_knee_joint: 300.0
+    right_ankle_pitch_joint: 40.0
+    right_ankle_roll_joint: 40.0
+    left_hip_yaw_joint: 200.0
+    left_hip_roll_joint: 200.0
+    left_hip_pitch_joint: 200.0
+    left_knee_joint: 300.0
+    left_ankle_pitch_joint: 40.0
+    left_ankle_roll_joint: 40.0
+  kd: 0.0 # Derivative gain for the PD controller
+  # See also https://github.com/unitreerobotics/unitree_rl_gym/blob/276801e46c5d433564f24658bac64f254b7d2d4b/legged_gym/envs/h1_2/h1_2_config.py#L56C1-L61C37
+  kd_values:
+    right_hip_yaw_joint: 2.5
+    right_hip_roll_joint: 2.5
+    right_hip_pitch_joint: 2.5
+    right_knee_joint: 4.0
+    right_ankle_pitch_joint: 2.0
+    right_ankle_roll_joint: 2.0
+    left_hip_yaw_joint: 2.5
+    left_hip_roll_joint: 2.5
+    left_hip_pitch_joint: 2.5
+    left_knee_joint: 4.0
+    left_ankle_pitch_joint: 2.0
+    left_ankle_roll_joint: 2.0
+hip_joints:
+  - right_hip_yaw_joint
+  - right_hip_roll_joint
+  - right_hip_pitch_joint
+  - left_hip_yaw_joint
+  - left_hip_roll_joint
+  - left_hip_pitch_joint
+base_init_pos: [0.0, 0.0, 1.0] # Initial position of the robot base
 base_init_quat: [1.0, 0.0, 0.0, 0.0] # Initial orientation of the robot base
 episode_length_seconds: 20.0 # Length of the episode in seconds
 resampling_time_seconds: 0.5 # Time between resampling the action
