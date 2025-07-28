@@ -399,6 +399,14 @@ class PPOEnv:
         # compute reward
         self.rew_buf[:] = 0.0
         for name, reward_func in self.reward_functions.items():
+            if self.env_cfg.reward_config.only_positive_rewards:
+                if type(reward_func()) is not torch.Tensor:
+                    reward = torch.tensor(
+                        reward_func(), device=self.device, dtype=gs.tc_float
+                    )
+                else:
+                    reward = reward_func()
+                reward = torch.clip(reward, 0.0)
             rew = reward_func() * self.reward_scales[name]
             self.rew_buf += rew
             self.episode_sums[name] += rew

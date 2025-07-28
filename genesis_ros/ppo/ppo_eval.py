@@ -45,14 +45,14 @@ def eval(
         topic_interface = NopInterface()
 
     log_dir = f"logs/{exp_name}"
-    env_cfg, obs_cfg, command_cfg, train_cfg, entities = pickle.load(
+    env_cfg, obs_cfg, command_cfg, train_cfg, sim_cfg, entities = pickle.load(
         open(f"logs/{exp_name}/cfgs.pkl", "rb")
     )
     env = PPOEnv(
         entities=entities,
         reward_functions=[],
         num_envs=1,
-        simulation_cfg=SimulationConfig(),
+        simulation_cfg=sim_cfg,
         env_cfg=env_cfg,
         obs_cfg=obs_cfg,
         command_cfg=command_cfg,

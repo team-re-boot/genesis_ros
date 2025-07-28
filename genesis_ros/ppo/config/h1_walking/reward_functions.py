@@ -8,7 +8,7 @@ def get_reward_functions():
     # ------------ reward functions----------------
     def reward_base_height(self):
         # Penalize base height away from target
-        return torch.square(self.base_pos[:, 2] - 1.05)
+        return torch.square(torch.mean(self.base_pos[:, 2].unsqueeze(1), dim=1) - 1.05)
 
     reward_functions.append((reward_base_height, -10.0))
 
@@ -47,9 +47,7 @@ def get_reward_functions():
     reward_functions.append((reward_action_rate, -0.01))
 
     def reward_dof_pos_limits(self):
-        out_of_limits = -(self.dof_pos - self.dof_pos_limits_lower).clip(
-            max=0.0
-        )  # lower limit
+        out_of_limits = -(self.dof_pos - self.dof_pos_limits_lower).clip(max=0.0)
         out_of_limits += (self.dof_pos - self.dof_pos_limits_upper).clip(min=0.0)
         return torch.sum(out_of_limits, dim=1)
 

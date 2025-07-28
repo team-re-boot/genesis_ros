@@ -44,6 +44,11 @@ class PDCcontrollerConfig(YAMLWizard):
 
 
 @dataclass
+class RewardConfig(YAMLWizard):
+    only_positive_rewards: bool = False  # If True, negative rewards are clipped.
+
+
+@dataclass
 class EnvironmentConfig(YAMLWizard):
     default_joint_angles: Dict[str, float] = field(default_factory=dict)
     dof_names: List[str] = field(default_factory=list)
@@ -66,6 +71,7 @@ class EnvironmentConfig(YAMLWizard):
     action_scale: float = 0.25
     simulate_action_latency: bool = True
     clip_actions: float = 100.0
+    reward_config: RewardConfig = RewardConfig()
 
     def append_joint(self, joint: Tuple[str, float]) -> None:
         if not joint[0] in self.dof_names and joint[0] not in self.fix_joints:

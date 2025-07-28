@@ -5,15 +5,15 @@ default_joint_angles: # The default joint angles for the robot
   left_knee_joint: 0.3
   right_ankle_joint: -0.2
   left_ankle_joint: -0.2
-# fix_joints: # Joints which is fixed during experiment
-#   - left_shoulder_pitch_joint
-#   - right_shoulder_pitch_joint
-#   - left_shoulder_roll_joint
-#   - right_shoulder_roll_joint
-#   - left_shoulder_yaw_joint
-#   - right_shoulder_yaw_joint
-#   - left_elbow_joint
-#   - right_elbow_joint
+fix_joints: # Joints which is fixed during experiment
+  - left_shoulder_pitch_joint
+  - right_shoulder_pitch_joint
+  - left_shoulder_roll_joint
+  - right_shoulder_roll_joint
+  - left_shoulder_yaw_joint
+  - right_shoulder_yaw_joint
+  - left_elbow_joint
+  - right_elbow_joint
 foot_links: # Links which are considered as feet
   - left_ankle_link
   - right_ankle_link
@@ -62,5 +62,7 @@ resampling_time_seconds: 0.5 # Time between resampling the action
 action_scale: 0.25 # Scale for the action space
 simulate_action_latency: true # Whether to simulate action latency
 clip_action: 100.0 # Clip the action to a certain range
+reward_config:
+  only_positive_rewards: true
 termination_if_roll_greater_than: 10.0
 termination_if_pitch_greater_than: 20.0
