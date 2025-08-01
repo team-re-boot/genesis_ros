@@ -62,8 +62,10 @@ def get_reward_functions():
         reward = torch.zeros(self.num_envs, dtype=torch.float, device=self.device)
         for i in range(len(self.env_cfg.foot_links)):
             is_stance = self.leg_phase[:, i] < 0.55
-            contact = self.contact_forces[:, i, 2] > 1
-            reward += ~(contact ^ is_stance)
+            contact_z = self.contact_forces[:, i, 2] > 1
+            # contact_xy = torch.norm(self.contact_forces[:, i, 0:1], dim=1) < 1.0
+            # reward += ~(contact_xy & contact_z ^ is_stance)
+            reward += ~(contact_z ^ is_stance)
         return reward
 
     reward_functions.append((reward_contact, 0.18))
@@ -94,5 +96,11 @@ def get_reward_functions():
         return torch.sum(torch.square(self.hip_dof_pos), dim=1)
 
     reward_functions.append((reward_hip_pos, -1.0))
+
+    def reward_similar_to_default(self):
+        # Penalize joint poses far away from default pose
+        return torch.sum(torch.abs(self.dof_pos - self.default_dof_pos), dim=1)
+
+    reward_functions.append((reward_similar_to_default, -10.0))
 
     return reward_functions

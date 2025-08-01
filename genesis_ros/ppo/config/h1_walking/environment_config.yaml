@@ -14,9 +14,11 @@ fix_joints: # Joints which is fixed during experiment
   - right_shoulder_yaw_joint
   - left_elbow_joint
   - right_elbow_joint
+  - torso_joint
 foot_links: # Links which are considered as feet
   - left_ankle_link
   - right_ankle_link
+friction: 1.0 # Friction coefficient for the robot
 pd_controller:
   kp: 100.0 # Proportional gain for the PD controller
   # See also https://github.com/unitreerobotics/unitree_rl_gym/blob/276801e46c5d433564f24658bac64f254b7d2d4b/legged_gym/envs/h1_2/h1_2_config.py#L48-L53
@@ -55,7 +57,7 @@ hip_joints:
   - left_hip_yaw_joint
   - left_hip_roll_joint
   - left_hip_pitch_joint
-base_init_pos: [0.0, 0.0, 1.0] # Initial position of the robot base
+base_init_pos: [0.0, 0.0, 1.1] # Initial position of the robot base
 base_init_quat: [1.0, 0.0, 0.0, 0.0] # Initial orientation of the robot base
 episode_length_seconds: 20.0 # Length of the episode in seconds
 resampling_time_seconds: 0.5 # Time between resampling the action

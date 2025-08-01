@@ -242,6 +242,8 @@ class PPOEnv:
             device=self.device,
             dtype=gs.tc_float,
         )
+        if self.env_cfg.friction:
+            self.robot.set_friction(self.env_cfg.friction)
         self.last_actions = torch.zeros_like(self.actions)
         self.dof_pos = torch.zeros_like(self.actions)
         self.dof_pos_limits_lower = torch.zeros(

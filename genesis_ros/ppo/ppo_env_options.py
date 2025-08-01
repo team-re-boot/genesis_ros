@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Dict, List, Tuple, Any, Union
+from typing import Dict, List, Tuple, Any, Union, Optional
 from dataclass_wizard import YAMLWizard
 from pathlib import Path
 
@@ -59,13 +59,15 @@ class EnvironmentConfig(YAMLWizard):
     # PD
     pd_controller: PDCcontrollerConfig = PDCcontrollerConfig()
     # termination
-    termination_if_roll_greater_than: float = 10  # degree
+    termination_if_roll_greater_than: float = 10.0  # degree
     termination_if_pitch_greater_than: float = 10.0  # degree
     # base pose
     base_init_pos: Tuple[float, float, float] = field(default=(0.0, 0.0, 0.42))
     base_init_quat: Tuple[float, float, float, float] = field(
         default=(1.0, 0.0, 0.0, 0.0)
     )
+    # friction
+    friction: Optional[float] = None  # Friction coefficient for all links
     episode_length_seconds: float = 20.0
     resampling_time_seconds: float = 4.0
     action_scale: float = 0.25
