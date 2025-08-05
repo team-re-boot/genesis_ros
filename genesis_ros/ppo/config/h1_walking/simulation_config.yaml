@@ -1,2 +1,3 @@
 simulate_action_latency: True # Whether to simulate action latency
 dt: 0.0025  # Time step for the simulation
+decimation: 4 # Control Robot by 100 Hz

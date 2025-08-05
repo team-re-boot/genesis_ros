@@ -46,6 +46,7 @@ class PPOEnv:
             simulation_cfg.simulate_action_latency
         )  # there is a 1 step latency on real robot
         self.dt = simulation_cfg.dt
+        self.decimation = simulation_cfg.decimation
         self.max_episode_length = math.ceil(env_cfg.episode_length_seconds / self.dt)
 
         self.env_cfg = env_cfg
@@ -268,6 +269,11 @@ class PPOEnv:
             device=self.device,
             dtype=gs.tc_float,
         )
+        self.knee_dof_pos = torch.zeros(
+            (self.num_envs, len(self.env_cfg.knee_joints)),
+            device=self.device,
+            dtype=gs.tc_float,
+        )
 
         self.dof_pos_fixed = torch.zeros_like(self.fixed_actions)
         self.dof_vel = torch.zeros_like(self.actions)
@@ -290,6 +296,8 @@ class PPOEnv:
         # extra information for logging
         self.extras = dict()  # type: ignore
         self.extras["observations"] = dict()
+        self.current_decimation = 0
+        self.reset()
 
     def _resample_commands(self, envs_idx):
         self.commands[envs_idx, 0] = gs_rand_float(
@@ -313,18 +321,24 @@ class PPOEnv:
         )
 
     def step(self, actions):
-        self.actions = torch.clip(
-            actions, -self.env_cfg.clip_actions, self.env_cfg.clip_actions
-        )
-        exec_actions = (
-            self.last_actions if self.simulate_action_latency else self.actions
-        )
-        target_dof_pos = exec_actions * self.env_cfg.action_scale + self.default_dof_pos
-        self.robot.control_dofs_position(target_dof_pos, self.motor_dofs)
+        if self.current_decimation == self.decimation:
+            self.current_decimation = 0
+            self.actions = torch.clip(
+                actions, -self.env_cfg.clip_actions, self.env_cfg.clip_actions
+            )
+            exec_actions = (
+                self.last_actions if self.simulate_action_latency else self.actions
+            )
+            target_dof_pos = (
+                exec_actions * self.env_cfg.action_scale + self.default_dof_pos
+            )
+            self.robot.control_dofs_position(target_dof_pos, self.motor_dofs)
 
-        self.robot.control_dofs_position(
-            [self.fixed_joint_angles[:] for _ in range(self.num_envs)], self.fixed_dofs
-        )
+            self.robot.control_dofs_position(
+                [self.fixed_joint_angles[:] for _ in range(self.num_envs)],
+                self.fixed_dofs,
+            )
+        self.current_decimation = self.current_decimation + 1
 
         self.scene.step()
         self._update_phase()
@@ -339,6 +353,11 @@ class PPOEnv:
         for i, hip_joint in enumerate(self.env_cfg.hip_joints):
             self.hip_dof_pos[:, i] = self.robot.get_dofs_position(
                 [self.robot.get_joint(hip_joint).dof_idx_local]
+            )[0]
+
+        for i, knee_joint in enumerate(self.env_cfg.knee_joints):
+            self.knee_dof_pos[:, i] = self.robot.get_dofs_position(
+                [self.robot.get_joint(knee_joint).dof_idx_local]
             )[0]
 
         # update buffers
@@ -376,7 +395,6 @@ class PPOEnv:
 
         # print("penalty : ", self.get_base_stability_penalty())
         # print("reward : ", self.reward_tracking_lin_vel())
-
         self.reset_buf |= (
             torch.abs(self.base_euler[:, 1])
             > self.env_cfg.termination_if_pitch_greater_than

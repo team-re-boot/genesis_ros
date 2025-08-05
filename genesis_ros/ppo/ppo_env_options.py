@@ -8,6 +8,8 @@ from pathlib import Path
 class SimulationConfig(YAMLWizard):
     simulate_action_latency: bool = True
     dt: float = 0.02
+    # decimation: Number of control action updates @ sim DT per policy DT
+    decimation = 1
 
     @classmethod
     def safe_load(cls, path: Path) -> Any:
@@ -55,6 +57,7 @@ class EnvironmentConfig(YAMLWizard):
     fix_joints: List[str] = field(default_factory=list)
     foot_links: List[str] = field(default_factory=list)  # Foot links of the robot
     hip_joints: List[str] = field(default_factory=list)  # Hip joints of the robot
+    knee_joints: List[str] = field(default_factory=list)  # Knee joints of the robot
     leg_phase: LegPhaseConfig = LegPhaseConfig()
     # PD
     pd_controller: PDCcontrollerConfig = PDCcontrollerConfig()

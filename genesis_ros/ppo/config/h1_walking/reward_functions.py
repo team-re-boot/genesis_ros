@@ -10,7 +10,7 @@ def get_reward_functions():
         # Penalize base height away from target
         return torch.square(torch.mean(self.base_pos[:, 2].unsqueeze(1), dim=1) - 1.05)
 
-    reward_functions.append((reward_base_height, -10.0))
+    reward_functions.append((reward_base_height, -30.0))
 
     def reward_tracking_lin_vel(self):
         # Tracking of linear velocity commands (xy axes)
@@ -19,7 +19,7 @@ def get_reward_functions():
         )
         return torch.exp(-lin_vel_error / 0.25)
 
-    reward_functions.append((reward_tracking_lin_vel, 1.0))
+    reward_functions.append((reward_tracking_lin_vel, 5.0))
 
     def reward_tracking_ang_vel(self):
         # Tracking of angular velocity commands (yaw)
@@ -63,8 +63,6 @@ def get_reward_functions():
         for i in range(len(self.env_cfg.foot_links)):
             is_stance = self.leg_phase[:, i] < 0.55
             contact_z = self.contact_forces[:, i, 2] > 1
-            # contact_xy = torch.norm(self.contact_forces[:, i, 0:1], dim=1) < 1.0
-            # reward += ~(contact_xy & contact_z ^ is_stance)
             reward += ~(contact_z ^ is_stance)
         return reward
 
@@ -99,8 +97,15 @@ def get_reward_functions():
 
     def reward_similar_to_default(self):
         # Penalize joint poses far away from default pose
-        return torch.sum(torch.abs(self.dof_pos - self.default_dof_pos), dim=1)
+        assert (
+            len(self.env_cfg.knee_joints) == 2
+        ), "This reward is only valid for humanoid."
+        is_stance = (self.leg_phase[:, 0] < 0.55) | (self.leg_phase[:, 1] < 0.55)
+        reward = torch.sum(torch.abs(self.knee_dof_pos)[:, :], dim=1) * torch.where(
+            is_stance, 0.1, 1.0
+        )
+        return reward
 
-    reward_functions.append((reward_similar_to_default, -10.0))
+    reward_functions.append((reward_similar_to_default, -8.0))
 
     return reward_functions
