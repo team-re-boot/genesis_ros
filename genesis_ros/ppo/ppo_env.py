@@ -392,9 +392,6 @@ class PPOEnv:
         self._resample_commands(envs_idx)
         # check termination and reset
         self.reset_buf = self.episode_length_buf > self.max_episode_length
-
-        # print("penalty : ", self.get_base_stability_penalty())
-        # print("reward : ", self.reward_tracking_lin_vel())
         self.reset_buf |= (
             torch.abs(self.base_euler[:, 1])
             > self.env_cfg.termination_if_pitch_greater_than

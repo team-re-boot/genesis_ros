@@ -15,6 +15,8 @@ fix_joints: # Joints which is fixed during experiment
   - left_elbow_joint
   - right_elbow_joint
   - torso_joint
+  - right_hip_yaw_joint
+  - left_hip_yaw_joint
 hip_joints:
   - right_hip_yaw_joint
   - right_hip_roll_joint
@@ -61,14 +63,14 @@ pd_controller:
     left_knee_joint: 4.0
     left_ankle_pitch_joint: 2.0
     left_ankle_roll_joint: 2.0
-base_init_pos: [0.0, 0.0, 1.1] # Initial position of the robot base
+base_init_pos: [0.0, 0.0, 1.05] # Initial position of the robot base
 base_init_quat: [1.0, 0.0, 0.0, 0.0] # Initial orientation of the robot base
 episode_length_seconds: 20.0 # Length of the episode in seconds
 resampling_time_seconds: 8 # Time between resampling the action
-action_scale: 0.25 # Scale for the action space
+action_scale: 0.1 # Scale for the action space
 simulate_action_latency: true # Whether to simulate action latency
 clip_action: 100.0 # Clip the action to a certain range
 reward_config:
-  only_positive_rewards: true
-termination_if_roll_greater_than: 30.0
-termination_if_pitch_greater_than: 30.0
+  only_positive_rewards: false
+termination_if_roll_greater_than: 20.0
+termination_if_pitch_greater_than: 10.0
