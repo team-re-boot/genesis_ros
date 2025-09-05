@@ -72,5 +72,5 @@ simulate_action_latency: true # Whether to simulate action latency
 clip_action: 100.0 # Clip the action to a certain range
 reward_config:
   only_positive_rewards: false
-termination_if_roll_greater_than: 20.0
-termination_if_pitch_greater_than: 10.0
+termination_if_roll_greater_than: 30.0
+termination_if_pitch_greater_than: 30.0

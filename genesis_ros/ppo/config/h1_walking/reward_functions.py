@@ -31,17 +31,17 @@ def get_reward_functions():
         # Penalize changes in actions
         return torch.sum(torch.square(self.last_actions - self.actions), dim=1)
 
-    reward_functions.append((reward_action_rate, -0.005))
+    reward_functions.append((reward_action_rate, -0.1))
 
     def reward_similar_to_default(self):
         # Penalize joint poses far away from default pose
         return torch.sum(torch.abs(self.dof_pos - self.default_dof_pos), dim=1)
 
-    reward_functions.append((reward_similar_to_default, -0.5))
+    reward_functions.append((reward_similar_to_default, -1.5))
 
     def reward_base_height(self):
         # Penalize base height away from target
-        return torch.square(self.base_pos[:, 2] - 0.7)
+        return torch.abs(self.base_pos[:, 2] - 0.7)
 
     reward_functions.append((reward_base_height, -1.0))
 
@@ -51,78 +51,93 @@ def get_reward_functions():
 
     # reward_functions.append((reward_terminate, -1.0))
 
-    def reward_alive(self):
-        return self.episode_length_buf / self.max_episode_length
+    # def reward_alive(self):
+    #     return self.episode_length_buf / self.max_episode_length
 
-    reward_functions.append((reward_alive, 1.0))
+    # reward_functions.append((reward_alive, 1.0))
 
+    # 補助関数: 0〜1に滑らかにマップ
+    def smoothstep(x, low, high):
+        t = ((x - low) / (high - low)).clamp(0.0, 1.0)
+        return t * t * (3.0 - 2.0 * t)
+
+    # 線形(base)と凸(shaped)をブレンド（パラメータは定数）
     def convex_blend_reward(
-        base_reward: torch.Tensor,
-        threshold: float = 0.4,
-        beta: float = 0.03,  # さらに弱め
-        p: float = 2.0,
+        base_reward: torch.Tensor, threshold: float, beta: float, p: float
     ) -> torch.Tensor:
-        max_th = threshold
-        base = base_reward.clamp(min=0.0, max=max_th)
-        r = (base / max_th).clamp(0.0, 1.0)
-        shaped = max_th * r.pow(p)
+        base = base_reward.clamp(min=0.0, max=threshold)
+        r = (base / threshold).clamp(0.0, 1.0)
+        shaped = threshold * r.pow(p)
         blended = (1.0 - beta) * base + beta * shaped
-        return blended.clamp(min=0.0, max=max_th)  # 出力安全域
+        return blended.clamp(min=0.0, max=threshold)
 
-    def reward_feet_air_time_from_phase(self):
-        # --- 接地検出：Z成分を使い、ヒステリシスでチャタリング抑制 ---
-        fz = self.contact_forces[:, :, 2]  # [N,2] 垂直
-        hi, lo = 5.0, 3.0  # 例: N単位。環境に合わせて調整
-        if not hasattr(self, "_foot_contact_state"):
-            self._foot_contact_state = torch.zeros_like(fz, dtype=torch.bool)
-        foot_contact = torch.where(self._foot_contact_state, fz > lo, fz > hi)
-        # 次ステップ用に保持（勾配には載せない）
-        self._foot_contact_state = foot_contact.detach()
+    def reward_feet_air_time_stable(self):
+        # ================= 定数（ここだけ調整すればOK） =================
+        MAX_TH = 0.40  # 報酬上限
+        CONTACT_SPLIT = 0.55  # 接地/遊脚の位相しきい
+        CMD_MIN = 0.10  # 動作している判定
+        BETA = 0.30  # 線形:凸 のブレンド率（凸の効き）
+        P = 2.50  # 凸の強さ（>1で上側を強調）
+        UPR_LOW = 0.85  # 直立ゲートの下限
+        UPR_HIGH = 0.97  # 直立ゲートの上限
+        W_ALIVE = 0.05 * MAX_TH  # 直立ボーナス
+        W_OMEGA = 0.05 * MAX_TH  # 角速度の抑制ボーナス
+        W_TAU = 0.02 * MAX_TH  # トルクの抑制ボーナス
+        OMEGA_SCALE = 4.0  # 角速度のスケール
+        TAU_SCALE = 2.0  # トルクのスケール
+        # ============================================================
 
-        contact_count = foot_contact.int().sum(dim=1)  # [N]
-        single_stance = contact_count == 1
-        double_swing = contact_count == 0
-        double_stance = contact_count == 2
+        leg_phase = self.leg_phase  # [N,2]
+        device = leg_phase.device
+        N = leg_phase.size(0)
 
-        # --- 「空中進捗」：実接地に基づく遊脚だけを評価 ---
-        swing_mask = ~foot_contact  # [N,2]
+        # 位相ベースの接地近似（実接地があるなら後段で置き換え）
+        in_contact = leg_phase <= CONTACT_SPLIT  # [N,2] bool
+        single_stance = in_contact.int().sum(dim=1) == 1
+
+        # 遊脚側の空中進捗（片足支持のときだけ）
+        swing_mask = ~in_contact
         air_progress = torch.where(
             swing_mask,
-            (self.leg_phase - 0.55).clamp(min=0.0),
-            torch.zeros_like(self.leg_phase),
+            (leg_phase - CONTACT_SPLIT).clamp(min=0.0),
+            torch.zeros_like(leg_phase),
         )  # [N,2]
-        # 遊脚側のみの値を抽出（single時は1脚だけ非ゼロ）
-        per_row = (air_progress * swing_mask.float()).sum(dim=1)  # [N]
+        base_linear = torch.where(
+            single_stance, air_progress.max(dim=1).values, torch.zeros(N, device=device)
+        )  # [N]
 
-        # 片足支持のときだけ正の基礎報酬
-        base = torch.where(single_stance, per_row, torch.zeros_like(per_row))
+        # 指令が小さいときは0
+        moving = (torch.norm(self.commands, dim=1) > CMD_MIN).float()
+        base_linear = base_linear * moving
 
-        max_th = 0.4
-        pos = convex_blend_reward(base, threshold=max_th, beta=0.03, p=2.0)
+        # 直立ゲート
+        q = self.base_quat / torch.linalg.norm(
+            self.base_quat, dim=-1, keepdim=True
+        ).clamp_min(1e-8)
+        w, x, y, z = q.unbind(-1)
+        up_z = 1 - 2 * (x * x + y * y)
+        g_upright = smoothstep(up_z, UPR_LOW, UPR_HIGH)  # [0,1]
 
-        # --- 明確な禁止項：二足同時に浮いたら強い罰 ---
-        k0 = 0.4 * max_th  # 二足浮きペナルティの強さ（まずはこれくらいから）
-        penalty_no_contact = -k0 * double_swing.float()
+        # 接地ゲート：少なくとも1脚接地
+        # 実接地フラグ: 例) 法線力 > ϵ
+        # foot_contact: [N,2] bool
+        foot_contact = self.contact_forces[:, :, 2] > 1.0
+        stance_ok = (foot_contact.int().sum(dim=1) >= 1).float()
 
-        # 二足接地は少しだけ不利（歩行を促すため、弱め）
-        k2 = 0.1 * max_th
-        penalty_double_stance = -k2 * double_stance.float()
+        gate = g_upright * stance_ok  # [0,1]
 
-        # “1本だけ接地”を中心に寄せる滑らかな形（任意：弱めの二乗罰）
-        lam = 0.05 * max_th
-        penalty_cc = -lam * (contact_count.float() - 1.0).pow(2)
+        # 凸ブレンド（定数パラメータ）
+        shaped = convex_blend_reward(base_linear, threshold=MAX_TH, beta=BETA, p=P)
 
-        reward = pos + penalty_no_contact + penalty_double_stance + penalty_cc
+        # 安全ゲート適用
+        reward = gate * shaped
 
-        # 速度指令が小さいときはゼロ
-        moving = (torch.norm(self.commands, dim=1) > 0.1).float()
-        reward = reward * moving
+        # 軽い安定化ボーナス（任意）
+        reward = reward + W_ALIVE * g_upright
 
-        # 数値安定のために全体を最終クリップ（上下）
-        reward = reward.clamp(min=-max_th, max=max_th)
-        return reward
+        return reward.clamp(min=0.0, max=MAX_TH)
 
-    reward_functions.append((reward_feet_air_time_from_phase, 1.5))
+    reward_functions.append((reward_feet_air_time_stable, 1.5))
 
     def reward_feet_slide(self):
         # Penalize contact with no velocity
@@ -132,5 +147,24 @@ def get_reward_functions():
         return torch.sum(penalize, dim=(1, 2))
 
     reward_functions.append((reward_feet_slide, -0.25))
+
+    def reward_posture(self):
+        pitch_sigma: float = 0.10  # 許容幅 (rad)
+        q = self.base_quat / torch.linalg.norm(
+            self.base_quat, dim=-1, keepdim=True
+        ).clamp_min(1e-8)
+        w, x, y, z = q.unbind(-1)
+        # 回転後の (0,0,1) を直接計算（回転行列の第3列に相当）
+        # up_x = 2 * (x * z + w * y)
+        # up_y = 2 * (y * z - w * x)
+        up_z = 1 - 2 * (x * x + y * y)
+        # base_up = torch.stack([up_x, up_y, up_z], dim=-1)
+        # 符号なしの傾き：直立(0)からの角度
+        # up_z = base_up[:, 2].clamp(-1.0, 1.0)
+        tilt = torch.acos(up_z)  # 0=直立, 増えるほど傾きが大きい
+        r_posture = torch.exp(-((tilt / pitch_sigma) ** 2))
+        return r_posture.clamp(0.0, 1.0)
+
+    reward_functions.append((reward_posture, -1.0))
 
     return reward_functions
