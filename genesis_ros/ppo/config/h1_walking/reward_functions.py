@@ -7,10 +7,23 @@ def get_reward_functions():
     # ------------ reward functions----------------
     def reward_tracking_lin_vel(self):
         # Tracking of linear velocity commands (xy axes)
-        lin_vel_error = torch.sum(
-            torch.square(self.commands[:, :2] - self.base_lin_vel[:, :2]), dim=1
-        )
+        # lin_vel_error = torch.sum(
+        #     torch.square(self.commands[:, :2] - self.base_lin_vel[:, :2]), dim=1
+        # )
+        lin_vel_error = self.commands[:, 0] - self.base_lin_vel[:, 0]
         return torch.exp(-lin_vel_error / 0.25)
+        # scaling_factorは報酬の鋭敏さを調整するハイパーパラメータ。
+        # この値が大きいほど、少しの誤差でも報酬が急激に減少する。
+        # scaling_factor = 5.0
+        # return torch.exp(
+        #     -scaling_factor
+        #     * torch.sum(
+        #         torch.square(
+        #             torch.square(self.commands[:, :2] - self.base_lin_vel[:, :2])
+        #         ),
+        #         dim=1,
+        #     )
+        # )
 
     reward_functions.append((reward_tracking_lin_vel, 1.0))
 
@@ -22,16 +35,33 @@ def get_reward_functions():
     reward_functions.append((reward_tracking_ang_vel, 0.2))
 
     def reward_lin_vel_z(self):
-        # Penalize z axis base linear velocity
-        return torch.square(self.base_lin_vel[:, 2])
+        """
+        Z軸方向の線形速度が0に近いほど高い報酬を与える。
+        torch.exp(-a * x^2) の形をしており、
+        速度(x)が0のときに最大値1.0をとり、速度が大きくなるにつれて0に近づく。
+        """
+        # scaling_factorは報酬の鋭敏さを調整するハイパーパラメータ。
+        # この値が大きいほど、少しの上下動でも報酬が急激に減少する。
+        scaling_factor = 5.0
+        return torch.exp(-scaling_factor * torch.square(self.base_lin_vel[:, 2]))
 
-    reward_functions.append((reward_lin_vel_z, -1.0))
+    reward_functions.append((reward_lin_vel_z, 1.0))
 
     def reward_action_rate(self):
         # Penalize changes in actions
-        return torch.sum(torch.square(self.last_actions - self.actions), dim=1)
+        # return torch.sum(torch.square(self.last_actions - self.actions), dim=1)
+        # scaling_factorは報酬の鋭敏さを調整するハイパーパラメータ。
+        # この値が大きいほど、少しの誤差でも報酬が急激に減少する。
+        scaling_factor = 15.0
+        return torch.exp(
+            -scaling_factor
+            * torch.sum(
+                torch.square(self.last_actions - self.actions),
+                dim=1,
+            )
+        )
 
-    reward_functions.append((reward_action_rate, -0.1))
+    reward_functions.append((reward_action_rate, 1.0))
 
     def reward_similar_to_default(self):
         # Penalize joint poses far away from default pose
@@ -40,10 +70,14 @@ def get_reward_functions():
     reward_functions.append((reward_similar_to_default, -1.5))
 
     def reward_base_height(self):
-        # Penalize base height away from target
-        return torch.abs(self.base_pos[:, 2] - 0.7)
+        # この値が大きいほど、少しの誤差でも報酬が急激に減少する。
+        scaling_factor = 5.0
+        return torch.exp(-scaling_factor * torch.abs(self.base_pos[:, 2] - 0.7))
 
-    reward_functions.append((reward_base_height, -1.0))
+        # Penalize base height away from target
+        # return torch.abs(self.base_pos[:, 2] - 0.7)
+
+    reward_functions.append((reward_base_height, 1.0))
 
     # def reward_terminate(self):
     #     # print(torch.sum(self.reset_buf, dim=0))
@@ -122,20 +156,28 @@ def get_reward_functions():
         # 実接地フラグ: 例) 法線力 > ϵ
         # foot_contact: [N,2] bool
         foot_contact = self.contact_forces[:, :, 2] > 1.0
-        stance_ok = (foot_contact.int().sum(dim=1) >= 1).float()
+        contact_count = foot_contact.int().sum(dim=1)  # [N] 0,1,2
+        stance_ok = (contact_count >= 1).float()  # 少なくとも1脚
+        flight = (contact_count == 0).float()  # 両足離地
 
         gate = g_upright * stance_ok  # [0,1]
 
         # 凸ブレンド（定数パラメータ）
         shaped = convex_blend_reward(base_linear, threshold=MAX_TH, beta=BETA, p=P)
 
+        W_FLIGHT = 0.1 * MAX_TH  # 離地ペナルティの強さ（要調整）
+
         # 安全ゲート適用
+        gate = g_upright * stance_ok
         reward = gate * shaped
 
-        # 軽い安定化ボーナス（任意）
-        reward = reward + W_ALIVE * g_upright
+        # 生存ボーナスは“接地時のみ”付与（空中では0）
+        reward = reward + W_ALIVE * g_upright * stance_ok
 
-        return reward.clamp(min=0.0, max=MAX_TH)
+        # 両足離地は明示的に減点
+        reward = reward - W_FLIGHT * flight
+
+        return reward.clamp(0.0, MAX_TH)
 
     reward_functions.append((reward_feet_air_time_stable, 1.5))
 
@@ -155,16 +197,16 @@ def get_reward_functions():
         ).clamp_min(1e-8)
         w, x, y, z = q.unbind(-1)
         # 回転後の (0,0,1) を直接計算（回転行列の第3列に相当）
-        # up_x = 2 * (x * z + w * y)
-        # up_y = 2 * (y * z - w * x)
+        up_x = 2 * (x * z + w * y)
+        up_y = 2 * (y * z - w * x)
         up_z = 1 - 2 * (x * x + y * y)
-        # base_up = torch.stack([up_x, up_y, up_z], dim=-1)
+        base_up = torch.stack([up_x, up_y, up_z], dim=-1)
         # 符号なしの傾き：直立(0)からの角度
-        # up_z = base_up[:, 2].clamp(-1.0, 1.0)
+        up_z = base_up[:, 2].clamp(-1.0, 1.0)
         tilt = torch.acos(up_z)  # 0=直立, 増えるほど傾きが大きい
         r_posture = torch.exp(-((tilt / pitch_sigma) ** 2))
         return r_posture.clamp(0.0, 1.0)
 
-    reward_functions.append((reward_posture, -1.0))
+    reward_functions.append((reward_posture, 2.0))
 
     return reward_functions
