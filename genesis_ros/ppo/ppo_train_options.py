@@ -19,6 +19,7 @@ class Algorithm(YAMLWizard):
     schedule: str = "adaptive"
     use_clipped_value_loss: bool = True
     value_loss_coef: float = 1.0
+    normalize_advantage_per_mini_batch: bool = False
 
     @classmethod
     def safe_load(cls, path: Path) -> Any:
@@ -35,6 +36,8 @@ class Policy(YAMLWizard):
     critic_hidden_dims: List[int] = field(default_factory=lambda: [512, 256, 128])
     init_noise_std: float = 1.0
     class_name: str = "ActorCritic"
+    actor_obs_normalization: bool = False
+    critic_obs_normalization: bool = False
 
     @classmethod
     def safe_load(cls, path: Path) -> Any:

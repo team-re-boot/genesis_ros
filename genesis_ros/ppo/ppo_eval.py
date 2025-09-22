@@ -20,6 +20,7 @@ from rsl_rl.runners import OnPolicyRunner
 from dataclasses import asdict
 from typing import Union
 import zenoh
+import time
 
 
 def eval(
@@ -44,14 +45,14 @@ def eval(
         topic_interface = NopInterface()
 
     log_dir = f"logs/{exp_name}"
-    env_cfg, obs_cfg, command_cfg, train_cfg, entities = pickle.load(
+    env_cfg, obs_cfg, command_cfg, train_cfg, sim_cfg, entities = pickle.load(
         open(f"logs/{exp_name}/cfgs.pkl", "rb")
     )
     env = PPOEnv(
         entities=entities,
         reward_functions=[],
         num_envs=1,
-        simulation_cfg=SimulationConfig(),
+        simulation_cfg=sim_cfg,
         env_cfg=env_cfg,
         obs_cfg=obs_cfg,
         command_cfg=command_cfg,
@@ -92,6 +93,7 @@ def eval(
             if dones[0]:
                 break
             step += 1
+            # time.sleep(0.1)
     gs.destroy()
 
 

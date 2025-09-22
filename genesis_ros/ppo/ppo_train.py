@@ -66,7 +66,7 @@ def train(
     os.makedirs(log_dir, exist_ok=True)
 
     pickle.dump(
-        [env_cfg, obs_cfg, command_cfg, train_cfg, entities],
+        [env_cfg, obs_cfg, command_cfg, train_cfg, sim_cfg, entities],
         open(f"{log_dir}/cfgs.pkl", "wb"),
     )
 
@@ -88,7 +88,9 @@ def train(
     )
     torch.jit.trace(
         ActorPolicy(runner.alg.actor_critic).to(device="cpu"),
-        torch.zeros(env.num_actions * 3 + 3 * 3).to(device="cpu"),
+        torch.zeros(env.num_actions * 3 + len(env_cfg.fix_joints) * 2 + 3 * 3).to(
+            device="cpu"
+        ),
     ).save(Path(log_dir) / "actor.pt")
     gs.destroy()
 
